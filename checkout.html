@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout - DIY Hardware Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Complete your purchase securely." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--gray-700); background: var(--light); }
+    a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+    ul { list-style: none; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
+    .logo { font-weight: 800; font-size: 1.5rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links > li > a { font-weight: 500; color: var(--gray-700); }
+    .nav-links > li > a:hover { color: var(--primary); }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 0.5rem; }
+    .nav-toggle span { width: 25px; height: 2px; background: var(--secondary); }
+    .cart-link { position: relative; }
+    .cart-count { position: absolute; top: -8px; right: -8px; background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+
+    .checkout-section { padding: 7rem 0 4rem; }
+    .checkout-layout { display: grid; grid-template-columns: 1fr 420px; gap: 2rem; align-items: start; }
+
+    .checkout-form { background: white; border-radius: 16px; box-shadow: var(--shadow); padding: 2rem; }
+    .form-section { margin-bottom: 2rem; }
+    .form-section:last-child { margin-bottom: 0; }
+    .form-section-title { font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--secondary); font-size: 0.9rem; }
+    .form-group input, .form-group select { width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+    .form-group input.error { border-color: var(--danger); }
+    .error-message { color: var(--danger); font-size: 0.8rem; margin-top: 0.25rem; }
+
+    .order-summary { background: white; border-radius: 16px; box-shadow: var(--shadow); padding: 1.5rem; position: sticky; top: 100px; }
+    .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--gray-200); }
+    .summary-items { max-height: 300px; overflow-y: auto; margin-bottom: 1rem; }
+    .summary-item { display: flex; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--gray-100); }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-item-image { width: 60px; height: 60px; background: var(--gray-100); border-radius: 6px; overflow: hidden; flex-shrink: 0; }
+    .summary-item-image img { width: 100%; height: 100%; object-fit: cover; }
+    .summary-item-details { flex: 1; }
+    .summary-item-name { font-size: 0.9rem; font-weight: 600; color: var(--secondary); }
+    .summary-item-qty { font-size: 0.8rem; color: var(--gray-500); }
+    .summary-item-price { font-weight: 700; color: var(--primary); }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--gray-700); font-size: 0.95rem; }
+    .summary-row.total { font-size: 1.25rem; font-weight: 700; color: var(--secondary); padding-top: 1rem; border-top: 2px solid var(--gray-200); margin-top: 1rem; }
+
+    .payment-methods { margin-top: 1.5rem; }
+    .payment-methods-title { font-weight: 600; margin-bottom: 1rem; color: var(--secondary); }
+    #paypal-button-container { min-height: 50px; }
+    .payment-note { font-size: 0.8rem; color: var(--gray-500); text-align: center; margin-top: 1rem; }
+
+    .back-to-cart { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 600; margin-bottom: 1.5rem; }
+    .back-to-cart:hover { gap: 0.75rem; }
+
+    .order-success { display: none; text-align: center; padding: 4rem 2rem; }
+    .order-success.show { display: block; }
+    .order-success-icon { font-size: 5rem; margin-bottom: 1.5rem; }
+    .order-success h2 { font-size: 2rem; color: var(--secondary); margin-bottom: 1rem; }
+    .order-success p { color: var(--gray-500); margin-bottom: 2rem; }
+    .order-success .order-id { background: var(--gray-100); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 1.1rem; margin-bottom: 2rem; }
+    .btn-home { display: inline-block; padding: 1rem 2rem; background: var(--primary); color: white; border-radius: 8px; font-weight: 600; }
+    .btn-home:hover { background: var(--primary-dark); }
+
+    footer { background: var(--secondary); color: white; padding: 4rem 0 2rem; margin-top: 4rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand p { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem; }
+    .footer-title { font-weight: 600; margin-bottom: 1.5rem; }
+    .footer-links li { margin-bottom: 0.75rem; }
+    .footer-links a { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
+    .footer-links a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
+
+    @media (max-width: 1024px) {
+      .checkout-layout { grid-template-columns: 1fr; }
+      .order-summary { position: static; order: -1; }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: white; flex-direction: column; padding: 1rem; gap: 0; box-shadow: var(--shadow-lg); display: none; }
+      .nav-links.open { display: flex; }
+      .nav-links > li { width: 100%; }
+      .nav-links > li > a { display: block; padding: 1rem; }
+      .nav-toggle { display: flex; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="container nav-bar">
+      <a href="index.html" class="logo"><div class="logo-icon">🔧</div>DIY Hardware</a>
+      <div class="nav-toggle" id="navToggle"><span></span><span></span><span></span></div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="category.html">Categories</a></li>
+        <li><a href="products.html">Our Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="checkout-section" id="checkoutContent">
+    <div class="container">
+      <a href="cart.html" class="back-to-cart">← Back to Cart</a>
+      <div class="checkout-layout">
+        <div class="checkout-form">
+          <form id="checkoutForm">
+            <div class="form-section">
+              <h3 class="form-section-title">Contact Information</h3>
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input type="tel" id="phone" name="phone" required>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="form-section-title">Shipping Address</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">First Name *</label>
+                  <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last Name *</label>
+                  <input type="text" id="lastName" name="lastName" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="address">Street Address *</label>
+                <input type="text" id="address" name="address" required>
+              </div>
+              <div class="form-group">
+                <label for="address2">Apartment, suite, etc. (optional)</label>
+                <input type="text" id="address2" name="address2">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="city">City *</label>
+                  <input type="text" id="city" name="city" required>
+                </div>
+                <div class="form-group">
+                  <label for="postcode">Postcode *</label>
+                  <input type="text" id="postcode" name="postcode" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="country">Country *</label>
+                <select id="country" name="country" required>
+                  <option value="GB">United Kingdom</option>
+                  <option value="IE">Ireland</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="order-summary">
+          <h3 class="summary-title">Order Summary</h3>
+          <div class="summary-items" id="summaryItems">
+            <!-- Items loaded here -->
+          </div>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="subtotal">£0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span id="shipping">FREE</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="total">£0.00</span>
+          </div>
+
+          <div class="payment-methods">
+            <div class="payment-methods-title">Payment Method</div>
+            <!-- PayPal Button Container -->
+            <div id="paypal-button-container"></div>
+            <p class="payment-note">Secure payment powered by PayPal</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Order Success -->
+  <section class="checkout-section order-success" id="orderSuccess">
+    <div class="container">
+      <div class="order-success-icon">✅</div>
+      <h2>Order Confirmed!</h2>
+      <p>Thank you for your purchase. You will receive an email confirmation shortly.</p>
+      <div class="order-id">Order ID: <span id="orderId"></span></div>
+      <a href="index.html" class="btn-home">Return to Home</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;"><div class="logo-icon">🔧</div>DIY Hardware</div>
+          <p>Your trusted source for quality window and door hardware parts.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Categories</h4>
+          <ul class="footer-links">
+            <li><a href="products.html#window-handles">Window Handles</a></li>
+            <li><a href="products.html#door-handles">Door Handles</a></li>
+            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
+            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Support</h4>
+          <ul class="footer-links">
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="#">Shipping Info</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DIY Hardware Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+
+  <!-- PayPal SDK - Replace YOUR_CLIENT_ID with your PayPal Client ID -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script>
+
+  <script>
+    // Mobile nav
+    document.getElementById('navToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Check if cart is empty
+    const cart = Cart.getCart();
+    if (cart.length === 0) {
+      window.location.href = 'cart.html';
+    }
+
+    // Load order summary
+    function loadOrderSummary() {
+      const container = document.getElementById('summaryItems');
+      const cart = Cart.getCart();
+
+      container.innerHTML = cart.map(item => `
+        <div class="summary-item">
+          <div class="summary-item-image">
+            <img src="${item.image}" alt="${item.name}">
+          </div>
+          <div class="summary-item-details">
+            <div class="summary-item-name">${item.name}</div>
+            <div class="summary-item-qty">Qty: ${item.quantity}</div>
+          </div>
+          <div class="summary-item-price">£${(item.price * item.quantity).toFixed(2)}</div>
+        </div>
+      `).join('');
+
+      const subtotal = Cart.getTotal();
+      const shipping = subtotal >= 50 ? 0 : 4.99;
+      const total = subtotal + shipping;
+
+      document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
+      document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
+      document.getElementById('total').textContent = `£${total.toFixed(2)}`;
+
+      return total;
+    }
+
+    const orderTotal = loadOrderSummary();
+
+    // Form validation
+    function validateForm() {
+      const form = document.getElementById('checkoutForm');
+      const inputs = form.querySelectorAll('[required]');
+      let isValid = true;
+
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('error');
+          isValid = false;
+        } else {
+          input.classList.remove('error');
+        }
+      });
+
+      return isValid;
+    }
+
+    // PayPal Buttons
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'pay'
+      },
+
+      // Validate form before payment
+      onClick: function(data, actions) {
+        if (!validateForm()) {
+          alert('Please fill in all required fields before proceeding to payment.');
+          return actions.reject();
+        }
+        return actions.resolve();
+      },
+
+      // Create order
+      createOrder: function(data, actions) {
+        const cart = Cart.getCart();
+        const subtotal = Cart.getTotal();
+        const shipping = subtotal >= 50 ? 0 : 4.99;
+
+        return actions.order.create({
+          purchase_units: [{
+            description: 'DIY Hardware Shop Order',
+            amount: {
+              currency_code: 'GBP',
+              value: (subtotal + shipping).toFixed(2),
+              breakdown: {
+                item_total: {
+                  currency_code: 'GBP',
+                  value: subtotal.toFixed(2)
+                },
+                shipping: {
+                  currency_code: 'GBP',
+                  value: shipping.toFixed(2)
+                }
+              }
+            },
+            items: cart.map(item => ({
+              name: item.name,
+              unit_amount: {
+                currency_code: 'GBP',
+                value: item.price.toFixed(2)
+              },
+              quantity: item.quantity.toString()
+            }))
+          }]
+        });
+      },
+
+      // Capture payment
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          // Payment successful
+          const orderId = details.id;
+
+          // Clear cart
+          Cart.clearCart();
+
+          // Show success
+          document.getElementById('checkoutContent').style.display = 'none';
+          document.getElementById('orderSuccess').classList.add('show');
+          document.getElementById('orderId').textContent = orderId;
+
+          // Save order to localStorage (for order history)
+          const orders = JSON.parse(localStorage.getItem('diyHardwareOrders') || '[]');
+          orders.push({
+            id: orderId,
+            date: new Date().toISOString(),
+            total: orderTotal,
+            status: 'confirmed'
+          });
+          localStorage.setItem('diyHardwareOrders', JSON.stringify(orders));
+        });
+      },
+
+      // Handle errors
+      onError: function(err) {
+        console.error('PayPal Error:', err);
+        alert('There was an error processing your payment. Please try again.');
+      }
+    }).render('#paypal-button-container');
+  </script>
+</body>
+</html>

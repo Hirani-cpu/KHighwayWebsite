@@ -178,6 +178,7 @@
         </li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
       </ul>
     </div>
   </header>
@@ -278,10 +279,10 @@
           </div>
 
           <div class="action-buttons">
-            <button class="btn-primary">
+            <button class="btn-primary" id="addToCartBtn">
               <span>🛒</span> Add to Cart
             </button>
-            <button class="btn-secondary">Buy on eBay</button>
+            <a href="#" class="btn-secondary" id="ebayBtn" target="_blank">Buy on eBay</a>
           </div>
 
           <div class="product-meta">
@@ -382,6 +383,7 @@
 
   <button class="back-to-top" id="backToTop">↑</button>
 
+  <script src="js/cart.js"></script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
@@ -415,6 +417,30 @@
         }
       });
     });
+
+    // Product data
+    const product = {
+      id: 'espag-window-handle-white',
+      name: 'Espag Window Handle - White',
+      price: 8.99,
+      image: 'images/products/window-handles/espag-white.jpg',
+      ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+white' // Replace with actual eBay listing URL
+    };
+
+    // Add to Cart
+    document.getElementById('addToCartBtn').addEventListener('click', () => {
+      const quantity = parseInt(document.getElementById('quantity').value);
+      Cart.addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: quantity
+      });
+    });
+
+    // eBay button
+    document.getElementById('ebayBtn').href = product.ebayUrl;
   </script>
 </body>
 </html>

@@ -72,8 +72,14 @@
     .product-body { padding: 1.25rem; }
     .product-name { font-size: 1rem; font-weight: 600; color: var(--secondary); margin-bottom: 0.5rem; }
     .product-price { color: var(--primary); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.75rem; }
-    .product-btn { display: block; text-align: center; background: var(--primary); color: white; padding: 0.625rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; }
+    .product-btn { display: block; text-align: center; background: var(--primary); color: white; padding: 0.625rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; }
     .product-btn:hover { background: var(--primary-dark); }
+    .product-actions { display: flex; gap: 0.5rem; }
+    .product-actions .product-btn { flex: 1; }
+    .btn-cart { background: var(--success); }
+    .btn-cart:hover { background: #059669; }
+    .cart-link { position: relative; }
+    .cart-count { position: absolute; top: -8px; right: -8px; background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
 
     footer { background: var(--secondary); color: white; padding: 4rem 0 2rem; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
@@ -145,6 +151,7 @@
         </li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
       </ul>
     </div>
   </header>
@@ -178,36 +185,48 @@
       <!-- Window Handles -->
       <h2 class="section-title" id="window-handles">Window Handles</h2>
       <div class="products-grid reveal" data-category="window-handles">
-        <div class="product-card">
+        <div class="product-card" data-id="espag-white" data-name="Espag Window Handle - White" data-price="8.99" data-image="images/products/window-handles/espag-white.jpg">
           <div class="product-image"><img src="images/products/window-handles/espag-white.jpg" alt="Espag Window Handle - White"></div>
           <div class="product-body">
             <h3 class="product-name">Espag Window Handle - White</h3>
             <div class="product-price">£8.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="espag-chrome" data-name="Espag Window Handle - Chrome" data-price="9.99" data-image="images/products/window-handles/espag-chrome.jpg">
           <div class="product-image"><img src="images/products/window-handles/espag-chrome.jpg" alt="Espag Window Handle - Chrome"></div>
           <div class="product-body">
             <h3 class="product-name">Espag Window Handle - Chrome</h3>
             <div class="product-price">£9.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="cockspur" data-name="Cockspur Window Handle" data-price="7.99" data-image="images/products/window-handles/cockspur.jpg">
           <div class="product-image"><img src="images/products/window-handles/cockspur.jpg" alt="Cockspur Window Handle"></div>
           <div class="product-body">
             <h3 class="product-name">Cockspur Window Handle</h3>
             <div class="product-price">£7.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="inline-black" data-name="Inline Window Handle - Black" data-price="10.99" data-image="images/products/window-handles/inline-black.jpg">
           <div class="product-image"><img src="images/products/window-handles/inline-black.jpg" alt="Inline Window Handle - Black"></div>
           <div class="product-body">
             <h3 class="product-name">Inline Window Handle - Black</h3>
             <div class="product-price">£10.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
       </div>
@@ -215,36 +234,48 @@
       <!-- Door Handles -->
       <h2 class="section-title" id="door-handles">Door Handles</h2>
       <div class="products-grid reveal" data-category="door-handles">
-        <div class="product-card">
+        <div class="product-card" data-id="lever-chrome" data-name="Lever Door Handle - Chrome" data-price="24.99" data-image="images/products/door-handles/lever-chrome.jpg">
           <div class="product-image"><img src="images/products/door-handles/lever-chrome.jpg" alt="Lever Door Handle - Chrome"></div>
           <div class="product-body">
             <h3 class="product-name">Lever Door Handle - Chrome</h3>
             <div class="product-price">£24.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="lever-gold" data-name="Lever Door Handle - Gold" data-price="29.99" data-image="images/products/door-handles/lever-gold.jpg">
           <div class="product-image"><img src="images/products/door-handles/lever-gold.jpg" alt="Lever Door Handle - Gold"></div>
           <div class="product-body">
             <h3 class="product-name">Lever Door Handle - Gold</h3>
             <div class="product-price">£29.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="pad-white" data-name="Pad Handle - White" data-price="18.99" data-image="images/products/door-handles/pad-white.jpg">
           <div class="product-image"><img src="images/products/door-handles/pad-white.jpg" alt="Pad Handle - White"></div>
           <div class="product-body">
             <h3 class="product-name">Pad Handle - White</h3>
             <div class="product-price">£18.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="d-handle-black" data-name="D Handle - Black" data-price="15.99" data-image="images/products/door-handles/d-handle-black.jpg">
           <div class="product-image"><img src="images/products/door-handles/d-handle-black.jpg" alt="D Handle - Black"></div>
           <div class="product-body">
             <h3 class="product-name">D Handle - Black</h3>
             <div class="product-price">£15.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions">
+              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              <a href="product-detail.html" class="product-btn">Details</a>
+            </div>
           </div>
         </div>
       </div>
@@ -252,36 +283,36 @@
       <!-- Letter Boxes -->
       <h2 class="section-title" id="letter-boxes">Letter Boxes</h2>
       <div class="products-grid reveal" data-category="letter-boxes">
-        <div class="product-card">
+        <div class="product-card" data-id="letterbox-12-chrome" data-name="12 Letterbox - Chrome" data-price="14.99" data-image="images/products/letter-boxes/letterbox-12-chrome.jpg">
           <div class="product-image"><img src="images/products/letter-boxes/letterbox-12-chrome.jpg" alt="12 Letterbox - Chrome"></div>
           <div class="product-body">
             <h3 class="product-name">12" Letterbox - Chrome</h3>
             <div class="product-price">£14.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="letterbox-10-gold" data-name="10 Letterbox - Gold" data-price="16.99" data-image="images/products/letter-boxes/letterbox-10-gold.jpg">
           <div class="product-image"><img src="images/products/letter-boxes/letterbox-10-gold.jpg" alt="10 Letterbox - Gold"></div>
           <div class="product-body">
             <h3 class="product-name">10" Letterbox - Gold</h3>
             <div class="product-price">£16.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="draught-excluder" data-name="Draught Excluder Letterbox" data-price="19.99" data-image="images/products/letter-boxes/draught-excluder.jpg">
           <div class="product-image"><img src="images/products/letter-boxes/draught-excluder.jpg" alt="Draught Excluder Letterbox"></div>
           <div class="product-body">
             <h3 class="product-name">Draught Excluder Letterbox</h3>
             <div class="product-price">£19.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="telescopic" data-name="Telescopic Letterbox" data-price="22.99" data-image="images/products/letter-boxes/telescopic.jpg">
           <div class="product-image"><img src="images/products/letter-boxes/telescopic.jpg" alt="Telescopic Letterbox"></div>
           <div class="product-body">
             <h3 class="product-name">Telescopic Letterbox</h3>
             <div class="product-price">£22.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
       </div>
@@ -289,36 +320,36 @@
       <!-- Trickle Vents -->
       <h2 class="section-title" id="trickle-vents">Trickle Vents</h2>
       <div class="products-grid reveal" data-category="trickle-vents">
-        <div class="product-card">
+        <div class="product-card" data-id="slot-vent-white" data-name="Slot Vent 4000 - White" data-price="6.99" data-image="images/products/trickle-vents/slot-vent-white.jpg">
           <div class="product-image"><img src="images/products/trickle-vents/slot-vent-white.jpg" alt="Slot Vent 4000 - White"></div>
           <div class="product-body">
             <h3 class="product-name">Slot Vent 4000 - White</h3>
             <div class="product-price">£6.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="slot-vent-brown" data-name="Slot Vent 4000 - Brown" data-price="6.99" data-image="images/products/trickle-vents/slot-vent-brown.jpg">
           <div class="product-image"><img src="images/products/trickle-vents/slot-vent-brown.jpg" alt="Slot Vent 4000 - Brown"></div>
           <div class="product-body">
             <h3 class="product-name">Slot Vent 4000 - Brown</h3>
             <div class="product-price">£6.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="night-vent" data-name="Night Vent Restrictor" data-price="4.99" data-image="images/products/trickle-vents/night-vent.jpg">
           <div class="product-image"><img src="images/products/trickle-vents/night-vent.jpg" alt="Night Vent Restrictor"></div>
           <div class="product-body">
             <h3 class="product-name">Night Vent Restrictor</h3>
             <div class="product-price">£4.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="canopy-cover" data-name="Canopy Vent Cover" data-price="3.99" data-image="images/products/trickle-vents/canopy-cover.jpg">
           <div class="product-image"><img src="images/products/trickle-vents/canopy-cover.jpg" alt="Canopy Vent Cover"></div>
           <div class="product-body">
             <h3 class="product-name">Canopy Vent Cover</h3>
             <div class="product-price">£3.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
       </div>
@@ -326,36 +357,36 @@
       <!-- Lock Cylinders -->
       <h2 class="section-title" id="lock-cylinders">Lock Cylinders</h2>
       <div class="products-grid reveal" data-category="lock-cylinders">
-        <div class="product-card">
+        <div class="product-card" data-id="euro-35-brass" data-name="Euro Cylinder 35/35 - Brass" data-price="12.99" data-image="images/products/lock-cylinders/euro-35-brass.jpg">
           <div class="product-image"><img src="images/products/lock-cylinders/euro-35-brass.jpg" alt="Euro Cylinder 35/35 - Brass"></div>
           <div class="product-body">
             <h3 class="product-name">Euro Cylinder 35/35 - Brass</h3>
             <div class="product-price">£12.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="euro-40-nickel" data-name="Euro Cylinder 40/40 - Nickel" data-price="14.99" data-image="images/products/lock-cylinders/euro-40-nickel.jpg">
           <div class="product-image"><img src="images/products/lock-cylinders/euro-40-nickel.jpg" alt="Euro Cylinder 40/40 - Nickel"></div>
           <div class="product-body">
             <h3 class="product-name">Euro Cylinder 40/40 - Nickel</h3>
             <div class="product-price">£14.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="anti-snap" data-name="Anti-Snap Cylinder" data-price="24.99" data-image="images/products/lock-cylinders/anti-snap.jpg">
           <div class="product-image"><img src="images/products/lock-cylinders/anti-snap.jpg" alt="Anti-Snap Cylinder"></div>
           <div class="product-body">
             <h3 class="product-name">Anti-Snap Cylinder</h3>
             <div class="product-price">£24.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="thumbturn" data-name="Thumbturn Cylinder" data-price="18.99" data-image="images/products/lock-cylinders/thumbturn.jpg">
           <div class="product-image"><img src="images/products/lock-cylinders/thumbturn.jpg" alt="Thumbturn Cylinder"></div>
           <div class="product-body">
             <h3 class="product-name">Thumbturn Cylinder</h3>
             <div class="product-price">£18.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
       </div>
@@ -363,36 +394,36 @@
       <!-- Bolts -->
       <h2 class="section-title" id="bolts">Bolts</h2>
       <div class="products-grid reveal" data-category="bolts">
-        <div class="product-card">
+        <div class="product-card" data-id="flush-150-chrome" data-name="Flush Bolt 150mm - Chrome" data-price="8.99" data-image="images/products/bolts/flush-150-chrome.jpg">
           <div class="product-image"><img src="images/products/bolts/flush-150-chrome.jpg" alt="Flush Bolt 150mm - Chrome"></div>
           <div class="product-body">
             <h3 class="product-name">Flush Bolt 150mm - Chrome</h3>
             <div class="product-price">£8.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="flush-200-brass" data-name="Flush Bolt 200mm - Brass" data-price="10.99" data-image="images/products/bolts/flush-200-brass.jpg">
           <div class="product-image"><img src="images/products/bolts/flush-200-brass.jpg" alt="Flush Bolt 200mm - Brass"></div>
           <div class="product-body">
             <h3 class="product-name">Flush Bolt 200mm - Brass</h3>
             <div class="product-price">£10.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="barrel-100" data-name="Barrel Bolt 100mm" data-price="5.99" data-image="images/products/bolts/barrel-100.jpg">
           <div class="product-image"><img src="images/products/bolts/barrel-100.jpg" alt="Barrel Bolt 100mm"></div>
           <div class="product-body">
             <h3 class="product-name">Barrel Bolt 100mm</h3>
             <div class="product-price">£5.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
-        <div class="product-card">
+        <div class="product-card" data-id="security-bolt" data-name="Security Door Bolt" data-price="7.99" data-image="images/products/bolts/security-bolt.jpg">
           <div class="product-image"><img src="images/products/bolts/security-bolt.jpg" alt="Security Door Bolt"></div>
           <div class="product-body">
             <h3 class="product-name">Security Door Bolt</h3>
             <div class="product-price">£7.99</div>
-            <a href="product-detail.html" class="product-btn">View Details</a>
+            <div class="product-actions"><button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button><a href="product-detail.html" class="product-btn">Details</a></div>
           </div>
         </div>
       </div>
@@ -447,10 +478,23 @@
     <img src="" alt="Product" id="lightboxImg">
   </div>
 
+  <script src="js/cart.js"></script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
     navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+    // Add to Cart function
+    function addToCart(button) {
+      const card = button.closest('.product-card');
+      Cart.addItem({
+        id: card.dataset.id,
+        name: card.dataset.name,
+        price: parseFloat(card.dataset.price),
+        image: card.dataset.image,
+        quantity: 1
+      });
+    }
 
     const header = document.getElementById('header');
     window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
