@@ -7,7 +7,8 @@
       "Bash(git commit:*)",
       "Bash(git remote add:*)",
       "Bash(git push:*)",
-      "WebFetch(domain:www.diy-hardware-shop.co.uk)"
+      "WebFetch(domain:www.diy-hardware-shop.co.uk)",
+      "Bash(git init:*)"
     ],
     "deny": [],
     "ask": []
