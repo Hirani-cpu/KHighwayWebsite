@@ -121,6 +121,61 @@
         display: flex;
       }
     }
+
+    /* HERO SECTION */
+    .hero {
+      background: #e5edf7;
+      padding: 2.5rem 0 2rem;
+      border-bottom: 1px solid #d0d7e0;
+    }
+
+    .hero-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .hero-text {
+      flex: 1 1 260px;
+    }
+
+    .hero-title {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 1.25rem;
+      max-width: 480px;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: #1e73be;
+      color: #fff;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .hero-image-placeholder {
+      flex: 1 1 260px;
+      min-height: 200px;
+      border-radius: 8px;
+      border: 2px dashed #9cb4d8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #57709c;
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.95rem;
+      background: #f0f4fb;
+    }
   </style>
 </head>
 <body>
@@ -143,5 +198,22 @@
       </ul>
     </div>
   </header>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <h1 class="hero-title">All Types of Window &amp; Door Parts</h1>
+        <p class="hero-subtitle">
+          Browse a wide range of hardware components suitable for uPVC, aluminium and timber windows and doors.
+        </p>
+        <a href="#products" class="hero-cta">View Featured Products</a>
+      </div>
+
+      <div class="hero-image-placeholder">
+        Hero image or banner goes here (e.g. window &amp; door hardware).
+      </div>
+    </div>
+  </section>
 </body>
 </html>
