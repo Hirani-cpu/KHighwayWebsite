@@ -483,41 +483,50 @@
   </div>
 
   <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/reviews.js"></script>
-  <script>
+  <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module">
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
     navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
 
-    // Update all product detail links with product IDs and add rating badges
-    document.querySelectorAll('.product-card').forEach(card => {
-      const productId = card.dataset.id;
-      const detailsLink = card.querySelector('a.product-btn');
-      if (detailsLink && productId) {
-        detailsLink.href = `product-detail.html?id=${productId}`;
+    // Wait for Firebase to initialize then load ratings
+    const checkReady = setInterval(async () => {
+      if (window.Auth && window.Auth._ready && window.Reviews) {
+        clearInterval(checkReady);
+        await loadProductRatings();
       }
+    }, 100);
 
-      // Add rating badge to product image
-      if (productId) {
-        const ratingData = Reviews.getAverageRating(productId);
-        const productImage = card.querySelector('.product-image');
+    async function loadProductRatings() {
+      // Update all product detail links with product IDs and add rating badges
+      for (const card of document.querySelectorAll('.product-card')) {
+        const productId = card.dataset.id;
+        const detailsLink = card.querySelector('a.product-btn');
+        if (detailsLink && productId) {
+          detailsLink.href = `product-detail.html?id=${productId}`;
+        }
 
-        if (productImage && ratingData.count > 0) {
-          const ratingBadge = document.createElement('div');
-          ratingBadge.className = 'product-rating';
-          ratingBadge.innerHTML = `
-            <span class="star">★</span>
-            <span class="rating-value">${ratingData.average}</span>
-            <span class="rating-count">(${ratingData.count})</span>
-          `;
-          productImage.appendChild(ratingBadge);
+        // Add rating badge to product image
+        if (productId) {
+          const ratingData = await Reviews.getAverageRating(productId);
+          const productImage = card.querySelector('.product-image');
+
+          if (productImage && ratingData.count > 0) {
+            const ratingBadge = document.createElement('div');
+            ratingBadge.className = 'product-rating';
+            ratingBadge.innerHTML = `
+              <span class="star">★</span>
+              <span class="rating-value">${ratingData.average}</span>
+              <span class="rating-count">(${ratingData.count})</span>
+            `;
+            productImage.appendChild(ratingBadge);
+          }
         }
       }
-    });
+    }
 
-    // Add to Cart function
-    function addToCart(button) {
+    // Add to Cart function - make global for onclick
+    window.addToCart = function(button) {
       const card = button.closest('.product-card');
       Cart.addItem({
         id: card.dataset.id,

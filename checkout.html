@@ -323,12 +323,12 @@
   </footer>
 
   <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
+  <script type="module" src="js/firebase-compat.js"></script>
 
   <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=AVCvli_4wEz5U6uVBt6yVv3SCt6qmz68pvTpq2Dv8u-eUO-9CUqThZQevR-hkBYIXh36bKVuTUtuPGv8&currency=GBP"></script>
 
-  <script>
+  <script type="module">
     // Mobile nav
     document.getElementById('navToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('open');
@@ -340,19 +340,24 @@
       window.location.href = 'cart.html';
     }
 
-    // Auto-fill form from user profile if logged in
-    if (Auth.isLoggedIn()) {
-      const user = Auth.getCurrentUser();
-      if (user.email) document.getElementById('email').value = user.email;
-      if (user.phone) document.getElementById('phone').value = user.phone;
-      if (user.firstName) document.getElementById('firstName').value = user.firstName;
-      if (user.lastName) document.getElementById('lastName').value = user.lastName;
-      if (user.address) document.getElementById('address').value = user.address;
-      if (user.address2) document.getElementById('address2').value = user.address2;
-      if (user.city) document.getElementById('city').value = user.city;
-      if (user.postcode) document.getElementById('postcode').value = user.postcode;
-      if (user.country) document.getElementById('country').value = user.country;
-    }
+    // Wait for Firebase to initialize then auto-fill form
+    const checkAuth = setInterval(() => {
+      if (window.Auth && window.Auth._ready) {
+        clearInterval(checkAuth);
+        if (Auth.isLoggedIn()) {
+          const user = Auth.getCurrentUser();
+          if (user.email) document.getElementById('email').value = user.email;
+          if (user.phone) document.getElementById('phone').value = user.phone;
+          if (user.firstName) document.getElementById('firstName').value = user.firstName;
+          if (user.lastName) document.getElementById('lastName').value = user.lastName;
+          if (user.address) document.getElementById('address').value = user.address;
+          if (user.address2) document.getElementById('address2').value = user.address2;
+          if (user.city) document.getElementById('city').value = user.city;
+          if (user.postcode) document.getElementById('postcode').value = user.postcode;
+          if (user.country) document.getElementById('country').value = user.country;
+        }
+      }
+    }, 100);
 
     // Get selected shipping cost
     function getSelectedShipping() {
@@ -478,9 +483,12 @@
 
       // Capture payment
       onApprove: function(data, actions) {
-        return actions.order.capture().then(function(details) {
+        return actions.order.capture().then(async function(details) {
           // Payment successful
           const orderId = details.id;
+          const cartItems = Cart.getCart();
+          const orderSubtotal = Cart.getTotal();
+          const orderShipping = getSelectedShipping();
 
           // Clear cart
           Cart.clearCart();
@@ -490,23 +498,27 @@
           document.getElementById('orderSuccess').classList.add('show');
           document.getElementById('orderId').textContent = orderId;
 
-          // Save order to localStorage (for order history)
-          const orders = JSON.parse(localStorage.getItem('diyHardwareOrders') || '[]');
-          const userEmail = Auth.isLoggedIn() ? Auth.getCurrentUser().email : document.getElementById('email').value;
-          const orderSubtotal = Cart.getTotal();
-          const orderShipping = getSelectedShipping();
+          // Save order to Firebase
+          const userEmail = (window.Auth && Auth.isLoggedIn()) ? Auth.getCurrentUser().email : document.getElementById('email').value;
           const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
           const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
-          orders.push({
-            id: orderId,
-            date: new Date().toISOString(),
-            total: orderSubtotal + orderShipping,
-            status: 'confirmed',
+
+          await FirebaseOrders.saveOrder({
+            orderId: orderId,
             userEmail: userEmail,
+            total: orderSubtotal + orderShipping,
             deliveryMethod: selectedDelivery,
-            deliveryInstructions: deliveryInstructions
+            deliveryInstructions: deliveryInstructions,
+            items: cartItems,
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName: document.getElementById('lastName').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            address2: document.getElementById('address2').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            postcode: document.getElementById('postcode').value.trim(),
+            country: document.getElementById('country').value,
+            phone: document.getElementById('phone').value.trim()
           });
-          localStorage.setItem('diyHardwareOrders', JSON.stringify(orders));
         });
       },
 

@@ -207,21 +207,26 @@
   </footer>
 
   <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
+  <script type="module" src="js/firebase-compat.js"></script>
 
-  <script>
+  <script type="module">
     // Mobile nav
     document.getElementById('navToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('open');
     });
 
-    // Redirect if already logged in
-    if (Auth.isLoggedIn()) {
-      window.location.href = 'account.html';
-    }
+    // Wait for Firebase to initialize
+    const checkAuth = setInterval(() => {
+      if (window.Auth && window.Auth._ready) {
+        clearInterval(checkAuth);
+        if (Auth.isLoggedIn()) {
+          window.location.href = 'account.html';
+        }
+      }
+    }, 100);
 
     // Handle signup form
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const firstName = document.getElementById('firstName').value.trim();
@@ -240,7 +245,7 @@
       }
 
       // Attempt signup
-      const result = Auth.signup({
+      const result = await Auth.signup({
         firstName,
         lastName,
         email,

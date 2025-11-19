@@ -297,19 +297,27 @@
   </footer>
 
   <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
+  <script type="module" src="js/firebase-compat.js"></script>
 
-  <script>
+  <script type="module">
     // Mobile nav
     document.getElementById('navToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('open');
     });
 
-    // Redirect if not logged in
-    if (!Auth.isLoggedIn()) {
-      window.location.href = 'login.html';
-    }
+    // Wait for Firebase to initialize
+    const checkAuth = setInterval(async () => {
+      if (window.Auth && window.Auth._ready) {
+        clearInterval(checkAuth);
+        if (!Auth.isLoggedIn()) {
+          window.location.href = 'login.html';
+          return;
+        }
+        initAccount();
+      }
+    }, 100);
 
+    async function initAccount() {
     const user = Auth.getCurrentUser();
 
     // Set user name
@@ -330,12 +338,9 @@
     loadProfile();
 
     // Load orders
-    function loadOrders() {
+    async function loadOrders() {
       const container = document.getElementById('ordersList');
-      const allOrders = JSON.parse(localStorage.getItem('diyHardwareOrders') || '[]');
-
-      // Filter orders for current user
-      const userOrders = allOrders.filter(order => order.userEmail === user.email);
+      const userOrders = await FirebaseOrders.getUserOrders(user.email);
 
       if (userOrders.length === 0) {
         container.innerHTML = `
@@ -364,7 +369,7 @@
         return `
           <div class="order-card">
             <div class="order-header">
-              <span class="order-id">Order #${order.id}</span>
+              <span class="order-id">Order #${order.orderId || order.id}</span>
               <span class="order-status ${statusClass}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
             </div>
             <div class="order-details">
@@ -373,7 +378,7 @@
             </div>
           </div>
         `;
-      }).reverse().join('');
+      }).join('');
     }
     loadOrders();
 
@@ -398,10 +403,10 @@
     });
 
     // Profile form
-    document.getElementById('profileForm').addEventListener('submit', function(e) {
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const result = Auth.updateProfile({
+      const result = await Auth.updateProfile({
         firstName: document.getElementById('firstName').value.trim(),
         lastName: document.getElementById('lastName').value.trim(),
         phone: document.getElementById('phone').value.trim(),
@@ -453,10 +458,11 @@
     });
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      Auth.logout();
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await Auth.logout();
       window.location.href = 'index.html';
     });
+    }
   </script>
 </body>
 </html>
