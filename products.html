@@ -100,6 +100,28 @@
 
     .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
     .reveal.active { opacity: 1; transform: translateY(0); }
+
+    /* Search and Filter */
+    .search-filter { display: flex; gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap; align-items: center; justify-content: center; }
+    .search-box { position: relative; flex: 1; max-width: 400px; }
+    .search-box input { width: 100%; padding: 0.875rem 1rem; padding-right: 50px; border: 2px solid var(--gray-200); border-radius: 50px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+    .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .search-box button { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: var(--primary); border: none; border-radius: 50%; color: white; cursor: pointer; }
+    .filter-select { padding: 0.875rem 1.5rem; border: 2px solid var(--gray-200); border-radius: 50px; font-size: 1rem; font-family: inherit; cursor: pointer; }
+    .filter-select:focus { outline: none; border-color: var(--primary); }
+
+    /* Back to Top */
+    .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: var(--primary); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 999; }
+    .back-to-top.visible { opacity: 1; visibility: visible; }
+    .back-to-top:hover { background: var(--primary-dark); transform: translateY(-3px); }
+
+    /* Lightbox */
+    .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .lightbox.active { opacity: 1; visibility: visible; }
+    .lightbox img { max-width: 90%; max-height: 90%; border-radius: 8px; transform: scale(0.9); transition: transform 0.3s ease; }
+    .lightbox.active img { transform: scale(1); }
+    .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -122,6 +144,7 @@
           </div>
         </li>
         <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
       </ul>
     </div>
   </header>
@@ -135,11 +158,28 @@
 
   <section class="section">
     <div class="container">
+      <!-- Search and Filter -->
+      <div class="search-filter">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search products...">
+          <button type="button">🔍</button>
+        </div>
+        <select class="filter-select" id="categoryFilter">
+          <option value="all">All Categories</option>
+          <option value="window-handles">Window Handles</option>
+          <option value="door-handles">Door Handles</option>
+          <option value="letter-boxes">Letter Boxes</option>
+          <option value="trickle-vents">Trickle Vents</option>
+          <option value="lock-cylinders">Lock Cylinders</option>
+          <option value="bolts">Bolts</option>
+        </select>
+      </div>
+
       <!-- Window Handles -->
       <h2 class="section-title" id="window-handles">Window Handles</h2>
-      <div class="products-grid reveal">
+      <div class="products-grid reveal" data-category="window-handles">
         <div class="product-card">
-          <div class="product-image"><span>Product Image</span></div>
+          <div class="product-image"><img src="https://lh3.googleusercontent.com/sitesv/AAzXCkfYq3RQ6X7O010se8iibhC12Q7z0GD75-18MDCMuBmuicdf_tLauUtvDaYxFlYhIzEz7AvjxUV1NjFSfLz3LMsFesUg5gMI_RqE1IqzBs7E0zmheKQqRufATyqYF0lN7r5VUrDRKesMI1hskY6g7fqqAUfwsU_hl6nMy47bJlq-h_nNnVu731oPDqyRxBR0KFn1LH5EW4AG7lcJXi6Kkn_Ui6SZzFNpLYdLm6U=w1280" alt="Espag Window Handle"></div>
           <div class="product-body">
             <h3 class="product-name">Espag Window Handle - White</h3>
             <div class="product-price">£8.99</div>
@@ -147,7 +187,7 @@
           </div>
         </div>
         <div class="product-card">
-          <div class="product-image"><span>Product Image</span></div>
+          <div class="product-image"><img src="https://lh3.googleusercontent.com/sitesv/AAzXCkfYq3RQ6X7O010se8iibhC12Q7z0GD75-18MDCMuBmuicdf_tLauUtvDaYxFlYhIzEz7AvjxUV1NjFSfLz3LMsFesUg5gMI_RqE1IqzBs7E0zmheKQqRufATyqYF0lN7r5VUrDRKesMI1hskY6g7fqqAUfwsU_hl6nMy47bJlq-h_nNnVu731oPDqyRxBR0KFn1LH5EW4AG7lcJXi6Kkn_Ui6SZzFNpLYdLm6U=w1280" alt="Espag Window Handle Chrome"></div>
           <div class="product-body">
             <h3 class="product-name">Espag Window Handle - Chrome</h3>
             <div class="product-price">£9.99</div>
@@ -387,7 +427,7 @@
         <div>
           <h4 class="footer-title">Support</h4>
           <ul class="footer-links">
-            <li><a href="#">Contact Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
             <li><a href="#">Shipping Info</a></li>
             <li><a href="#">Returns</a></li>
             <li><a href="#">FAQ</a></li>
@@ -399,6 +439,13 @@
       </div>
     </div>
   </footer>
+
+  <button class="back-to-top" id="backToTop">↑</button>
+
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightboxClose">&times;</span>
+    <img src="" alt="Product" id="lightboxImg">
+  </div>
 
   <script>
     const navToggle = document.getElementById('navToggle');
@@ -416,6 +463,68 @@
     }
     window.addEventListener('scroll', revealOnScroll);
     revealOnScroll();
+
+    // Back to Top
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => backToTop.classList.toggle('visible', window.scrollY > 500));
+    backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    document.querySelectorAll('.product-image img').forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    document.getElementById('lightboxClose').addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Search and Filter
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const productCards = document.querySelectorAll('.product-card');
+    const sections = document.querySelectorAll('.section-title, .products-grid');
+
+    function filterProducts() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const category = categoryFilter.value;
+
+      document.querySelectorAll('[data-category]').forEach(grid => {
+        const gridCategory = grid.getAttribute('data-category');
+        const sectionTitle = grid.previousElementSibling;
+
+        if (category !== 'all' && gridCategory !== category) {
+          grid.style.display = 'none';
+          if (sectionTitle) sectionTitle.style.display = 'none';
+        } else {
+          grid.style.display = '';
+          if (sectionTitle) sectionTitle.style.display = '';
+        }
+      });
+
+      productCards.forEach(card => {
+        const name = card.querySelector('.product-name').textContent.toLowerCase();
+        if (name.includes(searchTerm)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', filterProducts);
+    categoryFilter.addEventListener('change', filterProducts);
   </script>
 </body>
 </html>

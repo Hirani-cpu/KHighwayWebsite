@@ -932,6 +932,133 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Back to Top Button */
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .back-to-top:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .lightbox.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .lightbox.active img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .lightbox-close:hover {
+      transform: scale(1.2);
+    }
+
+    /* Search Box */
+    .search-box {
+      position: relative;
+      max-width: 400px;
+      margin: 0 auto 3rem;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      padding-right: 50px;
+      border: 2px solid var(--gray-200);
+      border-radius: 50px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-box button {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .search-box button:hover {
+      background: var(--primary-dark);
+    }
   </style>
 </head>
 <body>
@@ -964,6 +1091,7 @@
           </div>
         </li>
         <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
       </ul>
     </div>
   </header>
@@ -990,9 +1118,7 @@
 
       <div class="hero-image">
         <div class="hero-image-wrapper">
-          <div class="hero-image-placeholder">
-            Premium window & door hardware image
-          </div>
+          <img src="https://lh3.googleusercontent.com/sitesv/AAzXCkfEidWigH2W3Vc-B0crl_TvwZptPsqQpDNToaxXmVjmPIb-Loe5ObbP_8wkXzLZRvT3SyqSPxmapMzQRELKygaMg8E7hILjPGXdolmgS6rFVhRJtd-KZyEmOirGei11FHJ520SNDEpTPo463kURhxhAm0DZZoUtxcUMYvhmfrQEavaDcUvxsfOQTec=w1280" alt="Window and Door Hardware" style="border-radius: 12px; width: 100%; height: 350px; object-fit: cover;">
         </div>
         <div class="floating-card floating-card-1">
           <span>🚚</span>
@@ -1056,12 +1182,12 @@
       <div class="products-grid">
         <article class="product-card reveal">
           <div class="product-image">
-            <span>Window Handle Image</span>
+            <img src="https://lh3.googleusercontent.com/sitesv/AAzXCkfYq3RQ6X7O010se8iibhC12Q7z0GD75-18MDCMuBmuicdf_tLauUtvDaYxFlYhIzEz7AvjxUV1NjFSfLz3LMsFesUg5gMI_RqE1IqzBs7E0zmheKQqRufATyqYF0lN7r5VUrDRKesMI1hskY6g7fqqAUfwsU_hl6nMy47bJlq-h_nNnVu731oPDqyRxBR0KFn1LH5EW4AG7lcJXi6Kkn_Ui6SZzFNpLYdLm6U=w1280" alt="Window Handle" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-body">
             <h3 class="product-title">Window Handles</h3>
             <p class="product-text">Premium replacement window handles suitable for various profiles and locking systems.</p>
-            <a href="#" class="product-link">
+            <a href="products.html#window-handles" class="product-link">
               View Collection
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -1072,12 +1198,12 @@
 
         <article class="product-card reveal">
           <div class="product-image">
-            <span>Door Handle Image</span>
+            <img src="https://lh3.googleusercontent.com/sitesv/AAzXCkdGiz2jt9VnaMmT_nnjeoUpH66_QipEFsJlnf-4DNRgS7AI3Tco662GFdSTsSPtDuiWquaRKurh31QuXd9NBh5HiSmKcgmtWlYgtwSR6Cj7glLIoi9Tb6nHPGWefEu5iKoXFnqwY2ARfYcBtLP2Fmdqlg_kMj4hOVtvd6VxkYuR8Uwwzpo8VJ7y5poRDpWfYmmE1KzwgonwNEVASKc3tklw6codTWQ6MsUUUhs=w1280" alt="Door Handle" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-body">
             <h3 class="product-title">Door Handles</h3>
             <p class="product-text">Exterior and interior door handles in multiple finishes for long-lasting durability.</p>
-            <a href="#" class="product-link">
+            <a href="products.html#door-handles" class="product-link">
               View Collection
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -1088,12 +1214,12 @@
 
         <article class="product-card reveal">
           <div class="product-image">
-            <span>Lock Cylinder Image</span>
+            <img src="https://lh3.googleusercontent.com/sitesv/AAzXCkcxF7tAPyBgM5KfnlbfYpb6YCUW2IfKu3gMC8LB5TlbMGiazOzXM0cE0GUobDrn50qJXWuD7ywcFBvy4diUbblk1a4b9i9ETCNXqZLy2CNd99mAfiP1IDsDW3Gm7a0pHtIjXXqHX7AH8CAK2vX1uDGt-euLrY6dZgeGfKE6wCVkUw3wDIhWiGOptAqzijWrFBi-y3_kbLYQ-U7156nV1dA4ZsLSzgA_lz9TeIQ=w1280" alt="Lock Cylinder" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-body">
             <h3 class="product-title">Lock Cylinders</h3>
             <p class="product-text">High-security euro profile cylinders and accessories for residential doors.</p>
-            <a href="#" class="product-link">
+            <a href="products.html#lock-cylinders" class="product-link">
               View Collection
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -1140,8 +1266,8 @@
   <section class="section" id="about">
     <div class="container">
       <div class="about-grid">
-        <div class="about-image reveal">
-          About Us Image
+        <div class="about-image reveal" style="padding: 0; overflow: hidden;">
+          <img src="https://lh3.googleusercontent.com/sitesv/AAzXCkfAkCC86ndmHhsgoB7eyo1NOyZb6XBrW8KAaN1_LE2QEbgM10aH-AG3CAFBPTOfJz6dCN-WGAdBkGaRhXH4cXLn8iEPe9r22sb4qAAmo2vV-MkM-5FVtAmNkvvEkljp7uzr_OfnF8nxKmhakpglveL49D5c4h9sTjlqHs5LjVTNmCjSkC65AVyVN6PlRUjMc_Liczn1PlglWT65R1Aq7nWod-pwC6IGmj7dMKM=w1280" alt="About Us" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <div class="about-content reveal">
           <h3>Your Trusted Hardware Partner</h3>
@@ -1209,7 +1335,7 @@
         <div>
           <h4 class="footer-title">Support</h4>
           <ul class="footer-links">
-            <li><a href="#">Contact Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
             <li><a href="#">Shipping Info</a></li>
             <li><a href="#">Returns</a></li>
             <li><a href="#">FAQ</a></li>
@@ -1222,6 +1348,15 @@
       </div>
     </div>
   </footer>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" id="backToTop">↑</button>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightboxClose">&times;</span>
+    <img src="" alt="Lightbox Image" id="lightboxImg">
+  </div>
 
   <script>
     // Mobile nav toggle
@@ -1274,6 +1409,53 @@
           navLinks.classList.remove('open');
         }
       });
+    });
+
+    // Back to Top Button
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 500) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    });
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    document.querySelectorAll('.product-image img').forEach(img => {
+      img.style.cursor = 'pointer';
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    lightboxClose.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
     });
   </script>
 </body>
