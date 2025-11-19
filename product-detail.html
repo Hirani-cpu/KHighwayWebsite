@@ -811,13 +811,17 @@
     // Update page title
     document.title = `${product.name} - DIY Hardware Shop`;
 
-    // Add rating badge to main image
+    // Add rating badge to main image with scroll to reviews
     const ratingData = Reviews.getAverageRating(product.id);
     if (ratingData.count > 0) {
       const mainImage = document.querySelector('.main-image');
       const badge = document.createElement('div');
       badge.className = 'product-rating-badge';
+      badge.style.cursor = 'pointer';
       badge.innerHTML = `<span class="star">★</span><span class="rating-value">${ratingData.average}</span><span class="rating-count">(${ratingData.count})</span>`;
+      badge.addEventListener('click', () => {
+        document.querySelector('.reviews-section').scrollIntoView({ behavior: 'smooth' });
+      });
       mainImage.appendChild(badge);
     }
 
@@ -878,16 +882,33 @@
     const writeReviewBtn = document.getElementById('writeReviewBtn');
     const reviewFormContainer = document.getElementById('reviewFormContainer');
     const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+    let editingReviewId = null;
 
     writeReviewBtn.addEventListener('click', () => {
       reviewFormContainer.classList.add('active');
       writeReviewBtn.style.display = 'none';
 
-      // Auto-fill if logged in
+      // Auto-fill if logged in and check for existing review
       if (Auth.isLoggedIn()) {
         const user = Auth.getCurrentUser();
-        document.getElementById('reviewAuthor').value = user.firstName + ' ' + user.lastName;
-        document.getElementById('reviewEmail').value = user.email;
+        const existingReview = Reviews.getUserReview(product.id, user.email);
+
+        if (existingReview) {
+          // Edit mode
+          editingReviewId = existingReview.id;
+          document.getElementById('reviewAuthor').value = existingReview.author;
+          document.getElementById('reviewEmail').value = existingReview.email;
+          document.getElementById('reviewTitle').value = existingReview.title;
+          document.getElementById('reviewComment').value = existingReview.comment;
+          selectedRating = existingReview.rating;
+          document.getElementById('ratingValue').value = existingReview.rating;
+          updateStars(existingReview.rating);
+          document.querySelector('.review-form-title').textContent = 'Edit Your Review';
+          document.querySelector('.btn-submit-review').textContent = 'Update Review';
+        } else {
+          document.getElementById('reviewAuthor').value = user.firstName + ' ' + user.lastName;
+          document.getElementById('reviewEmail').value = user.email;
+        }
       }
     });
 
@@ -896,6 +917,9 @@
       writeReviewBtn.style.display = 'block';
       document.getElementById('reviewForm').reset();
       resetStars();
+      editingReviewId = null;
+      document.querySelector('.review-form-title').textContent = 'Write Your Review';
+      document.querySelector('.btn-submit-review').textContent = 'Submit Review';
     });
 
     // Star rating interaction
@@ -955,10 +979,15 @@
         verified: Auth.isLoggedIn()
       };
 
-      const result = Reviews.addReview(reviewData);
+      let result;
+      if (editingReviewId) {
+        result = Reviews.updateReview(editingReviewId, reviewData);
+      } else {
+        result = Reviews.addReview(reviewData);
+      }
 
       if (result.success) {
-        alertBox.innerHTML = '<div class="alert alert-success">Thank you for your review!</div>';
+        alertBox.innerHTML = `<div class="alert alert-success">${editingReviewId ? 'Review updated!' : 'Thank you for your review!'}</div>`;
 
         setTimeout(() => {
           reviewFormContainer.classList.remove('active');
@@ -966,8 +995,13 @@
           document.getElementById('reviewForm').reset();
           resetStars();
           alertBox.innerHTML = '';
+          editingReviewId = null;
+          document.querySelector('.review-form-title').textContent = 'Write Your Review';
+          document.querySelector('.btn-submit-review').textContent = 'Submit Review';
           loadReviews();
         }, 1500);
+      } else {
+        alertBox.innerHTML = `<div class="alert alert-error">${result.message}</div>`;
       }
     });
   </script>

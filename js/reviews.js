@@ -20,9 +20,21 @@ const Reviews = {
     return allReviews.filter(review => review.productId === productId);
   },
 
+  // Check if user already reviewed this product
+  getUserReview(productId, email) {
+    const reviews = this.getProductReviews(productId);
+    return reviews.find(r => r.email.toLowerCase() === email.toLowerCase());
+  },
+
   // Add a new review
   addReview(reviewData) {
     const reviews = this.getAllReviews();
+
+    // Check if user already reviewed this product
+    const existingReview = this.getUserReview(reviewData.productId, reviewData.email);
+    if (existingReview) {
+      return { success: false, message: 'You have already reviewed this product. You can edit your existing review.', existingReview: existingReview };
+    }
 
     const newReview = {
       id: Date.now().toString(),
@@ -40,6 +52,27 @@ const Reviews = {
     this.saveReviews(reviews);
 
     return { success: true, review: newReview };
+  },
+
+  // Update existing review
+  updateReview(reviewId, reviewData) {
+    const reviews = this.getAllReviews();
+    const index = reviews.findIndex(r => r.id === reviewId);
+
+    if (index === -1) {
+      return { success: false, message: 'Review not found.' };
+    }
+
+    reviews[index] = {
+      ...reviews[index],
+      rating: reviewData.rating,
+      title: reviewData.title,
+      comment: reviewData.comment,
+      date: new Date().toISOString()
+    };
+
+    this.saveReviews(reviews);
+    return { success: true, review: reviews[index] };
   },
 
   // Get average rating for a product
