@@ -202,18 +202,15 @@
         <!-- Product Gallery -->
         <div class="product-gallery">
           <div class="main-image">
-            <!-- ADD MAIN PRODUCT IMAGE HERE -->
-            <div class="main-image-placeholder">
-              <span>🪟</span>
-              <span>Add Product Image</span>
-            </div>
+            <!-- Main product image -->
+            <img src="images/products/window-handles/espag-white.jpg" alt="Espag Window Handle - White" id="mainProductImg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
           </div>
           <div class="thumbnail-grid">
-            <!-- ADD THUMBNAIL IMAGES HERE -->
-            <div class="thumbnail active">🪟</div>
-            <div class="thumbnail">📷</div>
-            <div class="thumbnail">📷</div>
-            <div class="thumbnail">📷</div>
+            <!-- Add multiple product images for thumbnails -->
+            <div class="thumbnail active"><img src="images/products/window-handles/espag-white.jpg" alt="View 1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
+            <div class="thumbnail"><img src="images/products/window-handles/espag-chrome.jpg" alt="View 2" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
+            <div class="thumbnail"><img src="images/products/window-handles/cockspur.jpg" alt="View 3" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
+            <div class="thumbnail"><img src="images/products/window-handles/inline-black.jpg" alt="View 4" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
           </div>
         </div>
 
@@ -304,7 +301,7 @@
       <div class="products-grid">
         <a href="product-detail.html" class="product-card">
           <div class="product-card-image">
-            <!-- ADD IMAGE --><span>🪟 Add Image</span>
+            <img src="images/products/window-handles/espag-chrome.jpg" alt="Espag Window Handle - Chrome" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-card-body">
             <h3 class="product-card-name">Espag Window Handle - Chrome</h3>
@@ -313,7 +310,7 @@
         </a>
         <a href="product-detail.html" class="product-card">
           <div class="product-card-image">
-            <!-- ADD IMAGE --><span>🪟 Add Image</span>
+            <img src="images/products/window-handles/cockspur.jpg" alt="Cockspur Window Handle" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-card-body">
             <h3 class="product-card-name">Cockspur Window Handle</h3>
@@ -322,7 +319,7 @@
         </a>
         <a href="product-detail.html" class="product-card">
           <div class="product-card-image">
-            <!-- ADD IMAGE --><span>🪟 Add Image</span>
+            <img src="images/products/window-handles/inline-black.jpg" alt="Inline Window Handle - Black" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-card-body">
             <h3 class="product-card-name">Inline Window Handle - Black</h3>
@@ -331,7 +328,7 @@
         </a>
         <a href="product-detail.html" class="product-card">
           <div class="product-card-image">
-            <!-- ADD IMAGE --><span>🔐 Add Image</span>
+            <img src="images/products/lock-cylinders/euro-35-brass.jpg" alt="Window Lock Key" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-card-body">
             <h3 class="product-card-name">Window Lock Key</h3>
@@ -407,11 +404,15 @@
       input.value = value;
     }
 
-    // Thumbnail selection
+    // Thumbnail selection - updates main image
     document.querySelectorAll('.thumbnail').forEach(thumb => {
       thumb.addEventListener('click', () => {
         document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
         thumb.classList.add('active');
+        const thumbImg = thumb.querySelector('img');
+        if (thumbImg) {
+          document.getElementById('mainProductImg').src = thumbImg.src;
+        }
       });
     });
   </script>
