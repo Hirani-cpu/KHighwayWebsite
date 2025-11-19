@@ -217,8 +217,13 @@
       color: var(--primary);
     }
 
-    .nav-links > li > a:hover::after {
+    .nav-links > li > a:hover::after,
+    .nav-links > li > a.active::after {
       width: 100%;
+    }
+
+    .nav-links > li > a.active {
+      color: var(--primary);
     }
 
     /* Dropdown */
@@ -945,20 +950,20 @@
       </div>
 
       <ul class="nav-links" id="navLinks">
-        <li><a href="#home">Home</a></li>
-        <li><a href="#categories">Categories</a></li>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="category.html">Categories</a></li>
         <li class="dropdown">
-          <a href="#products">Our Products</a>
+          <a href="products.html">Our Products</a>
           <div class="dropdown-menu">
-            <a href="#">Window Handles</a>
-            <a href="#">Door Handles</a>
-            <a href="#">Letter Boxes</a>
-            <a href="#">Trickle Vents</a>
-            <a href="#">Lock Cylinders</a>
-            <a href="#">Bolts</a>
+            <a href="products.html#window-handles">Window Handles</a>
+            <a href="products.html#door-handles">Door Handles</a>
+            <a href="products.html#letter-boxes">Letter Boxes</a>
+            <a href="products.html#trickle-vents">Trickle Vents</a>
+            <a href="products.html#lock-cylinders">Lock Cylinders</a>
+            <a href="products.html#bolts">Bolts</a>
           </div>
         </li>
-        <li><a href="#about">About</a></li>
+        <li><a href="about.html">About</a></li>
       </ul>
     </div>
   </header>
@@ -1184,20 +1189,20 @@
         <div>
           <h4 class="footer-title">Quick Links</h4>
           <ul class="footer-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#products">Products</a></li>
-            <li><a href="#categories">Categories</a></li>
-            <li><a href="#about">About</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About</a></li>
           </ul>
         </div>
 
         <div>
           <h4 class="footer-title">Categories</h4>
           <ul class="footer-links">
-            <li><a href="#">Window Handles</a></li>
-            <li><a href="#">Door Handles</a></li>
-            <li><a href="#">Lock Cylinders</a></li>
-            <li><a href="#">Letter Boxes</a></li>
+            <li><a href="products.html#window-handles">Window Handles</a></li>
+            <li><a href="products.html#door-handles">Door Handles</a></li>
+            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
+            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
           </ul>
         </div>
 
