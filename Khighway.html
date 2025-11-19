@@ -176,6 +176,81 @@
       font-size: 0.95rem;
       background: #f0f4fb;
     }
+
+    /* FEATURED PRODUCTS */
+    .section {
+      padding: 2.5rem 0;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .featured-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .featured-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .product-card {
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .product-image-placeholder {
+      background: #f2f2f2;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .product-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .product-title {
+      font-weight: 600;
+    }
+
+    .product-text {
+      font-size: 0.9rem;
+      color: #555;
+      flex: 1;
+    }
+
+    .product-link {
+      margin-top: 0.5rem;
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e73be;
+    }
   </style>
 </head>
 <body>
@@ -212,6 +287,57 @@
 
       <div class="hero-image-placeholder">
         Hero image or banner goes here (e.g. window &amp; door hardware).
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section" id="products">
+    <div class="container">
+      <h2 class="section-title">Featured Product Categories</h2>
+
+      <div class="featured-grid">
+        <!-- Card 1 -->
+        <article class="product-card">
+          <div class="product-image-placeholder">
+            Window handle image here
+          </div>
+          <div class="product-body">
+            <h3 class="product-title">Window Handles</h3>
+            <p class="product-text">
+              Replacement window handles suitable for a variety of profiles and locking systems.
+            </p>
+            <a href="#category" class="product-link">See More</a>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="product-card">
+          <div class="product-image-placeholder">
+            Door handle image here
+          </div>
+          <div class="product-body">
+            <h3 class="product-title">Door Handles</h3>
+            <p class="product-text">
+              Exterior and interior door handles in multiple finishes designed for long-term use.
+            </p>
+            <a href="#category" class="product-link">See More</a>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="product-card">
+          <div class="product-image-placeholder">
+            Cylinder lock image here
+          </div>
+          <div class="product-body">
+            <h3 class="product-title">Lock Cylinders</h3>
+            <p class="product-text">
+              High-security euro profile cylinders and compatible accessories for residential doors.
+            </p>
+            <a href="#category" class="product-link">See More</a>
+          </div>
+        </article>
       </div>
     </div>
   </section>
