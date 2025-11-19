@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - DIY Hardware Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Login to your DIY Hardware Shop account." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--gray-700); background: var(--light); }
+    a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+    ul { list-style: none; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
+    .logo { font-weight: 800; font-size: 1.5rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links > li > a { font-weight: 500; color: var(--gray-700); }
+    .nav-links > li > a:hover { color: var(--primary); }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 0.5rem; }
+    .nav-toggle span { width: 25px; height: 2px; background: var(--secondary); }
+    .cart-link { position: relative; }
+    .cart-count { position: absolute; top: -8px; right: -8px; background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+
+    .auth-section { padding: 7rem 0 4rem; min-height: calc(100vh - 200px); display: flex; align-items: center; }
+    .auth-container { max-width: 420px; margin: 0 auto; }
+    .auth-card { background: white; border-radius: 16px; box-shadow: var(--shadow-lg); padding: 2.5rem; }
+    .auth-header { text-align: center; margin-bottom: 2rem; }
+    .auth-header h1 { font-size: 1.75rem; color: var(--secondary); margin-bottom: 0.5rem; }
+    .auth-header p { color: var(--gray-500); }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--secondary); font-size: 0.9rem; }
+    .form-group input { width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+    .form-group input:focus { outline: none; border-color: var(--primary); }
+    .form-group input.error { border-color: var(--danger); }
+
+    .btn-primary { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .btn-primary:disabled { background: var(--gray-500); cursor: not-allowed; transform: none; }
+
+    .auth-footer { text-align: center; margin-top: 1.5rem; color: var(--gray-500); }
+    .auth-footer a { color: var(--primary); font-weight: 600; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .alert-error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+    .alert-success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+
+    footer { background: var(--secondary); color: white; padding: 4rem 0 2rem; margin-top: 4rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand p { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem; }
+    .footer-title { font-weight: 600; margin-bottom: 1.5rem; }
+    .footer-links li { margin-bottom: 0.75rem; }
+    .footer-links a { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
+    .footer-links a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
+
+    @media (max-width: 768px) {
+      .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: white; flex-direction: column; padding: 1rem; gap: 0; box-shadow: var(--shadow-lg); display: none; }
+      .nav-links.open { display: flex; }
+      .nav-links > li { width: 100%; }
+      .nav-links > li > a { display: block; padding: 1rem; }
+      .nav-toggle { display: flex; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .auth-card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="container nav-bar">
+      <a href="index.html" class="logo"><div class="logo-icon">🔧</div>DIY Hardware</a>
+      <div class="nav-toggle" id="navToggle"><span></span><span></span><span></span></div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="category.html">Categories</a></li>
+        <li><a href="products.html">Our Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="auth-section">
+    <div class="container">
+      <div class="auth-container">
+        <div class="auth-card">
+          <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Log in to your account</p>
+          </div>
+
+          <div id="alertBox"></div>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Log In</button>
+          </form>
+
+          <p class="auth-footer">
+            Don't have an account? <a href="signup.html">Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;"><div class="logo-icon">🔧</div>DIY Hardware</div>
+          <p>Your trusted source for quality window and door hardware parts.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Categories</h4>
+          <ul class="footer-links">
+            <li><a href="products.html#window-handles">Window Handles</a></li>
+            <li><a href="products.html#door-handles">Door Handles</a></li>
+            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
+            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Support</h4>
+          <ul class="footer-links">
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="#">Shipping Info</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DIY Hardware Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    // Mobile nav
+    document.getElementById('navToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+
+    // Redirect if already logged in
+    if (Auth.isLoggedIn()) {
+      window.location.href = 'account.html';
+    }
+
+    // Handle login form
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      const alertBox = document.getElementById('alertBox');
+
+      const result = Auth.login(email, password);
+
+      if (result.success) {
+        alertBox.innerHTML = '<div class="alert alert-success">' + result.message + ' Redirecting...</div>';
+        setTimeout(() => {
+          // Redirect to previous page or account
+          const returnUrl = new URLSearchParams(window.location.search).get('return') || 'account.html';
+          window.location.href = returnUrl;
+        }, 1000);
+      } else {
+        alertBox.innerHTML = '<div class="alert alert-error">' + result.message + '</div>';
+      }
+    });
+  </script>
+</body>
+</html>

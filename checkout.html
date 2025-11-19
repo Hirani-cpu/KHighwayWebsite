@@ -79,6 +79,19 @@
     #paypal-button-container { min-height: 50px; }
     .payment-note { font-size: 0.8rem; color: var(--gray-500); text-align: center; margin-top: 1rem; }
 
+    .delivery-options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .delivery-option { display: flex; align-items: center; padding: 1rem; border: 2px solid var(--gray-200); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+    .delivery-option:hover { border-color: var(--primary); background: var(--gray-100); }
+    .delivery-option.selected { border-color: var(--primary); background: #eff6ff; }
+    .delivery-option input[type="radio"] { display: none; }
+    .delivery-option .radio-circle { width: 20px; height: 20px; border: 2px solid var(--gray-300); border-radius: 50%; margin-right: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .delivery-option.selected .radio-circle { border-color: var(--primary); }
+    .delivery-option.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
+    .delivery-option-details { flex: 1; }
+    .delivery-option-name { font-weight: 600; color: var(--secondary); font-size: 0.95rem; }
+    .delivery-option-desc { font-size: 0.8rem; color: var(--gray-500); margin-top: 0.25rem; }
+    .delivery-option-price { font-weight: 700; color: var(--primary); font-size: 0.95rem; white-space: nowrap; }
+
     .back-to-cart { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 600; margin-bottom: 1.5rem; }
     .back-to-cart:hover { gap: 0.75rem; }
 
@@ -188,6 +201,43 @@
                 </select>
               </div>
             </div>
+
+            <div class="form-section">
+              <h3 class="form-section-title">Delivery Method</h3>
+              <div class="delivery-options">
+                <label class="delivery-option selected" data-price="0">
+                  <input type="radio" name="delivery" value="click-collect" checked>
+                  <div class="radio-circle"></div>
+                  <div class="delivery-option-details">
+                    <div class="delivery-option-name">Click & Collect</div>
+                    <div class="delivery-option-desc">Collect from our store</div>
+                  </div>
+                  <div class="delivery-option-price">FREE</div>
+                </label>
+                <label class="delivery-option" data-price="7">
+                  <input type="radio" name="delivery" value="tracked-24">
+                  <div class="radio-circle"></div>
+                  <div class="delivery-option-details">
+                    <div class="delivery-option-name">Royal Mail Tracked 24</div>
+                    <div class="delivery-option-desc">1-2 working days</div>
+                  </div>
+                  <div class="delivery-option-price">£7.00</div>
+                </label>
+                <label class="delivery-option" data-price="5">
+                  <input type="radio" name="delivery" value="tracked-48">
+                  <div class="radio-circle"></div>
+                  <div class="delivery-option-details">
+                    <div class="delivery-option-name">Royal Mail Tracked 48</div>
+                    <div class="delivery-option-desc">2-3 working days</div>
+                  </div>
+                  <div class="delivery-option-price">£5.00</div>
+                </label>
+              </div>
+              <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="deliveryInstructions">Delivery Instructions (optional)</label>
+                <textarea id="deliveryInstructions" name="deliveryInstructions" rows="3" style="width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; resize: vertical;" placeholder="E.g., Leave with neighbour, safe place instructions, access codes..."></textarea>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -273,9 +323,10 @@
   </footer>
 
   <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
 
-  <!-- PayPal SDK - Replace YOUR_CLIENT_ID with your PayPal Client ID -->
-  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script>
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AVCvli_4wEz5U6uVBt6yVv3SCt6qmz68pvTpq2Dv8u-eUO-9CUqThZQevR-hkBYIXh36bKVuTUtuPGv8&currency=GBP"></script>
 
   <script>
     // Mobile nav
@@ -287,6 +338,26 @@
     const cart = Cart.getCart();
     if (cart.length === 0) {
       window.location.href = 'cart.html';
+    }
+
+    // Auto-fill form from user profile if logged in
+    if (Auth.isLoggedIn()) {
+      const user = Auth.getCurrentUser();
+      if (user.email) document.getElementById('email').value = user.email;
+      if (user.phone) document.getElementById('phone').value = user.phone;
+      if (user.firstName) document.getElementById('firstName').value = user.firstName;
+      if (user.lastName) document.getElementById('lastName').value = user.lastName;
+      if (user.address) document.getElementById('address').value = user.address;
+      if (user.address2) document.getElementById('address2').value = user.address2;
+      if (user.city) document.getElementById('city').value = user.city;
+      if (user.postcode) document.getElementById('postcode').value = user.postcode;
+      if (user.country) document.getElementById('country').value = user.country;
+    }
+
+    // Get selected shipping cost
+    function getSelectedShipping() {
+      const selectedOption = document.querySelector('.delivery-option.selected');
+      return parseFloat(selectedOption.dataset.price) || 0;
     }
 
     // Load order summary
@@ -307,18 +378,32 @@
         </div>
       `).join('');
 
+      updateTotals();
+    }
+
+    // Update totals based on selected delivery
+    function updateTotals() {
       const subtotal = Cart.getTotal();
-      const shipping = subtotal >= 50 ? 0 : 4.99;
+      const shipping = getSelectedShipping();
       const total = subtotal + shipping;
 
       document.getElementById('subtotal').textContent = `£${subtotal.toFixed(2)}`;
       document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `£${shipping.toFixed(2)}`;
       document.getElementById('total').textContent = `£${total.toFixed(2)}`;
-
-      return total;
     }
 
-    const orderTotal = loadOrderSummary();
+    loadOrderSummary();
+
+    // Delivery option selection
+    const deliveryOptions = document.querySelectorAll('.delivery-option');
+    deliveryOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        deliveryOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+        option.querySelector('input[type="radio"]').checked = true;
+        updateTotals();
+      });
+    });
 
     // Form validation
     function validateForm() {
@@ -360,7 +445,7 @@
       createOrder: function(data, actions) {
         const cart = Cart.getCart();
         const subtotal = Cart.getTotal();
-        const shipping = subtotal >= 50 ? 0 : 4.99;
+        const shipping = getSelectedShipping();
 
         return actions.order.create({
           purchase_units: [{
@@ -407,11 +492,19 @@
 
           // Save order to localStorage (for order history)
           const orders = JSON.parse(localStorage.getItem('diyHardwareOrders') || '[]');
+          const userEmail = Auth.isLoggedIn() ? Auth.getCurrentUser().email : document.getElementById('email').value;
+          const orderSubtotal = Cart.getTotal();
+          const orderShipping = getSelectedShipping();
+          const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
+          const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
           orders.push({
             id: orderId,
             date: new Date().toISOString(),
-            total: orderTotal,
-            status: 'confirmed'
+            total: orderSubtotal + orderShipping,
+            status: 'confirmed',
+            userEmail: userEmail,
+            deliveryMethod: selectedDelivery,
+            deliveryInstructions: deliveryInstructions
           });
           localStorage.setItem('diyHardwareOrders', JSON.stringify(orders));
         });

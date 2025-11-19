@@ -155,6 +155,56 @@
     .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: var(--primary); color: white; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 999; }
     .back-to-top.visible { opacity: 1; visibility: visible; }
     .back-to-top:hover { background: var(--primary-dark); transform: translateY(-3px); }
+
+    /* Reviews Section */
+    .reviews-section { padding: 4rem 0; background: var(--gray-100); }
+    .reviews-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .reviews-summary { display: flex; align-items: center; gap: 1rem; }
+    .reviews-average { font-size: 3rem; font-weight: 800; color: var(--secondary); }
+    .reviews-stars { color: var(--accent); font-size: 1.5rem; }
+    .reviews-count { color: var(--gray-500); font-size: 0.9rem; }
+    .btn-write-review { padding: 0.875rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-write-review:hover { background: var(--primary-dark); }
+
+    .reviews-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
+    .review-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); }
+    .review-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; }
+    .review-author { font-weight: 700; color: var(--secondary); }
+    .review-date { font-size: 0.85rem; color: var(--gray-500); }
+    .review-rating { color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .review-title { font-weight: 600; color: var(--secondary); margin-bottom: 0.5rem; }
+    .review-comment { color: var(--gray-700); line-height: 1.7; }
+    .review-verified { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: var(--success); margin-top: 0.75rem; }
+
+    .no-reviews { text-align: center; padding: 3rem; background: white; border-radius: 12px; color: var(--gray-500); }
+
+    /* Review Form */
+    .review-form-container { display: none; background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow); }
+    .review-form-container.active { display: block; }
+    .review-form-title { font-size: 1.25rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.5rem; }
+    .star-rating { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .star-rating .star { font-size: 2rem; color: var(--gray-300); cursor: pointer; transition: all 0.2s ease; }
+    .star-rating .star:hover, .star-rating .star.active { color: var(--accent); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--secondary); font-size: 0.9rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+    .btn-submit-review { padding: 0.875rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-submit-review:hover { background: var(--primary-dark); }
+    .btn-cancel-review { padding: 0.875rem 1.5rem; background: var(--gray-100); color: var(--gray-700); border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-cancel-review:hover { background: var(--gray-200); }
+
+    .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+    .alert-success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+    .alert-error { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
+
+    @media (max-width: 768px) {
+      .reviews-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -295,12 +345,77 @@
     </div>
   </section>
 
+  <!-- Customer Reviews -->
+  <section class="reviews-section">
+    <div class="container">
+      <div class="reviews-header">
+        <div>
+          <h2 class="section-title" style="text-align: left; margin-bottom: 0.5rem;">Customer Reviews</h2>
+          <div class="reviews-summary">
+            <div class="reviews-average" id="reviewsAverage">0</div>
+            <div>
+              <div class="reviews-stars" id="reviewsStars">☆☆☆☆☆</div>
+              <div class="reviews-count" id="reviewsCount">0 reviews</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-write-review" id="writeReviewBtn">Write a Review</button>
+      </div>
+
+      <!-- Review Form -->
+      <div class="review-form-container" id="reviewFormContainer">
+        <h3 class="review-form-title">Write Your Review</h3>
+        <div id="reviewFormAlert"></div>
+        <form id="reviewForm">
+          <div class="form-group">
+            <label>Your Rating *</label>
+            <div class="star-rating" id="starRating">
+              <span class="star" data-rating="1">☆</span>
+              <span class="star" data-rating="2">☆</span>
+              <span class="star" data-rating="3">☆</span>
+              <span class="star" data-rating="4">☆</span>
+              <span class="star" data-rating="5">☆</span>
+            </div>
+            <input type="hidden" id="ratingValue" value="0">
+          </div>
+          <div class="form-group">
+            <label for="reviewTitle">Review Title *</label>
+            <input type="text" id="reviewTitle" placeholder="Summarize your experience" required>
+          </div>
+          <div class="form-group">
+            <label for="reviewComment">Your Review *</label>
+            <textarea id="reviewComment" placeholder="Tell us about your experience with this product..." required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reviewAuthor">Your Name *</label>
+              <input type="text" id="reviewAuthor" required>
+            </div>
+            <div class="form-group">
+              <label for="reviewEmail">Your Email *</label>
+              <input type="email" id="reviewEmail" required>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-submit-review">Submit Review</button>
+            <button type="button" class="btn-cancel-review" id="cancelReviewBtn">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Reviews List -->
+      <div class="reviews-list" id="reviewsList">
+        <!-- Reviews loaded here -->
+      </div>
+    </div>
+  </section>
+
   <!-- Related Products -->
   <section class="related-products">
     <div class="container">
       <h2 class="section-title">Related Products</h2>
       <div class="products-grid">
-        <a href="product-detail.html" class="product-card">
+        <a href="product-detail.html?id=espag-chrome" class="product-card">
           <div class="product-card-image">
             <img src="images/products/window-handles/espag-chrome.jpg" alt="Espag Window Handle - Chrome" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
@@ -309,7 +424,7 @@
             <div class="product-card-price">£9.99</div>
           </div>
         </a>
-        <a href="product-detail.html" class="product-card">
+        <a href="product-detail.html?id=cockspur" class="product-card">
           <div class="product-card-image">
             <img src="images/products/window-handles/cockspur.jpg" alt="Cockspur Window Handle" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
@@ -318,7 +433,7 @@
             <div class="product-card-price">£7.99</div>
           </div>
         </a>
-        <a href="product-detail.html" class="product-card">
+        <a href="product-detail.html?id=inline-black" class="product-card">
           <div class="product-card-image">
             <img src="images/products/window-handles/inline-black.jpg" alt="Inline Window Handle - Black" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
@@ -327,13 +442,13 @@
             <div class="product-card-price">£10.99</div>
           </div>
         </a>
-        <a href="product-detail.html" class="product-card">
+        <a href="product-detail.html?id=euro-brass" class="product-card">
           <div class="product-card-image">
-            <img src="images/products/lock-cylinders/euro-35-brass.jpg" alt="Window Lock Key" style="width: 100%; height: 100%; object-fit: cover;">
+            <img src="images/products/lock-cylinders/euro-35-brass.jpg" alt="Euro Cylinder - Brass" style="width: 100%; height: 100%; object-fit: cover;">
           </div>
           <div class="product-card-body">
-            <h3 class="product-card-name">Window Lock Key</h3>
-            <div class="product-card-price">£3.99</div>
+            <h3 class="product-card-name">Euro Cylinder - Brass</h3>
+            <div class="product-card-price">£14.99</div>
           </div>
         </a>
       </div>
@@ -384,6 +499,8 @@
   <button class="back-to-top" id="backToTop">↑</button>
 
   <script src="js/cart.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/reviews.js"></script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
@@ -418,14 +535,277 @@
       });
     });
 
-    // Product data
-    const product = {
-      id: 'espag-window-handle-white',
-      name: 'Espag Window Handle - White',
-      price: 8.99,
-      image: 'images/products/window-handles/espag-white.jpg',
-      ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+white' // Replace with actual eBay listing URL
+    // Products database - IDs match data-id in products.html
+    const productsDB = {
+      'espag-white': {
+        id: 'espag-white',
+        name: 'Espag Window Handle - White',
+        price: 8.99,
+        oldPrice: 12.99,
+        image: 'images/products/window-handles/espag-white.jpg',
+        category: 'Window Handles',
+        sku: 'WH-ESP-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+white'
+      },
+      'espag-chrome': {
+        id: 'espag-chrome',
+        name: 'Espag Window Handle - Chrome',
+        price: 9.99,
+        oldPrice: 14.99,
+        image: 'images/products/window-handles/espag-chrome.jpg',
+        category: 'Window Handles',
+        sku: 'WH-ESP-CHR-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+chrome'
+      },
+      'cockspur': {
+        id: 'cockspur',
+        name: 'Cockspur Window Handle',
+        price: 7.99,
+        oldPrice: 10.99,
+        image: 'images/products/window-handles/cockspur.jpg',
+        category: 'Window Handles',
+        sku: 'WH-COC-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=cockspur+window+handle'
+      },
+      'inline-black': {
+        id: 'inline-black',
+        name: 'Inline Window Handle - Black',
+        price: 10.99,
+        oldPrice: 15.99,
+        image: 'images/products/window-handles/inline-black.jpg',
+        category: 'Window Handles',
+        sku: 'WH-INL-BLK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=inline+window+handle+black'
+      },
+      'lever-chrome': {
+        id: 'lever-chrome',
+        name: 'Lever Door Handle - Chrome',
+        price: 24.99,
+        oldPrice: 32.99,
+        image: 'images/products/door-handles/lever-chrome.jpg',
+        category: 'Door Handles',
+        sku: 'DH-LEV-CHR-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+chrome'
+      },
+      'lever-gold': {
+        id: 'lever-gold',
+        name: 'Lever Door Handle - Gold',
+        price: 29.99,
+        oldPrice: 39.99,
+        image: 'images/products/door-handles/lever-gold.jpg',
+        category: 'Door Handles',
+        sku: 'DH-LEV-GLD-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+gold'
+      },
+      'pad-white': {
+        id: 'pad-white',
+        name: 'Pad Handle - White',
+        price: 18.99,
+        oldPrice: 24.99,
+        image: 'images/products/door-handles/pad-white.jpg',
+        category: 'Door Handles',
+        sku: 'DH-PAD-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=pad+handle+white'
+      },
+      'd-handle-black': {
+        id: 'd-handle-black',
+        name: 'D Handle - Black',
+        price: 15.99,
+        oldPrice: 21.99,
+        image: 'images/products/door-handles/d-handle-black.jpg',
+        category: 'Door Handles',
+        sku: 'DH-D-BLK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=d+handle+black'
+      },
+      'letterbox-chrome': {
+        id: 'letterbox-chrome',
+        name: 'Letter Box - Chrome',
+        price: 22.99,
+        oldPrice: 29.99,
+        image: 'images/products/letter-boxes/letterbox-chrome.jpg',
+        category: 'Letter Boxes',
+        sku: 'LB-STD-CHR-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+chrome'
+      },
+      'letterbox-gold': {
+        id: 'letterbox-gold',
+        name: 'Letter Box - Gold',
+        price: 27.99,
+        oldPrice: 35.99,
+        image: 'images/products/letter-boxes/letterbox-gold.jpg',
+        category: 'Letter Boxes',
+        sku: 'LB-STD-GLD-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+gold'
+      },
+      'letterbox-black': {
+        id: 'letterbox-black',
+        name: 'Letter Box - Black',
+        price: 24.99,
+        oldPrice: 31.99,
+        image: 'images/products/letter-boxes/letterbox-black.jpg',
+        category: 'Letter Boxes',
+        sku: 'LB-STD-BLK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+black'
+      },
+      'letterbox-white': {
+        id: 'letterbox-white',
+        name: 'Letter Box - White',
+        price: 19.99,
+        oldPrice: 26.99,
+        image: 'images/products/letter-boxes/letterbox-white.jpg',
+        category: 'Letter Boxes',
+        sku: 'LB-STD-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+white'
+      },
+      'vent-white': {
+        id: 'vent-white',
+        name: 'Trickle Vent - White',
+        price: 8.99,
+        oldPrice: 12.99,
+        image: 'images/products/trickle-vents/vent-white.jpg',
+        category: 'Trickle Vents',
+        sku: 'TV-STD-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+white'
+      },
+      'vent-brown': {
+        id: 'vent-brown',
+        name: 'Trickle Vent - Brown',
+        price: 8.99,
+        oldPrice: 12.99,
+        image: 'images/products/trickle-vents/vent-brown.jpg',
+        category: 'Trickle Vents',
+        sku: 'TV-STD-BRN-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+brown'
+      },
+      'vent-black': {
+        id: 'vent-black',
+        name: 'Trickle Vent - Black',
+        price: 9.99,
+        oldPrice: 13.99,
+        image: 'images/products/trickle-vents/vent-black.jpg',
+        category: 'Trickle Vents',
+        sku: 'TV-STD-BLK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+black'
+      },
+      'vent-grey': {
+        id: 'vent-grey',
+        name: 'Trickle Vent - Grey',
+        price: 9.99,
+        oldPrice: 13.99,
+        image: 'images/products/trickle-vents/vent-grey.jpg',
+        category: 'Trickle Vents',
+        sku: 'TV-STD-GRY-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+grey'
+      },
+      'euro-brass': {
+        id: 'euro-brass',
+        name: 'Euro Cylinder 35/35 - Brass',
+        price: 14.99,
+        oldPrice: 19.99,
+        image: 'images/products/lock-cylinders/euro-35-brass.jpg',
+        category: 'Lock Cylinders',
+        sku: 'LC-EUR-BRS-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+brass'
+      },
+      'euro-nickel': {
+        id: 'euro-nickel',
+        name: 'Euro Cylinder 35/35 - Nickel',
+        price: 14.99,
+        oldPrice: 19.99,
+        image: 'images/products/lock-cylinders/euro-35-nickel.jpg',
+        category: 'Lock Cylinders',
+        sku: 'LC-EUR-NCK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+nickel'
+      },
+      'thumbturn-chrome': {
+        id: 'thumbturn-chrome',
+        name: 'Thumbturn Cylinder - Chrome',
+        price: 18.99,
+        oldPrice: 24.99,
+        image: 'images/products/lock-cylinders/thumbturn-chrome.jpg',
+        category: 'Lock Cylinders',
+        sku: 'LC-THB-CHR-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=thumbturn+cylinder+chrome'
+      },
+      'anti-snap-gold': {
+        id: 'anti-snap-gold',
+        name: 'Anti-Snap Cylinder - Gold',
+        price: 24.99,
+        oldPrice: 32.99,
+        image: 'images/products/lock-cylinders/anti-snap-gold.jpg',
+        category: 'Lock Cylinders',
+        sku: 'LC-ANT-GLD-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=anti+snap+cylinder+gold'
+      },
+      'barrel-bolt-chrome': {
+        id: 'barrel-bolt-chrome',
+        name: 'Barrel Bolt - Chrome',
+        price: 6.99,
+        oldPrice: 9.99,
+        image: 'images/products/bolts/barrel-chrome.jpg',
+        category: 'Bolts',
+        sku: 'BT-BAR-CHR-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=barrel+bolt+chrome'
+      },
+      'flush-bolt-brass': {
+        id: 'flush-bolt-brass',
+        name: 'Flush Bolt - Brass',
+        price: 12.99,
+        oldPrice: 17.99,
+        image: 'images/products/bolts/flush-brass.jpg',
+        category: 'Bolts',
+        sku: 'BT-FLU-BRS-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=flush+bolt+brass'
+      },
+      'tower-bolt-black': {
+        id: 'tower-bolt-black',
+        name: 'Tower Bolt - Black',
+        price: 8.99,
+        oldPrice: 12.99,
+        image: 'images/products/bolts/tower-black.jpg',
+        category: 'Bolts',
+        sku: 'BT-TWR-BLK-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=tower+bolt+black'
+      },
+      'necked-bolt-white': {
+        id: 'necked-bolt-white',
+        name: 'Necked Bolt - White',
+        price: 7.99,
+        oldPrice: 10.99,
+        image: 'images/products/bolts/necked-white.jpg',
+        category: 'Bolts',
+        sku: 'BT-NCK-WHT-001',
+        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=necked+bolt+white'
+      }
     };
+
+    // Get product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id') || 'espag-white';
+
+    // Get product from database
+    const product = productsDB[productId] || productsDB['espag-white'];
+
+    // Update page with product data
+    document.querySelector('.product-title').textContent = product.name;
+    document.querySelector('.product-category').textContent = product.category;
+    document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)} ${product.oldPrice ? `<span class="old-price">£${product.oldPrice.toFixed(2)}</span>` : ''}`;
+    document.getElementById('mainProductImg').src = product.image;
+    document.getElementById('mainProductImg').alt = product.name;
+    document.querySelector('.product-meta').innerHTML = `
+      <span>SKU: ${product.sku}</span>
+      <span>Category: ${product.category}</span>
+    `;
+    // Update breadcrumb
+    document.querySelector('.breadcrumb-list').innerHTML = `
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <a href="products.html">Products</a>
+      <span>/</span>
+      <span>${product.name}</span>
+    `;
+    // Update page title
+    document.title = `${product.name} - DIY Hardware Shop`;
 
     // Add to Cart
     document.getElementById('addToCartBtn').addEventListener('click', () => {
@@ -441,6 +821,141 @@
 
     // eBay button
     document.getElementById('ebayBtn').href = product.ebayUrl;
+
+    // ===== REVIEWS FUNCTIONALITY =====
+
+    // Load and display reviews
+    function loadReviews() {
+      const reviews = Reviews.getProductReviews(product.id);
+      const ratingData = Reviews.getAverageRating(product.id);
+
+      // Update summary
+      document.getElementById('reviewsAverage').textContent = ratingData.average;
+      document.getElementById('reviewsStars').innerHTML = Reviews.generateStars(Math.round(ratingData.average));
+      document.getElementById('reviewsCount').textContent = `${ratingData.count} review${ratingData.count !== 1 ? 's' : ''}`;
+
+      // Display reviews list
+      const container = document.getElementById('reviewsList');
+
+      if (reviews.length === 0) {
+        container.innerHTML = '<div class="no-reviews"><p>No reviews yet. Be the first to review this product!</p></div>';
+        return;
+      }
+
+      container.innerHTML = reviews.map(review => `
+        <div class="review-card">
+          <div class="review-header">
+            <div>
+              <div class="review-author">${review.author}</div>
+              <div class="review-date">${Reviews.formatDate(review.date)}</div>
+            </div>
+          </div>
+          <div class="review-rating">${Reviews.generateStars(review.rating)}</div>
+          <div class="review-title">${review.title}</div>
+          <div class="review-comment">${review.comment}</div>
+          ${review.verified ? '<div class="review-verified"><span>✓</span> Verified Purchase</div>' : ''}
+        </div>
+      `).reverse().join('');
+    }
+
+    loadReviews();
+
+    // Show/hide review form
+    const writeReviewBtn = document.getElementById('writeReviewBtn');
+    const reviewFormContainer = document.getElementById('reviewFormContainer');
+    const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+
+    writeReviewBtn.addEventListener('click', () => {
+      reviewFormContainer.classList.add('active');
+      writeReviewBtn.style.display = 'none';
+
+      // Auto-fill if logged in
+      if (Auth.isLoggedIn()) {
+        const user = Auth.getCurrentUser();
+        document.getElementById('reviewAuthor').value = user.firstName + ' ' + user.lastName;
+        document.getElementById('reviewEmail').value = user.email;
+      }
+    });
+
+    cancelReviewBtn.addEventListener('click', () => {
+      reviewFormContainer.classList.remove('active');
+      writeReviewBtn.style.display = 'block';
+      document.getElementById('reviewForm').reset();
+      resetStars();
+    });
+
+    // Star rating interaction
+    const starRating = document.getElementById('starRating');
+    const stars = starRating.querySelectorAll('.star');
+    let selectedRating = 0;
+
+    stars.forEach(star => {
+      star.addEventListener('click', () => {
+        selectedRating = parseInt(star.dataset.rating);
+        document.getElementById('ratingValue').value = selectedRating;
+        updateStars(selectedRating);
+      });
+
+      star.addEventListener('mouseenter', () => {
+        updateStars(parseInt(star.dataset.rating));
+      });
+
+      star.addEventListener('mouseleave', () => {
+        updateStars(selectedRating);
+      });
+    });
+
+    function updateStars(rating) {
+      stars.forEach(star => {
+        const starRating = parseInt(star.dataset.rating);
+        star.textContent = starRating <= rating ? '★' : '☆';
+        star.classList.toggle('active', starRating <= rating);
+      });
+    }
+
+    function resetStars() {
+      selectedRating = 0;
+      document.getElementById('ratingValue').value = 0;
+      updateStars(0);
+    }
+
+    // Submit review
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const alertBox = document.getElementById('reviewFormAlert');
+      const rating = parseInt(document.getElementById('ratingValue').value);
+
+      if (rating === 0) {
+        alertBox.innerHTML = '<div class="alert alert-error">Please select a rating.</div>';
+        return;
+      }
+
+      const reviewData = {
+        productId: product.id,
+        rating: rating,
+        title: document.getElementById('reviewTitle').value.trim(),
+        comment: document.getElementById('reviewComment').value.trim(),
+        author: document.getElementById('reviewAuthor').value.trim(),
+        email: document.getElementById('reviewEmail').value.trim(),
+        verified: Auth.isLoggedIn()
+      };
+
+      const result = Reviews.addReview(reviewData);
+
+      if (result.success) {
+        alertBox.innerHTML = '<div class="alert alert-success">Thank you for your review!</div>';
+
+        setTimeout(() => {
+          reviewFormContainer.classList.remove('active');
+          writeReviewBtn.style.display = 'block';
+          document.getElementById('reviewForm').reset();
+          resetStars();
+          alertBox.innerHTML = '';
+          loadReviews();
+        }, 1500);
+      }
+    });
   </script>
 </body>
 </html>
