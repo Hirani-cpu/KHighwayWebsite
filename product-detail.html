@@ -526,8 +526,8 @@
     window.addEventListener('scroll', () => backToTop.classList.toggle('visible', window.scrollY > 500));
     backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    // Quantity controls
-    function changeQuantity(delta) {
+    // Quantity controls - make global for onclick
+    window.changeQuantity = function(delta) {
       const input = document.getElementById('quantity');
       let value = parseInt(input.value) + delta;
       if (value < 1) value = 1;
