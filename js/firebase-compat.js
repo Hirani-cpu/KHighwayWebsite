@@ -163,17 +163,84 @@ window.FirebaseOrders = {
         ...data, userEmail: data.userEmail.toLowerCase(), date: new Date().toISOString()
       });
       return { success: true };
-    } catch (e) { return { success: false }; }
+    } catch (e) {
+      console.error('Error saving order:', e);
+      return { success: false };
+    }
   },
 
   async getUserOrders(email) {
     try {
       const q = query(collection(db, 'orders'), where('userEmail', '==', email.toLowerCase()));
       const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (e) { return []; }
+      return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => new Date(b.date) - new Date(a.date));
+    } catch (e) {
+      console.error('Error getting orders:', e);
+      return [];
+    }
   }
 };
 
-// Initialize
-Auth._init();
+// Cart sync with Firebase
+window.FirebaseCart = {
+  async saveCart(userId, cartItems) {
+    if (!userId) return;
+    try {
+      await setDoc(doc(db, 'carts', userId), {
+        items: cartItems,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error('Error saving cart:', e);
+    }
+  },
+
+  async loadCart(userId) {
+    if (!userId) return null;
+    try {
+      const docSnap = await getDoc(doc(db, 'carts', userId));
+      if (docSnap.exists()) {
+        return docSnap.data().items || [];
+      }
+      return null;
+    } catch (e) {
+      console.error('Error loading cart:', e);
+      return null;
+    }
+  },
+
+  async clearCart(userId) {
+    if (!userId) return;
+    try {
+      await setDoc(doc(db, 'carts', userId), {
+        items: [],
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error('Error clearing cart:', e);
+    }
+  }
+};
+
+// Initialize and sync cart
+Auth._init().then(async () => {
+  // Sync cart from Firebase when logged in
+  if (Auth.isLoggedIn() && Auth._user) {
+    const firebaseCart = await FirebaseCart.loadCart(Auth._user.uid);
+    if (firebaseCart && firebaseCart.length > 0) {
+      const localCart = JSON.parse(localStorage.getItem('diyHardwareCart') || '[]');
+      // Merge carts - Firebase takes priority, but add any local items not in Firebase
+      const mergedCart = [...firebaseCart];
+      localCart.forEach(localItem => {
+        if (!mergedCart.find(item => item.id === localItem.id)) {
+          mergedCart.push(localItem);
+        }
+      });
+      localStorage.setItem('diyHardwareCart', JSON.stringify(mergedCart));
+      // Update cart count display
+      if (window.Cart) {
+        Cart.updateCartCount();
+      }
+    }
+  }
+});

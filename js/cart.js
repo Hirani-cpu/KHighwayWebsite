@@ -6,10 +6,14 @@ const Cart = {
     return cart ? JSON.parse(cart) : [];
   },
 
-  // Save cart to localStorage
+  // Save cart to localStorage and Firebase
   saveCart: function(cart) {
     localStorage.setItem('diyHardwareCart', JSON.stringify(cart));
     this.updateCartCount();
+    // Sync to Firebase if logged in
+    if (window.Auth && window.Auth._user && window.FirebaseCart) {
+      FirebaseCart.saveCart(Auth._user.uid, cart);
+    }
   },
 
   // Add item to cart
@@ -72,6 +76,10 @@ const Cart = {
   clearCart: function() {
     localStorage.removeItem('diyHardwareCart');
     this.updateCartCount();
+    // Clear in Firebase if logged in
+    if (window.Auth && window.Auth._user && window.FirebaseCart) {
+      FirebaseCart.clearCart(Auth._user.uid);
+    }
   },
 
   // Update cart count in navbar
