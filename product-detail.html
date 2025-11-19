@@ -548,13 +548,14 @@
     });
 
     // Products database - IDs match data-id in products.html
+    // Images stored in: images/products/[category-folder]/[product-id]/1.jpg, 2.jpg, 3.jpg, 4.jpg
     const productsDB = {
       'espag-white': {
         id: 'espag-white',
         name: 'Espag Window Handle - White',
         price: 8.99,
         oldPrice: 12.99,
-        image: 'images/products/window-handles/espag-white.jpg',
+        imageFolder: 'images/products/window-handles/espag-white',
         category: 'Window Handles',
         sku: 'WH-ESP-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+white'
@@ -564,7 +565,7 @@
         name: 'Espag Window Handle - Chrome',
         price: 9.99,
         oldPrice: 14.99,
-        image: 'images/products/window-handles/espag-chrome.jpg',
+        imageFolder: 'images/products/window-handles/espag-chrome',
         category: 'Window Handles',
         sku: 'WH-ESP-CHR-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+chrome'
@@ -574,7 +575,7 @@
         name: 'Cockspur Window Handle',
         price: 7.99,
         oldPrice: 10.99,
-        image: 'images/products/window-handles/cockspur.jpg',
+        imageFolder: 'images/products/window-handles/cockspur',
         category: 'Window Handles',
         sku: 'WH-COC-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=cockspur+window+handle'
@@ -584,7 +585,7 @@
         name: 'Inline Window Handle - Black',
         price: 10.99,
         oldPrice: 15.99,
-        image: 'images/products/window-handles/inline-black.jpg',
+        imageFolder: 'images/products/window-handles/inline-black',
         category: 'Window Handles',
         sku: 'WH-INL-BLK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=inline+window+handle+black'
@@ -594,7 +595,7 @@
         name: 'Lever Door Handle - Chrome',
         price: 24.99,
         oldPrice: 32.99,
-        image: 'images/products/door-handles/lever-chrome.jpg',
+        imageFolder: 'images/products/door-handles/lever-chrome',
         category: 'Door Handles',
         sku: 'DH-LEV-CHR-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+chrome'
@@ -604,7 +605,7 @@
         name: 'Lever Door Handle - Gold',
         price: 29.99,
         oldPrice: 39.99,
-        image: 'images/products/door-handles/lever-gold.jpg',
+        imageFolder: 'images/products/door-handles/lever-gold',
         category: 'Door Handles',
         sku: 'DH-LEV-GLD-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+gold'
@@ -614,7 +615,7 @@
         name: 'Pad Handle - White',
         price: 18.99,
         oldPrice: 24.99,
-        image: 'images/products/door-handles/pad-white.jpg',
+        imageFolder: 'images/products/door-handles/pad-white',
         category: 'Door Handles',
         sku: 'DH-PAD-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=pad+handle+white'
@@ -624,7 +625,7 @@
         name: 'D Handle - Black',
         price: 15.99,
         oldPrice: 21.99,
-        image: 'images/products/door-handles/d-handle-black.jpg',
+        imageFolder: 'images/products/door-handles/d-handle-black',
         category: 'Door Handles',
         sku: 'DH-D-BLK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=d+handle+black'
@@ -634,7 +635,7 @@
         name: 'Letter Box - Chrome',
         price: 22.99,
         oldPrice: 29.99,
-        image: 'images/products/letter-boxes/letterbox-chrome.jpg',
+        imageFolder: 'images/products/letter-boxes/letterbox-chrome',
         category: 'Letter Boxes',
         sku: 'LB-STD-CHR-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+chrome'
@@ -644,7 +645,7 @@
         name: 'Letter Box - Gold',
         price: 27.99,
         oldPrice: 35.99,
-        image: 'images/products/letter-boxes/letterbox-gold.jpg',
+        imageFolder: 'images/products/letter-boxes/letterbox-gold',
         category: 'Letter Boxes',
         sku: 'LB-STD-GLD-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+gold'
@@ -654,7 +655,7 @@
         name: 'Letter Box - Black',
         price: 24.99,
         oldPrice: 31.99,
-        image: 'images/products/letter-boxes/letterbox-black.jpg',
+        imageFolder: 'images/products/letter-boxes/letterbox-black',
         category: 'Letter Boxes',
         sku: 'LB-STD-BLK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+black'
@@ -664,7 +665,7 @@
         name: 'Letter Box - White',
         price: 19.99,
         oldPrice: 26.99,
-        image: 'images/products/letter-boxes/letterbox-white.jpg',
+        imageFolder: 'images/products/letter-boxes/letterbox-white',
         category: 'Letter Boxes',
         sku: 'LB-STD-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+white'
@@ -674,7 +675,7 @@
         name: 'Trickle Vent - White',
         price: 8.99,
         oldPrice: 12.99,
-        image: 'images/products/trickle-vents/vent-white.jpg',
+        imageFolder: 'images/products/trickle-vents/vent-white',
         category: 'Trickle Vents',
         sku: 'TV-STD-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+white'
@@ -684,7 +685,7 @@
         name: 'Trickle Vent - Brown',
         price: 8.99,
         oldPrice: 12.99,
-        image: 'images/products/trickle-vents/vent-brown.jpg',
+        imageFolder: 'images/products/trickle-vents/vent-brown',
         category: 'Trickle Vents',
         sku: 'TV-STD-BRN-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+brown'
@@ -694,7 +695,7 @@
         name: 'Trickle Vent - Black',
         price: 9.99,
         oldPrice: 13.99,
-        image: 'images/products/trickle-vents/vent-black.jpg',
+        imageFolder: 'images/products/trickle-vents/vent-black',
         category: 'Trickle Vents',
         sku: 'TV-STD-BLK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+black'
@@ -704,7 +705,7 @@
         name: 'Trickle Vent - Grey',
         price: 9.99,
         oldPrice: 13.99,
-        image: 'images/products/trickle-vents/vent-grey.jpg',
+        imageFolder: 'images/products/trickle-vents/vent-grey',
         category: 'Trickle Vents',
         sku: 'TV-STD-GRY-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+grey'
@@ -714,7 +715,7 @@
         name: 'Euro Cylinder 35/35 - Brass',
         price: 14.99,
         oldPrice: 19.99,
-        image: 'images/products/lock-cylinders/euro-35-brass.jpg',
+        imageFolder: 'images/products/lock-cylinders/euro-brass',
         category: 'Lock Cylinders',
         sku: 'LC-EUR-BRS-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+brass'
@@ -724,7 +725,7 @@
         name: 'Euro Cylinder 35/35 - Nickel',
         price: 14.99,
         oldPrice: 19.99,
-        image: 'images/products/lock-cylinders/euro-35-nickel.jpg',
+        imageFolder: 'images/products/lock-cylinders/euro-nickel',
         category: 'Lock Cylinders',
         sku: 'LC-EUR-NCK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+nickel'
@@ -734,7 +735,7 @@
         name: 'Thumbturn Cylinder - Chrome',
         price: 18.99,
         oldPrice: 24.99,
-        image: 'images/products/lock-cylinders/thumbturn-chrome.jpg',
+        imageFolder: 'images/products/lock-cylinders/thumbturn-chrome',
         category: 'Lock Cylinders',
         sku: 'LC-THB-CHR-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=thumbturn+cylinder+chrome'
@@ -744,7 +745,7 @@
         name: 'Anti-Snap Cylinder - Gold',
         price: 24.99,
         oldPrice: 32.99,
-        image: 'images/products/lock-cylinders/anti-snap-gold.jpg',
+        imageFolder: 'images/products/lock-cylinders/anti-snap-gold',
         category: 'Lock Cylinders',
         sku: 'LC-ANT-GLD-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=anti+snap+cylinder+gold'
@@ -754,7 +755,7 @@
         name: 'Barrel Bolt - Chrome',
         price: 6.99,
         oldPrice: 9.99,
-        image: 'images/products/bolts/barrel-chrome.jpg',
+        imageFolder: 'images/products/bolts/barrel-bolt-chrome',
         category: 'Bolts',
         sku: 'BT-BAR-CHR-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=barrel+bolt+chrome'
@@ -764,7 +765,7 @@
         name: 'Flush Bolt - Brass',
         price: 12.99,
         oldPrice: 17.99,
-        image: 'images/products/bolts/flush-brass.jpg',
+        imageFolder: 'images/products/bolts/flush-bolt-brass',
         category: 'Bolts',
         sku: 'BT-FLU-BRS-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=flush+bolt+brass'
@@ -774,7 +775,7 @@
         name: 'Tower Bolt - Black',
         price: 8.99,
         oldPrice: 12.99,
-        image: 'images/products/bolts/tower-black.jpg',
+        imageFolder: 'images/products/bolts/tower-bolt-black',
         category: 'Bolts',
         sku: 'BT-TWR-BLK-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=tower+bolt+black'
@@ -784,7 +785,7 @@
         name: 'Necked Bolt - White',
         price: 7.99,
         oldPrice: 10.99,
-        image: 'images/products/bolts/necked-white.jpg',
+        imageFolder: 'images/products/bolts/necked-bolt-white',
         category: 'Bolts',
         sku: 'BT-NCK-WHT-001',
         ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=necked+bolt+white'
@@ -802,8 +803,29 @@
     document.querySelector('.product-title').textContent = product.name;
     document.querySelector('.product-category').textContent = product.category;
     document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)} ${product.oldPrice ? `<span class="old-price">£${product.oldPrice.toFixed(2)}</span>` : ''}`;
-    document.getElementById('mainProductImg').src = product.image;
+
+    // Set main image (1.jpg from folder)
+    const mainImg = `${product.imageFolder}/1.jpg`;
+    document.getElementById('mainProductImg').src = mainImg;
     document.getElementById('mainProductImg').alt = product.name;
+
+    // Generate thumbnails (1.jpg, 2.jpg, 3.jpg, 4.jpg)
+    const thumbnailContainer = document.querySelector('.thumbnails');
+    if (thumbnailContainer) {
+      thumbnailContainer.innerHTML = '';
+      for (let i = 1; i <= 4; i++) {
+        const thumb = document.createElement('div');
+        thumb.className = 'thumbnail' + (i === 1 ? ' active' : '');
+        thumb.innerHTML = `<img src="${product.imageFolder}/${i}.jpg" alt="${product.name} - Image ${i}">`;
+        thumb.addEventListener('click', () => {
+          document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+          document.getElementById('mainProductImg').src = `${product.imageFolder}/${i}.jpg`;
+        });
+        thumbnailContainer.appendChild(thumb);
+      }
+    }
+
     document.querySelector('.product-meta').innerHTML = `
       <span>SKU: ${product.sku}</span>
       <span>Category: ${product.category}</span>
@@ -840,7 +862,7 @@
         id: product.id,
         name: product.name,
         price: product.price,
-        image: product.image,
+        image: `${product.imageFolder}/1.jpg`,
         quantity: quantity
       });
     });
