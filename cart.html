@@ -206,7 +206,7 @@
   </footer>
 
   <script src="js/cart.js"></script>
-  <script src="js/auth.js"></script>
+  <script type="module" src="js/firebase-compat.js"></script>
   <script>
     // Mobile nav
     document.getElementById('navToggle').addEventListener('click', () => {
@@ -216,6 +216,11 @@
     // Header scroll
     window.addEventListener('scroll', () => {
       document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // Listen for cart sync from Firebase
+    window.addEventListener('cart-synced', () => {
+      renderCart();
     });
 
     // Render cart

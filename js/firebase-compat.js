@@ -227,20 +227,34 @@ Auth._init().then(async () => {
   // Sync cart from Firebase when logged in
   if (Auth.isLoggedIn() && Auth._user) {
     const firebaseCart = await FirebaseCart.loadCart(Auth._user.uid);
-    if (firebaseCart && firebaseCart.length > 0) {
-      const localCart = JSON.parse(localStorage.getItem('diyHardwareCart') || '[]');
-      // Merge carts - Firebase takes priority, but add any local items not in Firebase
+    const localCart = JSON.parse(localStorage.getItem('diyHardwareCart') || '[]');
+
+    if (firebaseCart !== null) {
+      // Firebase cart exists - use it as primary, merge local items
       const mergedCart = [...firebaseCart];
       localCart.forEach(localItem => {
-        if (!mergedCart.find(item => item.id === localItem.id)) {
+        const existing = mergedCart.find(item => item.id === localItem.id);
+        if (!existing) {
           mergedCart.push(localItem);
         }
       });
       localStorage.setItem('diyHardwareCart', JSON.stringify(mergedCart));
-      // Update cart count display
-      if (window.Cart) {
-        Cart.updateCartCount();
+
+      // Save merged cart back to Firebase if local had extra items
+      if (mergedCart.length > firebaseCart.length) {
+        await FirebaseCart.saveCart(Auth._user.uid, mergedCart);
       }
+    } else if (localCart.length > 0) {
+      // No Firebase cart but local has items - save to Firebase
+      await FirebaseCart.saveCart(Auth._user.uid, localCart);
     }
+
+    // Update cart count display
+    if (window.Cart) {
+      Cart.updateCartCount();
+    }
+
+    // Dispatch event for cart page to reload
+    window.dispatchEvent(new Event('cart-synced'));
   }
 });
