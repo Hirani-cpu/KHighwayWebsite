@@ -2,27 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DIY Hardware Shop</title>
+  <title>DIY Hardware Shop - Window & Door Parts</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Quality window and door hardware parts. Fast UK shipping, secure checkout, easy returns." />
 
-  <!-- Simple reset & base styles -->
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    * {
+    /* CSS Variables */
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --success: #10b981;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+
+    /* Reset */
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
+    /* Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 1.6;
-      color: #222;
-      background-color: #f5f5f5;
+      color: var(--gray-700);
+      background: var(--light);
+      overflow-x: hidden;
     }
 
     a {
       text-decoration: none;
       color: inherit;
+      transition: all 0.3s ease;
     }
 
     ul {
@@ -34,45 +67,138 @@
       display: block;
     }
 
-    /* Layout helpers */
     .container {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0 1rem;
+      padding: 0 1.5rem;
     }
 
-    /* HEADER / NAVBAR */
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .animate-fade-up {
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .animate-fade {
+      animation: fadeIn 1s ease forwards;
+    }
+
+    .animate-slide-left {
+      animation: slideInLeft 0.8s ease forwards;
+    }
+
+    .animate-slide-right {
+      animation: slideInRight 0.8s ease forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+
+    /* Header */
     header {
-      background: #ffffff;
-      border-bottom: 1px solid #ddd;
-      position: sticky;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--gray-200);
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    header.scrolled {
+      box-shadow: var(--shadow-lg);
     }
 
     .nav-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 0;
+      padding: 1rem 0;
     }
 
     .logo {
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: 0.05em;
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
     }
 
     .nav-links {
       display: flex;
-      gap: 1.25rem;
+      gap: 2rem;
       align-items: center;
     }
 
     .nav-links > li > a {
-      font-size: 0.95rem;
-      padding: 0.25rem 0;
+      font-weight: 500;
+      color: var(--gray-700);
+      padding: 0.5rem 0;
       position: relative;
     }
 
@@ -80,270 +206,737 @@
       content: "";
       position: absolute;
       left: 0;
-      bottom: -0.15rem;
+      bottom: 0;
       width: 0;
       height: 2px;
-      background: #333;
-      transition: width 0.2s ease;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.3s ease;
+    }
+
+    .nav-links > li > a:hover {
+      color: var(--primary);
     }
 
     .nav-links > li > a:hover::after {
       width: 100%;
     }
 
-    /* Mobile nav toggle */
+    /* Dropdown */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow-xl);
+      padding: 1rem;
+      min-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .dropdown:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: var(--gray-700);
+      font-size: 0.9rem;
+    }
+
+    .dropdown-menu a:hover {
+      background: var(--gray-100);
+      color: var(--primary);
+    }
+
     .nav-toggle {
       display: none;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       cursor: pointer;
+      padding: 0.5rem;
     }
 
     .nav-toggle span {
-      width: 22px;
+      width: 25px;
       height: 2px;
-      background: #333;
+      background: var(--secondary);
+      transition: all 0.3s ease;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+      padding-top: 80px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-text {
+      color: white;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.8s ease forwards;
+      animation-delay: 0.1s;
+      opacity: 0;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      max-width: 500px;
+      animation: fadeInUp 0.8s ease forwards;
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.8s ease forwards;
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .btn {
+      padding: 0.875rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: white;
+      color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-outline:hover {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+    }
+
+    .hero-image {
+      position: relative;
+      animation: slideInRight 1s ease forwards;
+      animation-delay: 0.3s;
+      opacity: 0;
+    }
+
+    .hero-image-wrapper {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .hero-image-placeholder {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-500);
+      font-size: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .floating-card {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: var(--shadow-xl);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-card-1 {
+      top: -20px;
+      right: -20px;
+      animation-delay: 0s;
+    }
+
+    .floating-card-2 {
+      bottom: 40px;
+      left: -30px;
+      animation-delay: 1.5s;
+    }
+
+    .floating-card span {
+      font-size: 1.5rem;
+    }
+
+    .floating-card p {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 0.25rem;
+    }
+
+    /* Products Section */
+    .section {
+      padding: 6rem 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--gray-500);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .product-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .product-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .product-image {
+      height: 200px;
+      background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-image::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .product-card:hover .product-image::after {
+      left: 100%;
+    }
+
+    .product-image span {
+      color: var(--gray-500);
+      font-size: 0.9rem;
+    }
+
+    .product-body {
+      padding: 1.5rem;
+    }
+
+    .product-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .product-text {
+      color: var(--gray-500);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .product-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .product-link svg {
+      transition: transform 0.3s ease;
+    }
+
+    .product-link:hover svg {
+      transform: translateX(5px);
+    }
+
+    /* Features Section */
+    .features {
+      background: var(--secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .features::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      opacity: 0.1;
+    }
+
+    .features .section-title,
+    .features .section-subtitle {
+      color: white;
+    }
+
+    .features .section-subtitle {
+      opacity: 0.8;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.4s ease;
+    }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .feature-title {
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-text {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    /* About Section */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .about-image {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 20px;
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-image::before {
+      content: "";
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      top: -50px;
+      right: -50px;
+    }
+
+    .about-content h3 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    .about-content p {
+      color: var(--gray-500);
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    .about-list {
+      margin-top: 2rem;
+    }
+
+    .about-list li {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      color: var(--gray-700);
+    }
+
+    .about-list li span {
+      width: 24px;
+      height: 24px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.7rem;
+    }
+
+    /* Categories Section */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+    }
+
+    .category-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .category-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .category-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--gray-100);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.25rem;
+      transition: all 0.3s ease;
+    }
+
+    .category-card:hover .category-icon {
+      background: var(--primary);
+      color: white;
+    }
+
+    .category-name {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--gray-700);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--secondary);
+      color: white;
+      padding: 4rem 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+
+    .footer-title {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 2rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-subtitle {
+        margin: 0 auto 2rem;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .hero-image {
+        display: none;
+      }
+
+      .products-grid,
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .categories-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 768px) {
       .nav-links {
-        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
         flex-direction: column;
-        align-items: flex-start;
-        padding: 0.5rem 0;
+        padding: 1rem;
+        gap: 0;
+        box-shadow: var(--shadow-lg);
+        display: none;
       }
 
       .nav-links.open {
         display: flex;
       }
 
+      .nav-links > li {
+        width: 100%;
+      }
+
+      .nav-links > li > a {
+        display: block;
+        padding: 1rem;
+      }
+
+      .dropdown-menu {
+        position: static;
+        transform: none;
+        box-shadow: none;
+        padding: 0 1rem;
+        opacity: 1;
+        visibility: visible;
+      }
+
       .nav-toggle {
         display: flex;
       }
-    }
 
-    /* HERO SECTION */
-    .hero {
-      background: #e5edf7;
-      padding: 2.5rem 0 2rem;
-      border-bottom: 1px solid #d0d7e0;
-    }
-
-    .hero-inner {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .hero-text {
-      flex: 1 1 260px;
-    }
-
-    .hero-title {
-      font-size: 2rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
-      color: #555;
-      margin-bottom: 1.25rem;
-      max-width: 480px;
-    }
-
-    .hero-cta {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      background: #1e73be;
-      color: #fff;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .hero-image-placeholder {
-      flex: 1 1 260px;
-      min-height: 200px;
-      border-radius: 8px;
-      border: 2px dashed #9cb4d8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #57709c;
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.95rem;
-      background: #f0f4fb;
-    }
-
-    /* FEATURED PRODUCTS */
-    .section {
-      padding: 2.5rem 0;
-    }
-
-    .section-title {
-      font-size: 1.4rem;
-      margin-bottom: 1.5rem;
-      text-align: left;
-    }
-
-    .featured-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-
-    @media (max-width: 900px) {
-      .featured-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .hero-title {
+        font-size: 2.5rem;
       }
-    }
 
-    @media (max-width: 600px) {
-      .featured-grid {
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .products-grid,
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .product-card {
-      background: #ffffff;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
+    /* Scroll Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease;
     }
 
-    .product-image-placeholder {
-      background: #f2f2f2;
-      height: 150px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      color: #777;
-    }
-
-    .product-body {
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex: 1;
-    }
-
-    .product-title {
-      font-weight: 600;
-    }
-
-    .product-text {
-      font-size: 0.9rem;
-      color: #555;
-      flex: 1;
-    }
-
-    .product-link {
-      margin-top: 0.5rem;
-      display: inline-block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #1e73be;
-    }
-
-    /* QUICK LINKS & ABOUT */
-    .two-column {
-      display: grid;
-      grid-template-columns: 1.1fr 2fr;
-      gap: 2rem;
-    }
-
-    @media (max-width: 800px) {
-      .two-column {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .quick-links-title,
-    .about-title {
-      font-size: 1.1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .quick-links-list li {
-      margin-bottom: 0.35rem;
-    }
-
-    .quick-links-list a {
-      color: #1e73be;
-      font-size: 0.95rem;
-    }
-
-    .about-text {
-      font-size: 0.95rem;
-      color: #444;
-    }
-
-    /* TRUST / BADGES SECTION */
-    .trust-section {
-      background: #ffffff;
-      border-top: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
-      padding: 1.75rem 0;
-      margin-bottom: 2rem;
-    }
-
-    .trust-title {
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-    }
-
-    .trust-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      font-size: 0.95rem;
-    }
-
-    .trust-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .trust-badge span.icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid #28a745;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      color: #28a745;
-    }
-
-    /* FOOTER */
-    footer {
-      padding: 1.5rem 0 2rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #777;
-    }
-
-    footer a {
-      color: #555;
-      text-decoration: underline;
-      font-size: 0.85rem;
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header>
+  <!-- Header -->
+  <header id="header">
     <div class="container nav-bar">
-      <div class="logo">DIY Hardware Shop</div>
+      <a href="#" class="logo">
+        <div class="logo-icon">🔧</div>
+        DIY Hardware
+      </a>
 
       <div class="nav-toggle" id="navToggle">
         <span></span>
@@ -353,150 +946,275 @@
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#home">Home</a></li>
-        <li><a href="#category">Category</a></li>
-        <li><a href="#products">Our Products</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li class="dropdown">
+          <a href="#products">Our Products</a>
+          <div class="dropdown-menu">
+            <a href="#">Window Handles</a>
+            <a href="#">Door Handles</a>
+            <a href="#">Letter Boxes</a>
+            <a href="#">Trickle Vents</a>
+            <a href="#">Lock Cylinders</a>
+            <a href="#">Bolts</a>
+          </div>
+        </li>
         <li><a href="#about">About</a></li>
       </ul>
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- Hero -->
   <section class="hero" id="home">
     <div class="container hero-inner">
       <div class="hero-text">
-        <h1 class="hero-title">All Types of Window &amp; Door Parts</h1>
+        <div class="hero-badge">✨ Premium Quality Hardware</div>
+        <h1 class="hero-title">All Types Of Window & Door Parts</h1>
         <p class="hero-subtitle">
-          Browse a wide range of hardware components suitable for uPVC, aluminium and timber windows and doors.
+          Discover our extensive collection of high-quality hardware components for uPVC, aluminium, and timber windows and doors. Fast UK delivery guaranteed.
         </p>
-        <a href="#products" class="hero-cta">View Featured Products</a>
+        <div class="hero-buttons">
+          <a href="#products" class="btn btn-primary">
+            Browse Products
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#about" class="btn btn-outline">Learn More</a>
+        </div>
       </div>
 
-      <div class="hero-image-placeholder">
-        Hero image or banner goes here (e.g. window &amp; door hardware).
+      <div class="hero-image">
+        <div class="hero-image-wrapper">
+          <div class="hero-image-placeholder">
+            Premium window & door hardware image
+          </div>
+        </div>
+        <div class="floating-card floating-card-1">
+          <span>🚚</span>
+          <p>Fast Shipping</p>
+        </div>
+        <div class="floating-card floating-card-2">
+          <span>⭐</span>
+          <p>Top Quality</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- FEATURED PRODUCTS -->
-  <section class="section" id="products">
+  <!-- Categories -->
+  <section class="section" id="categories">
     <div class="container">
-      <h2 class="section-title">Featured Product Categories</h2>
+      <div class="section-header reveal">
+        <span class="section-tag">Categories</span>
+        <h2 class="section-title">Shop By Category</h2>
+        <p class="section-subtitle">Browse our complete range of window and door hardware parts</p>
+      </div>
 
-      <div class="featured-grid">
-        <!-- Card 1 -->
-        <article class="product-card">
-          <div class="product-image-placeholder">
-            Window handle image here
+      <div class="categories-grid reveal">
+        <a href="#" class="category-card">
+          <div class="category-icon">🪟</div>
+          <div class="category-name">Window Handles</div>
+        </a>
+        <a href="#" class="category-card">
+          <div class="category-icon">🚪</div>
+          <div class="category-name">Door Handles</div>
+        </a>
+        <a href="#" class="category-card">
+          <div class="category-icon">📬</div>
+          <div class="category-name">Letter Boxes</div>
+        </a>
+        <a href="#" class="category-card">
+          <div class="category-icon">🌬️</div>
+          <div class="category-name">Trickle Vents</div>
+        </a>
+        <a href="#" class="category-card">
+          <div class="category-icon">🔐</div>
+          <div class="category-name">Lock Cylinders</div>
+        </a>
+        <a href="#" class="category-card">
+          <div class="category-icon">🔩</div>
+          <div class="category-name">Bolts</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section class="section" id="products" style="background: var(--gray-100);">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Products</span>
+        <h2 class="section-title">Featured Products</h2>
+        <p class="section-subtitle">Quality hardware solutions for all your window and door needs</p>
+      </div>
+
+      <div class="products-grid">
+        <article class="product-card reveal">
+          <div class="product-image">
+            <span>Window Handle Image</span>
           </div>
           <div class="product-body">
             <h3 class="product-title">Window Handles</h3>
-            <p class="product-text">
-              Replacement window handles suitable for a variety of profiles and locking systems.
-            </p>
-            <a href="#category" class="product-link">See More</a>
+            <p class="product-text">Premium replacement window handles suitable for various profiles and locking systems.</p>
+            <a href="#" class="product-link">
+              View Collection
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
           </div>
         </article>
 
-        <!-- Card 2 -->
-        <article class="product-card">
-          <div class="product-image-placeholder">
-            Door handle image here
+        <article class="product-card reveal">
+          <div class="product-image">
+            <span>Door Handle Image</span>
           </div>
           <div class="product-body">
             <h3 class="product-title">Door Handles</h3>
-            <p class="product-text">
-              Exterior and interior door handles in multiple finishes designed for long-term use.
-            </p>
-            <a href="#category" class="product-link">See More</a>
+            <p class="product-text">Exterior and interior door handles in multiple finishes for long-lasting durability.</p>
+            <a href="#" class="product-link">
+              View Collection
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
           </div>
         </article>
 
-        <!-- Card 3 -->
-        <article class="product-card">
-          <div class="product-image-placeholder">
-            Cylinder lock image here
+        <article class="product-card reveal">
+          <div class="product-image">
+            <span>Lock Cylinder Image</span>
           </div>
           <div class="product-body">
             <h3 class="product-title">Lock Cylinders</h3>
-            <p class="product-text">
-              High-security euro profile cylinders and compatible accessories for residential doors.
-            </p>
-            <a href="#category" class="product-link">See More</a>
+            <p class="product-text">High-security euro profile cylinders and accessories for residential doors.</p>
+            <a href="#" class="product-link">
+              View Collection
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
           </div>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- QUICK LINKS + ABOUT -->
-  <section class="section" id="category">
-    <div class="container two-column">
-      <!-- Quick links -->
-      <div>
-        <h3 class="quick-links-title">Quick Links</h3>
-        <ul class="quick-links-list">
-          <li><a href="#products">Our Products</a></li>
-          <li><a href="#category-list">Shop by Category</a></li>
-          <li><a href="#about">About Us</a></li>
-        </ul>
+  <!-- Features -->
+  <section class="section features">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Why Choose Us</span>
+        <h2 class="section-title">Shop With Confidence</h2>
+        <p class="section-subtitle">We're committed to providing the best shopping experience</p>
+      </div>
 
-        <div id="category-list" style="margin-top: 1.5rem;">
-          <h4 class="quick-links-title">Product Categories</h4>
-          <ul class="quick-links-list">
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">🚚</div>
+          <h3 class="feature-title">Fast UK Shipping</h3>
+          <p class="feature-text">Quick and reliable delivery across the United Kingdom</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Secure Checkout</h3>
+          <p class="feature-text">Safe and secure payment via trusted platforms</p>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">↩️</div>
+          <h3 class="feature-title">Easy Returns</h3>
+          <p class="feature-text">Hassle-free returns process for your peace of mind</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image reveal">
+          About Us Image
+        </div>
+        <div class="about-content reveal">
+          <h3>Your Trusted Hardware Partner</h3>
+          <p>
+            We supply a focused range of window and door hardware items suitable for common residential and commercial installations. Our aim is to make it easy for you to find the parts you need, with clear descriptions and straightforward ordering.
+          </p>
+          <p>
+            Whether you're a homeowner, tradesperson or property manager, you can order replacement components quickly and have them delivered across the UK.
+          </p>
+          <ul class="about-list">
+            <li>
+              <span>✓</span>
+              Wide range of quality products
+            </li>
+            <li>
+              <span>✓</span>
+              Competitive pricing
+            </li>
+            <li>
+              <span>✓</span>
+              Expert customer support
+            </li>
+            <li>
+              <span>✓</span>
+              Fast nationwide delivery
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;">
+            <div class="logo-icon">🔧</div>
+            DIY Hardware
+          </div>
+          <p>Your trusted source for quality window and door hardware parts. Fast shipping, secure checkout, and easy returns.</p>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#categories">Categories</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Categories</h4>
+          <ul class="footer-links">
             <li><a href="#">Window Handles</a></li>
             <li><a href="#">Door Handles</a></li>
-            <li><a href="#">Letter Boxes</a></li>
-            <li><a href="#">Trickle Vents</a></li>
             <li><a href="#">Lock Cylinders</a></li>
-            <li><a href="#">Bolts</a></li>
+            <li><a href="#">Letter Boxes</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Support</h4>
+          <ul class="footer-links">
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Shipping Info</a></li>
+            <li><a href="#">Returns</a></li>
+            <li><a href="#">FAQ</a></li>
           </ul>
         </div>
       </div>
 
-      <!-- About -->
-      <div id="about">
-        <h3 class="about-title">About Us</h3>
-        <p class="about-text">
-          We supply a focused range of window and door hardware items suitable for common residential
-          and commercial installations. Our aim is to make it easy for you to find the parts you need,
-          with clear descriptions and straightforward ordering.
-        </p>
-        <p class="about-text" style="margin-top: 0.75rem;">
-          Whether you're a homeowner, tradesperson or property manager, you can order
-          replacement components quickly and have them delivered across the UK.
-        </p>
+      <div class="footer-bottom">
+        <p>&copy; 2025 DIY Hardware Shop. All rights reserved.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- TRUST / BADGES -->
-  <section class="trust-section">
-    <div class="container">
-      <h3 class="trust-title">Shop With Confidence</h3>
-      <div class="trust-badges">
-        <div class="trust-badge">
-          <span class="icon">✓</span>
-          <span>Fast UK shipping</span>
-        </div>
-        <div class="trust-badge">
-          <span class="icon">✓</span>
-          <span>Secure checkout via marketplace</span>
-        </div>
-        <div class="trust-badge">
-          <span class="icon">✓</span>
-          <span>Simple returns process</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="container">
-      <p>&copy; <!-- Replace with year --> 2025 DIY Hardware Shop &mdash; All rights reserved.</p>
-      <p style="margin-top: 0.5rem;">
-        This is an example layout. Replace text and images with your own content.
-      </p>
     </div>
   </footer>
 
@@ -507,6 +1225,50 @@
 
     navToggle.addEventListener('click', () => {
       navLinks.classList.toggle('open');
+    });
+
+    // Header scroll effect
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Scroll reveal animation
+    const reveals = document.querySelectorAll('.reveal');
+
+    function revealOnScroll() {
+      reveals.forEach(element => {
+        const windowHeight = window.innerHeight;
+        const elementTop = element.getBoundingClientRect().top;
+        const revealPoint = 150;
+
+        if (elementTop < windowHeight - revealPoint) {
+          element.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // Initial check
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          // Close mobile nav if open
+          navLinks.classList.remove('open');
+        }
+      });
     });
   </script>
 </body>
