@@ -92,6 +92,12 @@ window.Auth = {
   },
 
   updateNavigation() {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.updateNavigation());
+      return;
+    }
+
     const navLinks = document.getElementById('navLinks');
     if (!navLinks) return;
     const existing = navLinks.querySelector('.auth-link');
