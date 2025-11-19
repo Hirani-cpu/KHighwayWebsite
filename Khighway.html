@@ -41,9 +41,107 @@
       margin: 0 auto;
       padding: 0 1rem;
     }
+
+    /* HEADER / NAVBAR */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    .nav-links > li > a {
+      font-size: 0.95rem;
+      padding: 0.25rem 0;
+      position: relative;
+    }
+
+    .nav-links > li > a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -0.15rem;
+      width: 0;
+      height: 2px;
+      background: #333;
+      transition: width 0.2s ease;
+    }
+
+    .nav-links > li > a:hover::after {
+      width: 100%;
+    }
+
+    /* Mobile nav toggle */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .nav-toggle span {
+      width: 22px;
+      height: 2px;
+      background: #333;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem 0;
+      }
+
+      .nav-links.open {
+        display: flex;
+      }
+
+      .nav-toggle {
+        display: flex;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Content will be added in subsequent commits -->
+  <!-- HEADER -->
+  <header>
+    <div class="container nav-bar">
+      <div class="logo">DIY Hardware Shop</div>
+
+      <div class="nav-toggle" id="navToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#category">Category</a></li>
+        <li><a href="#products">Our Products</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </div>
+  </header>
 </body>
 </html>
