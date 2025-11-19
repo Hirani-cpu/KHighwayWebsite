@@ -67,7 +67,14 @@ window.Auth = {
     }
   },
 
-  async logout() { await signOut(auth); },
+  async logout() {
+    // Clear local cart on logout
+    localStorage.removeItem('diyHardwareCart');
+    if (window.Cart) {
+      Cart.updateCartCount();
+    }
+    await signOut(auth);
+  },
 
   async updateProfile(updates) {
     if (!this._user) return { success: false, message: 'Not logged in.' };
@@ -227,26 +234,13 @@ Auth._init().then(async () => {
   // Sync cart from Firebase when logged in
   if (Auth.isLoggedIn() && Auth._user) {
     const firebaseCart = await FirebaseCart.loadCart(Auth._user.uid);
-    const localCart = JSON.parse(localStorage.getItem('diyHardwareCart') || '[]');
 
     if (firebaseCart !== null) {
-      // Firebase cart exists - use it as primary, merge local items
-      const mergedCart = [...firebaseCart];
-      localCart.forEach(localItem => {
-        const existing = mergedCart.find(item => item.id === localItem.id);
-        if (!existing) {
-          mergedCart.push(localItem);
-        }
-      });
-      localStorage.setItem('diyHardwareCart', JSON.stringify(mergedCart));
-
-      // Save merged cart back to Firebase if local had extra items
-      if (mergedCart.length > firebaseCart.length) {
-        await FirebaseCart.saveCart(Auth._user.uid, mergedCart);
-      }
-    } else if (localCart.length > 0) {
-      // No Firebase cart but local has items - save to Firebase
-      await FirebaseCart.saveCart(Auth._user.uid, localCart);
+      // Use Firebase cart only - don't merge with old local cart
+      localStorage.setItem('diyHardwareCart', JSON.stringify(firebaseCart));
+    } else {
+      // No Firebase cart - start with empty cart for this user
+      localStorage.setItem('diyHardwareCart', JSON.stringify([]));
     }
 
     // Update cart count display
