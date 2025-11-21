@@ -12,7 +12,8 @@
       "Bash(node --version)",
       "Bash(python -m http.server:*)",
       "WebFetch(domain:i.ibb.co)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(start chrome:*)"
     ],
     "deny": [],
     "ask": []

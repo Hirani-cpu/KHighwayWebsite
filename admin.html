@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - K Highway DIY Hardware Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-900: #0f172a;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--gray-700); background: var(--gray-100); }
+    a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    /* Admin Layout */
+    .admin-container { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 280px; background: var(--secondary); color: white; padding: 2rem 0; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar-header { padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-logo { font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
+    .sidebar-logo img { width: 40px; height: 40px; border-radius: 8px; background: white; object-fit: contain; }
+    .admin-badge { font-size: 0.7rem; background: var(--accent); padding: 0.25rem 0.5rem; border-radius: 4px; margin-top: 0.5rem; display: inline-block; }
+
+    .sidebar-nav { padding: 1.5rem 0; }
+    .nav-section { margin-bottom: 1.5rem; }
+    .nav-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); padding: 0 1.5rem; margin-bottom: 0.75rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1.5rem; color: rgba(255,255,255,0.7); transition: all 0.3s ease; cursor: pointer; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item.active { border-left: 3px solid var(--primary); }
+    .nav-item-icon { font-size: 1.1rem; }
+
+    /* Main Content */
+    .main-content { flex: 1; margin-left: 280px; padding: 2rem; }
+
+    /* Header */
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .admin-title { font-size: 1.75rem; font-weight: 800; color: var(--secondary); }
+    .admin-user { display: flex; align-items: center; gap: 1rem; }
+    .admin-user-info { text-align: right; }
+    .admin-user-name { font-weight: 600; color: var(--secondary); }
+    .admin-user-role { font-size: 0.85rem; color: var(--gray-500); }
+    .btn-logout { padding: 0.5rem 1rem; background: var(--danger); color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; }
+    .btn-logout:hover { background: #dc2626; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+    .stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow); }
+    .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+    .stat-icon.blue { background: rgba(37, 99, 235, 0.1); }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.1); }
+    .stat-icon.yellow { background: rgba(245, 158, 11, 0.1); }
+    .stat-icon.purple { background: rgba(139, 92, 246, 0.1); }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--secondary); }
+    .stat-label { color: var(--gray-500); font-size: 0.9rem; }
+
+    /* Content Panels */
+    .panel { background: white; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem; }
+    .panel-header { padding: 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--secondary); }
+    .panel-body { padding: 1.5rem; }
+
+    /* Buttons */
+    .btn { padding: 0.625rem 1.25rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-secondary:hover { background: var(--gray-300); }
+
+    /* Tables */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    .table th { font-weight: 600; color: var(--secondary); background: var(--gray-100); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .table tr:hover { background: var(--gray-100); }
+
+    /* Status Badges */
+    .badge { padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+    .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .badge-info { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+
+    /* Forms */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--secondary); font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--gray-200); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease; }
+    .form-control:focus { outline: none; border-color: var(--primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { padding: 1.5rem; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--secondary); }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-500); }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1.5rem; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 1rem; }
+
+    /* Access Denied */
+    .access-denied { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 2rem; }
+    .access-denied-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .access-denied h1 { font-size: 2rem; color: var(--danger); margin-bottom: 0.5rem; }
+    .access-denied p { color: var(--gray-500); margin-bottom: 1.5rem; }
+
+    /* Loading */
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .spinner { width: 48px; height: 48px; border: 4px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .main-content { margin-left: 0; }
+      .admin-container { flex-direction: column; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* Section visibility */
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+
+    /* Image upload styles */
+    .image-upload-area { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.3s ease; margin-bottom: 1rem; }
+    .image-upload-area:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
+    .image-upload-area input { display: none; }
+    .image-upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .image-upload-text { color: var(--gray-500); font-size: 0.9rem; }
+    .image-upload-text strong { color: var(--primary); }
+
+    .image-preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .preview-image { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--gray-100); }
+    .preview-image img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-image .remove-image { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: var(--danger); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .preview-image .image-name { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .preview-image.existing { border: 2px solid var(--success); }
+
+    #existingImages { margin-bottom: 1rem; }
+    #existingImages .image-preview-grid { margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <!-- Loading State -->
+  <div class="loading" id="loadingState">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Access Denied State -->
+  <div class="access-denied" id="accessDenied" style="display: none;">
+    <div class="access-denied-icon">🔒</div>
+    <h1>Access Denied</h1>
+    <p>You don't have permission to access the admin dashboard.</p>
+    <a href="index.html" class="btn btn-primary">Return to Home</a>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div class="admin-container" id="adminDashboard" style="display: none;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img src="images/logo/k-highway-logo.png" alt="K Highway Logo">
+          <span>K Highway</span>
+        </div>
+        <div class="admin-badge">ADMIN PANEL</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Overview</div>
+          <div class="nav-item active" data-section="dashboard">
+            <span class="nav-item-icon">📊</span>
+            Dashboard
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Management</div>
+          <div class="nav-item" data-section="products">
+            <span class="nav-item-icon">📦</span>
+            Products
+          </div>
+          <div class="nav-item" data-section="categories">
+            <span class="nav-item-icon">🏷️</span>
+            Categories
+          </div>
+          <div class="nav-item" data-section="orders">
+            <span class="nav-item-icon">🛒</span>
+            Orders
+          </div>
+          <div class="nav-item" data-section="users">
+            <span class="nav-item-icon">👥</span>
+            Users
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Settings</div>
+          <div class="nav-item" data-section="settings">
+            <span class="nav-item-icon">⚙️</span>
+            Store Settings
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="admin-header">
+        <h1 class="admin-title" id="sectionTitle">Dashboard</h1>
+        <div class="admin-user">
+          <div class="admin-user-info">
+            <div class="admin-user-name" id="adminName">Admin</div>
+            <div class="admin-user-role" id="adminRole">Master Admin</div>
+          </div>
+          <button class="btn-logout" onclick="Admin.logout()">Logout</button>
+        </div>
+      </header>
+
+      <!-- Dashboard Section -->
+      <section class="admin-section active" id="section-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">📦</div>
+            <div class="stat-value" id="totalProducts">0</div>
+            <div class="stat-label">Total Products</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🛒</div>
+            <div class="stat-value" id="totalOrders">0</div>
+            <div class="stat-label">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow">👥</div>
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">⭐</div>
+            <div class="stat-value" id="totalReviews">0</div>
+            <div class="stat-label">Total Reviews</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Recent Orders</h3>
+            <button class="btn btn-secondary" onclick="Admin.showSection('orders')">View All</button>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersTable">
+                <tr><td colspan="5" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Products Section -->
+      <section class="admin-section" id="section-products">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Products Management</h3>
+            <button class="btn btn-primary" onclick="Admin.showProductModal()">+ Add Product</button>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTable">
+                <tr><td colspan="7" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Categories Section -->
+      <section class="admin-section" id="section-categories">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Categories Management</h3>
+            <button class="btn btn-primary" onclick="Admin.showCategoryModal()">+ Add Category</button>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Icon</th>
+                  <th>Name</th>
+                  <th>Slug</th>
+                  <th>Products</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="categoriesTable">
+                <tr><td colspan="5" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Orders Section -->
+      <section class="admin-section" id="section-orders">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Orders Management</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable">
+                <tr><td colspan="7" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Users Section -->
+      <section class="admin-section" id="section-users">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Users Management</h3>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                  <th>Orders</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable">
+                <tr><td colspan="5" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section class="admin-section" id="section-settings">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Store Settings</h3>
+          </div>
+          <div class="panel-body">
+            <form id="storeSettingsForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Store Name</label>
+                  <input type="text" class="form-control" id="settingStoreName" value="K Highway DIY Hardware Shop">
+                </div>
+                <div class="form-group">
+                  <label>Contact Email</label>
+                  <input type="email" class="form-control" id="settingEmail" value="info@khighwaywd.co.uk">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Phone</label>
+                  <input type="text" class="form-control" id="settingPhone">
+                </div>
+                <div class="form-group">
+                  <label>Currency</label>
+                  <select class="form-control" id="settingCurrency">
+                    <option value="GBP">GBP (£)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Store Address</label>
+                <textarea class="form-control" id="settingAddress" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productModalTitle">Add New Product</h3>
+        <button class="modal-close" onclick="Admin.closeProductModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId">
+
+          <!-- Product Images -->
+          <div class="form-group">
+            <label>Product Images *</label>
+            <div id="existingImages"></div>
+            <label class="image-upload-area" for="productImages">
+              <input type="file" id="productImages" accept="image/*" multiple>
+              <div class="image-upload-icon">📷</div>
+              <div class="image-upload-text">
+                <strong>Click to upload</strong> or drag and drop<br>
+                PNG, JPG up to 5MB each
+              </div>
+            </label>
+            <div class="image-preview-grid" id="imagePreview"></div>
+          </div>
+
+          <!-- Basic Info -->
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" class="form-control" id="productName" required placeholder="e.g., Mila Universal Window Handle White">
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea class="form-control" id="productDescription" rows="4" placeholder="Detailed product description..."></textarea>
+          </div>
+
+          <!-- Price & Stock -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (£) *</label>
+              <input type="number" class="form-control" id="productPrice" step="0.01" min="0" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Stock Quantity *</label>
+              <input type="number" class="form-control" id="productStock" min="0" value="0" required>
+            </div>
+          </div>
+
+          <!-- Category & Brand -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category *</label>
+              <select class="form-control" id="productCategory" required>
+                <option value="">Select Category</option>
+                <option value="Window Handles">Window Handles</option>
+                <option value="Door Handles">Door Handles</option>
+                <option value="Letter Boxes">Letter Boxes</option>
+                <option value="Trickle Vents">Trickle Vents</option>
+                <option value="Lock Cylinders">Lock Cylinders</option>
+                <option value="Bolts">Bolts</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Brand</label>
+              <input type="text" class="form-control" id="productBrand" placeholder="e.g., Mila, Yale">
+            </div>
+          </div>
+
+          <!-- SKU & Status -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>SKU / Product Code</label>
+              <input type="text" class="form-control" id="productSku" placeholder="e.g., WH-MIL-WHT-001">
+            </div>
+            <div class="form-group">
+              <label>Status *</label>
+              <select class="form-control" id="productStatus" required>
+                <option value="active">Active (Visible on site)</option>
+                <option value="inactive">Inactive (Hidden)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Key Features -->
+          <div class="form-group">
+            <label>Key Features</label>
+            <textarea class="form-control" id="productFeatures" rows="4" placeholder="Enter each feature on a new line, e.g.:
+Suitable for uPVC and aluminium windows
+40mm spindle length (standard)
+Smooth 90° locking action
+Includes fixing screws"></textarea>
+            <small style="color: var(--gray-500);">Enter each feature on a new line</small>
+          </div>
+
+          <!-- Specifications -->
+          <div class="form-group">
+            <label>Specifications</label>
+            <textarea class="form-control" id="productSpecs" rows="5" placeholder="Enter specifications as Label: Value on each line, e.g.:
+Material: Zinc alloy
+Finish: White powder-coated
+Spindle Length: 40mm
+Spindle Type: 7mm square"></textarea>
+            <small style="color: var(--gray-500);">Enter as "Label: Value" on each line</small>
+          </div>
+
+          <!-- eBay URL -->
+          <div class="form-group">
+            <label>eBay Product URL (optional)</label>
+            <input type="url" class="form-control" id="productEbayUrl" placeholder="https://www.ebay.co.uk/itm/...">
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Admin.closeProductModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="Admin.saveProduct()">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="categoryModalTitle">Add Category</h3>
+        <button class="modal-close" onclick="Admin.closeCategoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="categoryForm">
+          <input type="hidden" id="categoryId">
+          <div class="form-group">
+            <label>Category Name *</label>
+            <input type="text" class="form-control" id="categoryName" required>
+          </div>
+          <div class="form-group">
+            <label>Slug *</label>
+            <input type="text" class="form-control" id="categorySlug" required placeholder="e.g., window-handles">
+          </div>
+          <div class="form-group">
+            <label>Icon (Emoji)</label>
+            <input type="text" class="form-control" id="categoryIcon" placeholder="e.g., 🪟">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea class="form-control" id="categoryDescription" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Admin.closeCategoryModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="Admin.saveCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/cart.js"></script>
+  <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

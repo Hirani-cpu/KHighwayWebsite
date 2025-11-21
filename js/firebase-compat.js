@@ -27,7 +27,13 @@ window.Auth = {
       onAuthStateChanged(auth, async (user) => {
         this._user = user;
         if (user) {
+          console.log('User UID:', user.uid);
           const docSnap = await getDoc(doc(db, 'users', user.uid));
+          console.log('Document exists:', docSnap.exists());
+          if (docSnap.exists()) {
+            console.log('User data:', docSnap.data());
+            console.log('Role:', docSnap.data().role);
+          }
           this._profile = docSnap.exists() ? { ...docSnap.data(), email: user.email } : null;
         } else {
           this._profile = null;
@@ -100,12 +106,27 @@ window.Auth = {
 
     const navLinks = document.getElementById('navLinks');
     if (!navLinks) return;
+
+    // Remove existing auth and admin links
     const existing = navLinks.querySelector('.auth-link');
     if (existing) existing.remove();
+    const existingAdmin = navLinks.querySelector('.admin-link');
+    if (existingAdmin) existingAdmin.remove();
+
+    // Add admin link if user is masterAdmin
+    if (this.isLoggedIn() && this._profile && this._profile.role === 'masterAdmin') {
+      const adminLi = document.createElement('li');
+      adminLi.className = 'admin-link';
+      adminLi.innerHTML = `<a href="admin.html" style="color: #f59e0b;">⚙️ Admin</a>`;
+      const cart = navLinks.querySelector('.cart-link')?.parentElement;
+      cart ? navLinks.insertBefore(adminLi, cart) : navLinks.appendChild(adminLi);
+    }
+
+    // Add auth link
     const li = document.createElement('li');
     li.className = 'auth-link';
     li.innerHTML = this.isLoggedIn() && this._profile
-      ? `<a href="account.html">👤 ${this._profile.firstName}</a>`
+      ? `<a href="account.html">👤 ${this._profile.firstName || this._profile.name || 'Account'}</a>`
       : `<a href="login.html">Login</a>`;
     const cart = navLinks.querySelector('.cart-link')?.parentElement;
     cart ? navLinks.insertBefore(li, cart) : navLinks.appendChild(li);

@@ -64,7 +64,8 @@
     .product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
 
     .product-gallery { position: sticky; top: 100px; }
-    .main-image { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; }
+    .main-image { width: 100%; max-width: 500px; aspect-ratio: 1; background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; overflow: hidden; box-shadow: var(--shadow-lg); position: relative; }
+    .main-image img { width: 100%; height: 100%; object-fit: contain; }
     .product-rating-badge { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.95); padding: 0.5rem 0.75rem; border-radius: 8px; display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 10; }
     .product-rating-badge .star { color: #f59e0b; }
     .product-rating-badge .rating-value { color: var(--secondary); }
@@ -73,8 +74,9 @@
     .main-image-placeholder span:first-child { font-size: 4rem; }
     .main-image-placeholder span:last-child { font-size: 0.9rem; font-weight: 600; }
 
-    .thumbnail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
-    .thumbnail { aspect-ratio: 1; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; font-size: 1.5rem; }
+    .thumbnail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; max-width: 500px; }
+    .thumbnail { aspect-ratio: 1; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; transition: all 0.3s ease; font-size: 1.5rem; overflow: hidden; }
+    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
     .thumbnail:hover, .thumbnail.active { border-color: var(--primary); }
 
     .product-info { animation: fadeInUp 0.8s ease forwards; }
@@ -505,6 +507,22 @@
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
   <script type="module">
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+
     // Wait for Firebase to initialize then load page
     const checkReady = setInterval(() => {
       if (window.Auth && window.Auth._ready && window.Reviews) {
@@ -535,301 +553,67 @@
       input.value = value;
     }
 
-    // Thumbnail selection - updates main image
-    document.querySelectorAll('.thumbnail').forEach(thumb => {
-      thumb.addEventListener('click', () => {
-        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-        thumb.classList.add('active');
-        const thumbImg = thumb.querySelector('img');
-        if (thumbImg) {
-          document.getElementById('mainProductImg').src = thumbImg.src;
-        }
-      });
-    });
-
-    // Products database - IDs match data-id in products.html
-    // Images stored in: images/products/[category-folder]/[product-id]/1.jpg, 2.jpg, 3.jpg, 4.jpg
-    const productsDB = {
-      'espag-white': {
-        id: 'espag-white',
-        name: 'Espag Window Handle - White',
-        price: 8.99,
-        oldPrice: 12.99,
-        imageFolder: 'images/products/window-handles/espag-white',
-        category: 'Window Handles',
-        sku: 'WH-ESP-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+white'
-      },
-      'espag-chrome': {
-        id: 'espag-chrome',
-        name: 'Espag Window Handle - Chrome',
-        price: 9.99,
-        oldPrice: 14.99,
-        imageFolder: 'images/products/window-handles/espag-chrome',
-        category: 'Window Handles',
-        sku: 'WH-ESP-CHR-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=espag+window+handle+chrome'
-      },
-      'cockspur': {
-        id: 'cockspur',
-        name: 'Cockspur Window Handle',
-        price: 7.99,
-        oldPrice: 10.99,
-        imageFolder: 'images/products/window-handles/cockspur',
-        category: 'Window Handles',
-        sku: 'WH-COC-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=cockspur+window+handle'
-      },
-      'inline-black': {
-        id: 'inline-black',
-        name: 'Inline Window Handle - Black',
-        price: 10.99,
-        oldPrice: 15.99,
-        imageFolder: 'images/products/window-handles/inline-black',
-        category: 'Window Handles',
-        sku: 'WH-INL-BLK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=inline+window+handle+black'
-      },
-      'lever-chrome': {
-        id: 'lever-chrome',
-        name: 'Lever Door Handle - Chrome',
-        price: 24.99,
-        oldPrice: 32.99,
-        imageFolder: 'images/products/door-handles/lever-chrome',
-        category: 'Door Handles',
-        sku: 'DH-LEV-CHR-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+chrome'
-      },
-      'lever-gold': {
-        id: 'lever-gold',
-        name: 'Lever Door Handle - Gold',
-        price: 29.99,
-        oldPrice: 39.99,
-        imageFolder: 'images/products/door-handles/lever-gold',
-        category: 'Door Handles',
-        sku: 'DH-LEV-GLD-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=lever+door+handle+gold'
-      },
-      'pad-white': {
-        id: 'pad-white',
-        name: 'Pad Handle - White',
-        price: 18.99,
-        oldPrice: 24.99,
-        imageFolder: 'images/products/door-handles/pad-white',
-        category: 'Door Handles',
-        sku: 'DH-PAD-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=pad+handle+white'
-      },
-      'd-handle-black': {
-        id: 'd-handle-black',
-        name: 'D Handle - Black',
-        price: 15.99,
-        oldPrice: 21.99,
-        imageFolder: 'images/products/door-handles/d-handle-black',
-        category: 'Door Handles',
-        sku: 'DH-D-BLK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=d+handle+black'
-      },
-      'letterbox-chrome': {
-        id: 'letterbox-chrome',
-        name: 'Letter Box - Chrome',
-        price: 22.99,
-        oldPrice: 29.99,
-        imageFolder: 'images/products/letter-boxes/letterbox-chrome',
-        category: 'Letter Boxes',
-        sku: 'LB-STD-CHR-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+chrome'
-      },
-      'letterbox-gold': {
-        id: 'letterbox-gold',
-        name: 'Letter Box - Gold',
-        price: 27.99,
-        oldPrice: 35.99,
-        imageFolder: 'images/products/letter-boxes/letterbox-gold',
-        category: 'Letter Boxes',
-        sku: 'LB-STD-GLD-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+gold'
-      },
-      'letterbox-black': {
-        id: 'letterbox-black',
-        name: 'Letter Box - Black',
-        price: 24.99,
-        oldPrice: 31.99,
-        imageFolder: 'images/products/letter-boxes/letterbox-black',
-        category: 'Letter Boxes',
-        sku: 'LB-STD-BLK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+black'
-      },
-      'letterbox-white': {
-        id: 'letterbox-white',
-        name: 'Letter Box - White',
-        price: 19.99,
-        oldPrice: 26.99,
-        imageFolder: 'images/products/letter-boxes/letterbox-white',
-        category: 'Letter Boxes',
-        sku: 'LB-STD-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=letter+box+white'
-      },
-      'vent-white': {
-        id: 'vent-white',
-        name: 'Trickle Vent - White',
-        price: 8.99,
-        oldPrice: 12.99,
-        imageFolder: 'images/products/trickle-vents/vent-white',
-        category: 'Trickle Vents',
-        sku: 'TV-STD-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+white'
-      },
-      'vent-brown': {
-        id: 'vent-brown',
-        name: 'Trickle Vent - Brown',
-        price: 8.99,
-        oldPrice: 12.99,
-        imageFolder: 'images/products/trickle-vents/vent-brown',
-        category: 'Trickle Vents',
-        sku: 'TV-STD-BRN-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+brown'
-      },
-      'vent-black': {
-        id: 'vent-black',
-        name: 'Trickle Vent - Black',
-        price: 9.99,
-        oldPrice: 13.99,
-        imageFolder: 'images/products/trickle-vents/vent-black',
-        category: 'Trickle Vents',
-        sku: 'TV-STD-BLK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+black'
-      },
-      'vent-grey': {
-        id: 'vent-grey',
-        name: 'Trickle Vent - Grey',
-        price: 9.99,
-        oldPrice: 13.99,
-        imageFolder: 'images/products/trickle-vents/vent-grey',
-        category: 'Trickle Vents',
-        sku: 'TV-STD-GRY-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=trickle+vent+grey'
-      },
-      'euro-brass': {
-        id: 'euro-brass',
-        name: 'Euro Cylinder 35/35 - Brass',
-        price: 14.99,
-        oldPrice: 19.99,
-        imageFolder: 'images/products/lock-cylinders/euro-brass',
-        category: 'Lock Cylinders',
-        sku: 'LC-EUR-BRS-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+brass'
-      },
-      'euro-nickel': {
-        id: 'euro-nickel',
-        name: 'Euro Cylinder 35/35 - Nickel',
-        price: 14.99,
-        oldPrice: 19.99,
-        imageFolder: 'images/products/lock-cylinders/euro-nickel',
-        category: 'Lock Cylinders',
-        sku: 'LC-EUR-NCK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=euro+cylinder+nickel'
-      },
-      'thumbturn-chrome': {
-        id: 'thumbturn-chrome',
-        name: 'Thumbturn Cylinder - Chrome',
-        price: 18.99,
-        oldPrice: 24.99,
-        imageFolder: 'images/products/lock-cylinders/thumbturn-chrome',
-        category: 'Lock Cylinders',
-        sku: 'LC-THB-CHR-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=thumbturn+cylinder+chrome'
-      },
-      'anti-snap-gold': {
-        id: 'anti-snap-gold',
-        name: 'Anti-Snap Cylinder - Gold',
-        price: 24.99,
-        oldPrice: 32.99,
-        imageFolder: 'images/products/lock-cylinders/anti-snap-gold',
-        category: 'Lock Cylinders',
-        sku: 'LC-ANT-GLD-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=anti+snap+cylinder+gold'
-      },
-      'barrel-bolt-chrome': {
-        id: 'barrel-bolt-chrome',
-        name: 'Barrel Bolt - Chrome',
-        price: 6.99,
-        oldPrice: 9.99,
-        imageFolder: 'images/products/bolts/barrel-bolt-chrome',
-        category: 'Bolts',
-        sku: 'BT-BAR-CHR-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=barrel+bolt+chrome'
-      },
-      'flush-bolt-brass': {
-        id: 'flush-bolt-brass',
-        name: 'Flush Bolt - Brass',
-        price: 12.99,
-        oldPrice: 17.99,
-        imageFolder: 'images/products/bolts/flush-bolt-brass',
-        category: 'Bolts',
-        sku: 'BT-FLU-BRS-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=flush+bolt+brass'
-      },
-      'tower-bolt-black': {
-        id: 'tower-bolt-black',
-        name: 'Tower Bolt - Black',
-        price: 8.99,
-        oldPrice: 12.99,
-        imageFolder: 'images/products/bolts/tower-bolt-black',
-        category: 'Bolts',
-        sku: 'BT-TWR-BLK-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=tower+bolt+black'
-      },
-      'necked-bolt-white': {
-        id: 'necked-bolt-white',
-        name: 'Necked Bolt - White',
-        price: 7.99,
-        oldPrice: 10.99,
-        imageFolder: 'images/products/bolts/necked-bolt-white',
-        category: 'Bolts',
-        sku: 'BT-NCK-WHT-001',
-        ebayUrl: 'https://www.ebay.co.uk/sch/i.html?_nkw=necked+bolt+white'
-      }
-    };
-
     // Get product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id') || 'espag-white';
+    const productId = urlParams.get('id');
 
-    // Get product from database
-    const product = productsDB[productId] || productsDB['espag-white'];
+    if (!productId) {
+      document.querySelector('.product-title').textContent = 'Product Not Found';
+      return;
+    }
+
+    // Load product from Firestore
+    let product = null;
+    try {
+      const productDoc = await getDoc(doc(db, 'products', productId));
+      if (productDoc.exists()) {
+        product = { id: productDoc.id, ...productDoc.data() };
+      }
+    } catch (error) {
+      console.error('Error loading product:', error);
+    }
+
+    if (!product) {
+      document.querySelector('.product-title').textContent = 'Product Not Found';
+      document.querySelector('.product-category').textContent = '';
+      document.querySelector('.product-price').textContent = '';
+      return;
+    }
 
     // Update page with product data
     document.querySelector('.product-title').textContent = product.name;
-    document.querySelector('.product-category').textContent = product.category;
-    document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)} ${product.oldPrice ? `<span class="old-price">£${product.oldPrice.toFixed(2)}</span>` : ''}`;
+    document.querySelector('.product-category').textContent = product.category || '';
+    document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)}`;
 
-    // Set main image (1.jpg from folder)
-    const mainImg = `${product.imageFolder}/1.jpg`;
-    document.getElementById('mainProductImg').src = mainImg;
+    // Set main image from images array
+    const mainImage = product.images && product.images.length > 0 ? product.images[0] : 'images/placeholder.jpg';
+    document.getElementById('mainProductImg').src = mainImage;
     document.getElementById('mainProductImg').alt = product.name;
 
-    // Generate thumbnails (1.jpg, 2.jpg, 3.jpg, 4.jpg)
+    // Generate thumbnails from images array
     const thumbnailContainer = document.querySelector('.thumbnail-grid');
-    if (thumbnailContainer) {
+    if (thumbnailContainer && product.images && product.images.length > 0) {
       thumbnailContainer.innerHTML = '';
-      for (let i = 1; i <= 4; i++) {
+      product.images.forEach((imgUrl, index) => {
         const thumb = document.createElement('div');
-        thumb.className = 'thumbnail' + (i === 1 ? ' active' : '');
-        thumb.innerHTML = `<img src="${product.imageFolder}/${i}.jpg" alt="${product.name} - Image ${i}">`;
+        thumb.className = 'thumbnail' + (index === 0 ? ' active' : '');
+        thumb.innerHTML = `<img src="${imgUrl}" alt="${product.name} - Image ${index + 1}">`;
         thumb.addEventListener('click', () => {
           document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
           thumb.classList.add('active');
-          document.getElementById('mainProductImg').src = `${product.imageFolder}/${i}.jpg`;
+          document.getElementById('mainProductImg').src = imgUrl;
         });
         thumbnailContainer.appendChild(thumb);
-      }
+      });
     }
 
+    // Update meta info
     document.querySelector('.product-meta').innerHTML = `
-      <span>SKU: ${product.sku}</span>
-      <span>Category: ${product.category}</span>
+      <span>SKU: ${product.sku || 'N/A'}</span>
+      <span>Category: ${product.category || 'N/A'}</span>
+      ${product.stock !== undefined ? `<span>Stock: ${product.stock}</span>` : ''}
     `;
+
     // Update breadcrumb
     document.querySelector('.breadcrumb-list').innerHTML = `
       <a href="index.html">Home</a>
@@ -838,13 +622,46 @@
       <span>/</span>
       <span>${product.name}</span>
     `;
+
     // Update page title
-    document.title = `${product.name} - K Highway DIY Hardware Shop Shop`;
+    document.title = `${product.name} - K Highway DIY Hardware Shop`;
+
+    // Update description if exists
+    const descriptionEl = document.querySelector('.product-description');
+    if (descriptionEl && product.description) {
+      descriptionEl.textContent = product.description;
+    }
+
+    // Update key features from Firestore
+    const featuresSection = document.querySelector('.product-features');
+    const featuresList = document.querySelector('.features-list');
+    if (featuresSection && featuresList) {
+      if (product.features && product.features.length > 0) {
+        featuresList.innerHTML = product.features.map(feature => `<li>${feature}</li>`).join('');
+        featuresSection.style.display = 'block';
+      } else {
+        featuresSection.style.display = 'none';
+      }
+    }
+
+    // Update specifications from Firestore
+    const specsSection = document.querySelector('.product-specs');
+    const specsTable = document.querySelector('.specs-table');
+    if (specsSection && specsTable) {
+      if (product.specifications && Object.keys(product.specifications).length > 0) {
+        specsTable.innerHTML = Object.entries(product.specifications)
+          .map(([key, value]) => `<tr><td>${key}</td><td>${value}</td></tr>`)
+          .join('');
+        specsSection.style.display = 'block';
+      } else {
+        specsSection.style.display = 'none';
+      }
+    }
 
     // Add rating badge to main image with scroll to reviews
-    const ratingData = await Reviews.getAverageRating(product.id);
+    const ratingData = await Reviews.getAverageRating(productId);
     if (ratingData.count > 0) {
-      const mainImage = document.querySelector('.main-image');
+      const mainImageEl = document.querySelector('.main-image');
       const badge = document.createElement('div');
       badge.className = 'product-rating-badge';
       badge.style.cursor = 'pointer';
@@ -852,35 +669,38 @@
       badge.addEventListener('click', () => {
         document.querySelector('.reviews-section').scrollIntoView({ behavior: 'smooth' });
       });
-      mainImage.appendChild(badge);
+      mainImageEl.appendChild(badge);
     }
 
     // Add to Cart
     document.getElementById('addToCartBtn').addEventListener('click', () => {
       const quantity = parseInt(document.getElementById('quantity').value);
+      const cartImage = product.images && product.images.length > 0 ? product.images[0] : 'images/placeholder.jpg';
       Cart.addItem({
         id: product.id,
         name: product.name,
         price: product.price,
-        image: `${product.imageFolder}/1.jpg`,
+        image: cartImage,
         quantity: quantity
       });
     });
 
-    // eBay button
-    document.getElementById('ebayBtn').href = product.ebayUrl;
+    // eBay button - use product ebayUrl if available
+    if (product.ebayUrl) {
+      document.getElementById('ebayBtn').href = product.ebayUrl;
+    }
 
     // ===== REVIEWS FUNCTIONALITY =====
 
     // Load and display reviews
     async function loadReviews() {
-      const reviews = await Reviews.getProductReviews(product.id);
-      const ratingData = await Reviews.getAverageRating(product.id);
+      const reviews = await Reviews.getProductReviews(productId);
+      const reviewRatingData = await Reviews.getAverageRating(productId);
 
       // Update summary
-      document.getElementById('reviewsAverage').textContent = ratingData.average;
-      document.getElementById('reviewsStars').innerHTML = Reviews.generateStars(Math.round(ratingData.average));
-      document.getElementById('reviewsCount').textContent = `${ratingData.count} review${ratingData.count !== 1 ? 's' : ''}`;
+      document.getElementById('reviewsAverage').textContent = reviewRatingData.average;
+      document.getElementById('reviewsStars').innerHTML = Reviews.generateStars(Math.round(reviewRatingData.average));
+      document.getElementById('reviewsCount').textContent = `${reviewRatingData.count} review${reviewRatingData.count !== 1 ? 's' : ''}`;
 
       // Display reviews list
       const container = document.getElementById('reviewsList');
@@ -921,7 +741,7 @@
       // Auto-fill if logged in and check for existing review
       if (Auth.isLoggedIn()) {
         const user = Auth.getCurrentUser();
-        const existingReview = await Reviews.getUserReview(product.id, user.email);
+        const existingReview = await Reviews.getUserReview(productId, user.email);
 
         if (existingReview) {
           // Edit mode
@@ -1000,7 +820,7 @@
       }
 
       const reviewData = {
-        productId: product.id,
+        productId: productId,
         rating: rating,
         title: document.getElementById('reviewTitle').value.trim(),
         comment: document.getElementById('reviewComment').value.trim(),
