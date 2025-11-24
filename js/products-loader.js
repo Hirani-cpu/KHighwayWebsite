@@ -1,5 +1,5 @@
 // Products Loader - Loads products from Firestore
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import {
   getFirestore,
   collection,
@@ -13,7 +13,7 @@ import {
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// Firebase config - must match firebase-compat.js
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
   authDomain: "k-highway-shop.firebaseapp.com",
@@ -23,8 +23,8 @@ const firebaseConfig = {
   appId: "1:568359321582:web:faf2b48cb3556664b898ff"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase - use existing app if already initialized
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
