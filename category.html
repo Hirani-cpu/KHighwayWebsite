@@ -181,7 +181,62 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
-  <script type="module" src="js/categories-loader.js"></script>
+  <script type="module">
+    // Load categories directly
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+
+    async function loadCategories() {
+      const container = document.querySelector('.categories-grid');
+      if (!container) return;
+
+      try {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Loading...</div>';
+        const snapshot = await getDocs(collection(db, 'categories'));
+
+        if (snapshot.empty) {
+          container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #64748b;">No categories yet. Add from admin panel.</div>';
+          return;
+        }
+
+        const categories = [];
+        snapshot.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+        categories.sort((a, b) => (a.order || 999) - (b.order || 999));
+
+        container.innerHTML = '';
+        categories.forEach(cat => {
+          const slug = cat.slug || cat.id;
+          const icon = cat.icon || '📦';
+          const desc = cat.description || `Browse our ${cat.name.toLowerCase()} collection`;
+          container.innerHTML += `
+            <a href="products.html#${slug}" class="category-card">
+              <div class="category-icon">${icon}</div>
+              <h3 class="category-name">${cat.name}</h3>
+              <p class="category-desc">${desc}</p>
+              <span class="category-link">Browse Products →</span>
+            </a>
+          `;
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red;">Error loading categories</div>';
+      }
+    }
+
+    loadCategories();
+  </script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');

@@ -225,7 +225,92 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
-  <script type="module" src="js/products-loader.js"></script>
+  <script type="module">
+    // Load products directly
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+
+    async function loadProducts() {
+      const container = document.getElementById('productSections');
+      const filterSelect = document.getElementById('categoryFilter');
+      if (!container) return;
+
+      try {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading products...</div>';
+
+        // Load categories for filter
+        if (filterSelect) {
+          filterSelect.innerHTML = '<option value="all">All Categories</option>';
+          const catSnap = await getDocs(collection(db, 'categories'));
+          catSnap.forEach(doc => {
+            const cat = doc.data();
+            filterSelect.innerHTML += `<option value="${cat.slug || doc.id}">${cat.name}</option>`;
+          });
+        }
+
+        // Load products
+        const productsQuery = query(collection(db, 'products'), where('status', '==', 'active'));
+        const snapshot = await getDocs(productsQuery);
+
+        if (snapshot.empty) {
+          container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b;">No products yet. Add from admin panel.</div>';
+          return;
+        }
+
+        // Group by category
+        const productsByCategory = {};
+        snapshot.forEach(doc => {
+          const product = { id: doc.id, ...doc.data() };
+          const category = product.category || 'Other';
+          if (!productsByCategory[category]) productsByCategory[category] = [];
+          productsByCategory[category].push(product);
+        });
+
+        container.innerHTML = '';
+        Object.keys(productsByCategory).forEach(category => {
+          const slug = category.toLowerCase().replace(/\s+/g, '-');
+          const section = document.createElement('div');
+          section.innerHTML = `<h2 class="section-title" id="${slug}">${category}</h2><div class="products-grid" data-category="${slug}"></div>`;
+          container.appendChild(section);
+
+          const grid = section.querySelector('.products-grid');
+          productsByCategory[category].forEach(product => {
+            const img = product.images?.[0] || 'images/placeholder.jpg';
+            grid.innerHTML += `
+              <div class="product-card" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-image="${img}">
+                <div class="product-image"><img src="${img}" alt="${product.name}"></div>
+                <div class="product-body">
+                  <h3 class="product-name">${product.name}</h3>
+                  <div class="product-price">£${product.price.toFixed(2)}</div>
+                  <div class="product-actions">
+                    <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+                    <a href="product-detail.html?id=${product.id}" class="product-btn">Details</a>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        });
+      } catch (error) {
+        console.error('Error loading products:', error);
+        container.innerHTML = '<div style="text-align: center; color: red;">Error loading products</div>';
+      }
+    }
+
+    loadProducts();
+  </script>
   <script type="module">
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
