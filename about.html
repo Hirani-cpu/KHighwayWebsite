@@ -255,6 +255,47 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module">
+    // Load store settings
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+
+    async function loadStoreSettings() {
+      try {
+        const configDoc = await getDoc(doc(db, 'config', 'store'));
+        if (configDoc.exists()) {
+          const config = configDoc.data();
+          if (config.storeName) {
+            document.querySelectorAll('.logo').forEach(el => {
+              const img = el.querySelector('img');
+              if (img) {
+                el.innerHTML = '';
+                el.appendChild(img);
+                el.appendChild(document.createTextNode(config.storeName));
+              }
+            });
+            document.title = `About Us - ${config.storeName}`;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading store settings:', error);
+      }
+    }
+
+    loadStoreSettings();
+  </script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');

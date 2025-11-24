@@ -154,7 +154,7 @@
             <div class="contact-icon">📧</div>
             <div class="contact-text">
               <h3>Email</h3>
-              <p><a href="mailto:info@diy-hardware-shop.co.uk">info@diy-hardware-shop.co.uk</a></p>
+              <p><a href="mailto:info@diy-hardware-shop.co.uk" id="contactEmail">info@diy-hardware-shop.co.uk</a></p>
             </div>
           </div>
 
@@ -162,15 +162,15 @@
             <div class="contact-icon">📞</div>
             <div class="contact-text">
               <h3>Phone</h3>
-              <p><a href="tel:+441onal234567890">+44 1234 567890</a></p>
+              <p><a href="tel:+441234567890" id="contactPhone">+44 1234 567890</a></p>
             </div>
           </div>
 
           <div class="contact-item">
             <div class="contact-icon">📍</div>
             <div class="contact-text">
-              <h3>Location</h3>
-              <p>United Kingdom</p>
+              <h3>Address</h3>
+              <p id="contactAddress">United Kingdom</p>
             </div>
           </div>
 
@@ -282,6 +282,73 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module">
+    // Load store settings
+    import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    const db = getFirestore(app);
+
+    async function loadStoreSettings() {
+      try {
+        const configDoc = await getDoc(doc(db, 'config', 'store'));
+        if (configDoc.exists()) {
+          const config = configDoc.data();
+
+          // Update store name in logo
+          if (config.storeName) {
+            document.querySelectorAll('.logo').forEach(el => {
+              const img = el.querySelector('img');
+              if (img) {
+                el.innerHTML = '';
+                el.appendChild(img);
+                el.appendChild(document.createTextNode(config.storeName));
+              }
+            });
+            document.title = `Contact Us - ${config.storeName}`;
+          }
+
+          // Update contact info
+          if (config.email) {
+            const emailEl = document.getElementById('contactEmail');
+            if (emailEl) {
+              emailEl.href = `mailto:${config.email}`;
+              emailEl.textContent = config.email;
+            }
+          }
+
+          if (config.phone) {
+            const phoneEl = document.getElementById('contactPhone');
+            if (phoneEl) {
+              phoneEl.href = `tel:${config.phone.replace(/\s/g, '')}`;
+              phoneEl.textContent = config.phone;
+            }
+          }
+
+          if (config.address) {
+            const addressEl = document.getElementById('contactAddress');
+            if (addressEl) {
+              addressEl.textContent = config.address;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading store settings:', error);
+      }
+    }
+
+    loadStoreSettings();
+  </script>
   <script>
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');

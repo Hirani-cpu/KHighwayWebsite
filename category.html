@@ -185,9 +185,9 @@
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
   <script type="module">
-    // Load categories directly
+    // Load categories and store settings
     import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
@@ -242,7 +242,31 @@
       }
     }
 
+    // Load store settings
+    async function loadStoreSettings() {
+      try {
+        const configDoc = await getDoc(doc(db, 'config', 'store'));
+        if (configDoc.exists()) {
+          const config = configDoc.data();
+          if (config.storeName) {
+            document.querySelectorAll('.logo').forEach(el => {
+              const img = el.querySelector('img');
+              if (img) {
+                el.innerHTML = '';
+                el.appendChild(img);
+                el.appendChild(document.createTextNode(config.storeName));
+              }
+            });
+            document.title = `Categories - ${config.storeName}`;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading store settings:', error);
+      }
+    }
+
     loadCategories();
+    loadStoreSettings();
   </script>
   <script>
     const navToggle = document.getElementById('navToggle');
