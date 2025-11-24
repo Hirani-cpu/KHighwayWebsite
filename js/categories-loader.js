@@ -37,7 +37,7 @@ const CategoriesLoader = {
 
   // Load categories for homepage
   async loadHomepageCategories() {
-    const container = document.querySelector('#categories .categories-grid');
+    const container = document.querySelector('#categoriesGrid') || document.querySelector('.categories-grid');
     if (!container) return;
 
     try {
@@ -45,8 +45,8 @@ const CategoriesLoader = {
       container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Loading categories...</div>';
 
       // Fetch categories from Firestore
-      const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(collection(db, 'categories'));
+      console.log('Categories loaded:', snapshot.size);
 
       if (snapshot.empty) {
         // If no categories in database, show default categories
@@ -57,10 +57,23 @@ const CategoriesLoader = {
       // Clear container
       container.innerHTML = '';
 
-      // Add each category
+      // Convert to array and sort by order
+      const categories = [];
       snapshot.forEach(doc => {
-        const category = doc.data();
-        const categoryCard = this.createCategoryCard(doc.id, category);
+        categories.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Sort by order field (if exists) or by name
+      categories.sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      // Add each category
+      categories.forEach(category => {
+        const categoryCard = this.createCategoryCard(category.id, category);
         container.innerHTML += categoryCard;
       });
 
@@ -112,8 +125,8 @@ const CategoriesLoader = {
       container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Loading categories...</div>';
 
       // Fetch categories from Firestore
-      const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(collection(db, 'categories'));
+      console.log('Categories loaded:', snapshot.size);
 
       if (snapshot.empty) {
         this.showDefaultCategoriesPage(container);
@@ -123,10 +136,23 @@ const CategoriesLoader = {
       // Clear container
       container.innerHTML = '';
 
-      // Add each category with description
+      // Convert to array and sort by order
+      const categories = [];
       snapshot.forEach(doc => {
-        const category = doc.data();
-        const categoryCard = this.createDetailedCategoryCard(doc.id, category);
+        categories.push({ id: doc.id, ...doc.data() });
+      });
+
+      // Sort by order field (if exists) or by name
+      categories.sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      // Add each category with description
+      categories.forEach(category => {
+        const categoryCard = this.createDetailedCategoryCard(category.id, category);
         container.innerHTML += categoryCard;
       });
 
@@ -202,12 +228,27 @@ const CategoriesLoader = {
 
   // Initialize
   init() {
-    // Wait for DOM to be ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.loadCategories());
-    } else {
+    // Wait for Firebase to be ready
+    const waitForFirebase = () => {
+      if (window.db || typeof db !== 'undefined') {
+        // Firebase is ready, load categories
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => this.loadCategories());
+        } else {
+          this.loadCategories();
+        }
+      } else {
+        // Wait a bit and try again
+        setTimeout(waitForFirebase, 100);
+      }
+    };
+
+    // Also listen for firebase-ready event
+    window.addEventListener('firebase-ready', () => {
       this.loadCategories();
-    }
+    });
+
+    waitForFirebase();
   },
 
   // Main load function
