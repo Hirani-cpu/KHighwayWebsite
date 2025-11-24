@@ -800,6 +800,8 @@ const Admin = {
       slug: document.getElementById('categorySlug').value,
       icon: document.getElementById('categoryIcon').value,
       description: document.getElementById('categoryDescription').value,
+      order: parseInt(document.getElementById('categoryOrder')?.value) || 999,
+      link: `products.html#${document.getElementById('categorySlug').value}`,
       updatedAt: serverTimestamp(),
       updatedBy: this.user.uid
     };

@@ -1176,28 +1176,29 @@
         <p class="section-subtitle">Browse our complete range of window and door hardware parts</p>
       </div>
 
-      <div class="categories-grid reveal">
-        <a href="#" class="category-card">
+      <div class="categories-grid reveal" id="categoriesGrid">
+        <!-- Categories will be loaded dynamically -->
+        <a href="products.html#window-handles" class="category-card">
           <div class="category-icon">🪟</div>
           <div class="category-name">Window Handles</div>
         </a>
-        <a href="#" class="category-card">
+        <a href="products.html#door-handles" class="category-card">
           <div class="category-icon">🚪</div>
           <div class="category-name">Door Handles</div>
         </a>
-        <a href="#" class="category-card">
+        <a href="products.html#letter-boxes" class="category-card">
           <div class="category-icon">📬</div>
           <div class="category-name">Letter Boxes</div>
         </a>
-        <a href="#" class="category-card">
+        <a href="products.html#trickle-vents" class="category-card">
           <div class="category-icon">🌬️</div>
           <div class="category-name">Trickle Vents</div>
         </a>
-        <a href="#" class="category-card">
+        <a href="products.html#lock-cylinders" class="category-card">
           <div class="category-icon">🔐</div>
           <div class="category-name">Lock Cylinders</div>
         </a>
-        <a href="#" class="category-card">
+        <a href="products.html#bolts" class="category-card">
           <div class="category-icon">🔩</div>
           <div class="category-name">Bolts</div>
         </a>
@@ -1399,6 +1400,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/categories-loader.js"></script>
   <script>
     // Mobile nav toggle
     const navToggle = document.getElementById('navToggle');
