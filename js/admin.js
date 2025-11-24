@@ -785,6 +785,8 @@ const Admin = {
   },
 
   // Category modal functions
+  categoryImageFile: null,
+
   showCategoryModal(categoryId = null) {
     if (this.userRole !== 'masterAdmin') {
       alert('Only Master Admin can manage categories');
@@ -794,6 +796,24 @@ const Admin = {
     document.getElementById('categoryModalTitle').textContent = categoryId ? 'Edit Category' : 'Add Category';
     document.getElementById('categoryForm').reset();
     document.getElementById('categoryId').value = categoryId || '';
+    document.getElementById('categoryImagePreview').innerHTML = '';
+    this.categoryImageFile = null;
+
+    // Setup image preview handler
+    const imageInput = document.getElementById('categoryImage');
+    imageInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.categoryImageFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('categoryImagePreview').innerHTML = `
+            <img src="${e.target.result}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          `;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
 
     if (categoryId) {
       this.loadCategoryForEdit(categoryId);
@@ -804,6 +824,7 @@ const Admin = {
 
   closeCategoryModal() {
     document.getElementById('categoryModal').classList.remove('active');
+    this.categoryImageFile = null;
   },
 
   async loadCategoryForEdit(categoryId) {
@@ -815,6 +836,15 @@ const Admin = {
         document.getElementById('categorySlug').value = category.slug || '';
         document.getElementById('categoryIcon').value = category.icon || '';
         document.getElementById('categoryDescription').value = category.description || '';
+        document.getElementById('categoryOrder').value = category.order || 999;
+
+        // Show existing image if any
+        if (category.image) {
+          document.getElementById('categoryImagePreview').innerHTML = `
+            <img src="${category.image}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">Current image (upload new to replace)</p>
+          `;
+        }
       }
     } catch (error) {
       console.error('Error loading category:', error);
@@ -842,6 +872,14 @@ const Admin = {
     };
 
     try {
+      // Upload image if selected
+      if (this.categoryImageFile) {
+        const imageRef = ref(storage, `categories/${categoryId}/${Date.now()}_${this.categoryImageFile.name}`);
+        await uploadBytes(imageRef, this.categoryImageFile);
+        const imageUrl = await getDownloadURL(imageRef);
+        categoryData.image = imageUrl;
+      }
+
       await setDoc(doc(db, 'categories', categoryId), categoryData, { merge: true });
       alert('Category saved successfully!');
       this.closeCategoryModal();

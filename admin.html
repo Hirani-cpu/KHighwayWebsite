@@ -582,8 +582,14 @@ Spindle Type: 7mm square"></textarea>
             <input type="text" class="form-control" id="categorySlug" required placeholder="e.g., window-handles">
           </div>
           <div class="form-group">
-            <label>Icon (Emoji)</label>
+            <label>Icon (Emoji) - Optional if using image</label>
             <input type="text" class="form-control" id="categoryIcon" placeholder="e.g., 🪟">
+          </div>
+          <div class="form-group">
+            <label>Category Image</label>
+            <input type="file" class="form-control" id="categoryImage" accept="image/*">
+            <div id="categoryImagePreview" style="margin-top: 10px;"></div>
+            <small class="form-text">Upload an image for the category (recommended: 400x300px)</small>
           </div>
           <div class="form-group">
             <label>Description</label>

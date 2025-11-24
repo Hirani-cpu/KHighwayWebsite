@@ -70,6 +70,9 @@
     .category-card:hover { border-color: var(--primary); transform: translateY(-10px); box-shadow: var(--shadow-xl); }
     .category-icon { width: 80px; height: 80px; background: var(--gray-100); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; transition: all 0.3s ease; }
     .category-card:hover .category-icon { background: var(--primary); }
+    .category-image { width: 100%; height: 150px; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
+    .category-image img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+    .category-card:hover .category-image img { transform: scale(1.05); }
     .category-name { font-weight: 700; font-size: 1.25rem; color: var(--secondary); margin-bottom: 0.75rem; }
     .category-desc { color: var(--gray-500); font-size: 0.9rem; margin-bottom: 1.5rem; }
     .category-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 600; font-size: 0.9rem; }
@@ -220,9 +223,13 @@
           const slug = cat.slug || cat.id;
           const icon = cat.icon || '📦';
           const desc = cat.description || `Browse our ${cat.name.toLowerCase()} collection`;
+          // Show image if available, otherwise show icon
+          const mediaHtml = cat.image
+            ? `<div class="category-image"><img src="${cat.image}" alt="${cat.name}"></div>`
+            : `<div class="category-icon">${icon}</div>`;
           container.innerHTML += `
             <a href="products.html#${slug}" class="category-card">
-              <div class="category-icon">${icon}</div>
+              ${mediaHtml}
               <h3 class="category-name">${cat.name}</h3>
               <p class="category-desc">${desc}</p>
               <span class="category-link">Browse Products →</span>
