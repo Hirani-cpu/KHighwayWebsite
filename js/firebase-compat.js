@@ -193,10 +193,29 @@ window.Reviews = {
 window.FirebaseOrders = {
   async saveOrder(data) {
     try {
-      await addDoc(collection(db, 'orders'), {
-        ...data, userEmail: data.userEmail.toLowerCase(), date: new Date().toISOString()
-      });
-      return { success: true };
+      const orderData = {
+        orderId: data.orderId,
+        userEmail: data.userEmail.toLowerCase(),
+        email: data.userEmail.toLowerCase(),
+        customerName: `${data.firstName} ${data.lastName}`,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        address: data.address,
+        address2: data.address2 || '',
+        city: data.city,
+        postcode: data.postcode,
+        country: data.country,
+        total: data.total,
+        status: 'pending',
+        deliveryMethod: data.deliveryMethod,
+        deliveryInstructions: data.deliveryInstructions || '',
+        items: data.items,
+        date: new Date().toISOString(),
+        createdAt: new Date()
+      };
+      const docRef = await addDoc(collection(db, 'orders'), orderData);
+      return { success: true, id: docRef.id };
     } catch (e) {
       console.error('Error saving order:', e);
       return { success: false };

@@ -235,12 +235,7 @@ const Admin = {
   // Load recent orders
   async loadRecentOrders() {
     try {
-      const ordersQuery = query(
-        collection(db, 'orders'),
-        orderBy('createdAt', 'desc'),
-        limit(5)
-      );
-      const ordersSnap = await getDocs(ordersQuery);
+      const ordersSnap = await getDocs(collection(db, 'orders'));
 
       const tbody = document.getElementById('recentOrdersTable');
 
@@ -249,13 +244,24 @@ const Admin = {
         return;
       }
 
-      tbody.innerHTML = '';
+      // Get all orders and sort by date descending
+      const orders = [];
       ordersSnap.forEach(doc => {
-        const order = doc.data();
-        const date = order.createdAt?.toDate?.() || new Date();
+        orders.push({ id: doc.id, ...doc.data() });
+      });
+      orders.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(a.date) || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(b.date) || new Date(0);
+        return dateB - dateA;
+      });
+
+      // Show only first 5
+      tbody.innerHTML = '';
+      orders.slice(0, 5).forEach(order => {
+        const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();
         tbody.innerHTML += `
           <tr>
-            <td>#${doc.id.slice(-6).toUpperCase()}</td>
+            <td>#${order.id.slice(-6).toUpperCase()}</td>
             <td>${order.customerName || order.email || 'Guest'}</td>
             <td>£${order.total?.toFixed(2) || '0.00'}</td>
             <td><span class="badge badge-${this.getStatusBadge(order.status)}">${order.status || 'pending'}</span></td>
@@ -344,11 +350,7 @@ const Admin = {
   // Load orders
   async loadOrders() {
     try {
-      const ordersQuery = query(
-        collection(db, 'orders'),
-        orderBy('createdAt', 'desc')
-      );
-      const ordersSnap = await getDocs(ordersQuery);
+      const ordersSnap = await getDocs(collection(db, 'orders'));
       const tbody = document.getElementById('ordersTable');
 
       if (ordersSnap.empty) {
@@ -356,19 +358,29 @@ const Admin = {
         return;
       }
 
-      tbody.innerHTML = '';
+      // Get all orders and sort by date descending
+      const orders = [];
       ordersSnap.forEach(doc => {
-        const order = doc.data();
-        const date = order.createdAt?.toDate?.() || new Date();
+        orders.push({ id: doc.id, ...doc.data() });
+      });
+      orders.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(a.date) || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(b.date) || new Date(0);
+        return dateB - dateA;
+      });
+
+      tbody.innerHTML = '';
+      orders.forEach(order => {
+        const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();
         const itemCount = order.items?.length || 0;
         tbody.innerHTML += `
           <tr>
-            <td>#${doc.id.slice(-6).toUpperCase()}</td>
+            <td>#${order.id.slice(-6).toUpperCase()}</td>
             <td>${order.customerName || order.email || 'Guest'}</td>
             <td>${itemCount} items</td>
             <td>£${order.total?.toFixed(2) || '0.00'}</td>
             <td>
-              <select onchange="Admin.updateOrderStatus('${doc.id}', this.value)" class="form-control" style="padding: 0.4rem; font-size: 0.8rem; width: auto;">
+              <select onchange="Admin.updateOrderStatus('${order.id}', this.value)" class="form-control" style="padding: 0.4rem; font-size: 0.8rem; width: auto;">
                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
@@ -378,7 +390,7 @@ const Admin = {
             </td>
             <td>${date.toLocaleDateString()}</td>
             <td>
-              <button class="btn btn-secondary" onclick="Admin.viewOrder('${doc.id}')" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">View</button>
+              <button class="btn btn-secondary" onclick="Admin.viewOrder('${order.id}')" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">View</button>
             </td>
           </tr>
         `;
