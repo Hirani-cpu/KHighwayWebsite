@@ -349,6 +349,7 @@ const Admin = {
 
   // Store orders for filtering
   allOrders: [],
+  orderViewMode: 'table', // 'table' or 'cards'
 
   // Load orders
   async loadOrders() {
@@ -378,6 +379,16 @@ const Admin = {
     }
   },
 
+  // Toggle between table and card view
+  toggleOrderView() {
+    this.orderViewMode = this.orderViewMode === 'table' ? 'cards' : 'table';
+    const btn = document.getElementById('toggleOrderViewBtn');
+    btn.innerHTML = this.orderViewMode === 'table' ? '📋 Detailed View' : '📊 Table View';
+    // Re-apply current filter
+    const currentFilter = document.getElementById('orderStatusFilter').value;
+    this.filterOrders(currentFilter);
+  },
+
   // Filter orders by status
   filterOrders(status) {
     if (status === 'all') {
@@ -388,7 +399,7 @@ const Admin = {
     }
   },
 
-  // Render orders as cards
+  // Render orders (table or cards based on mode)
   renderOrders(orders) {
     const container = document.getElementById('ordersContainer');
 
@@ -396,6 +407,63 @@ const Admin = {
       container.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--gray-500);">No orders found</div>';
       return;
     }
+
+    if (this.orderViewMode === 'table') {
+      this.renderOrdersTable(orders);
+    } else {
+      this.renderOrdersCards(orders);
+    }
+  },
+
+  // Render orders as table
+  renderOrdersTable(orders) {
+    const container = document.getElementById('ordersContainer');
+    container.innerHTML = `
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orders.map(order => {
+            const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();
+            const itemCount = order.items?.length || 0;
+            const statusClass = this.getStatusBadge(order.status);
+            return `
+              <tr>
+                <td>#${order.orderId || order.id.slice(-8).toUpperCase()}</td>
+                <td>${order.customerName || order.email || 'Guest'}</td>
+                <td>${itemCount} items</td>
+                <td>£${order.total?.toFixed(2) || '0.00'}</td>
+                <td><span class="badge badge-${statusClass}">${order.status || 'pending'}</span></td>
+                <td>${date.toLocaleDateString()}</td>
+                <td>
+                  <select onchange="Admin.updateOrderStatus('${order.id}', this.value)" class="form-control" style="padding: 0.4rem; font-size: 0.8rem; width: auto;">
+                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                  </select>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  // Render orders as cards
+  renderOrdersCards(orders) {
+    const container = document.getElementById('ordersContainer');
 
     container.innerHTML = `<div class="admin-orders-list">${orders.map(order => {
       const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();

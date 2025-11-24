@@ -320,6 +320,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script type="module">
     // Mobile nav
@@ -459,7 +460,7 @@
                 <span class="order-total-value">£${order.total.toFixed(2)}</span>
               </div>
               <div class="order-actions">
-                <button class="btn-order btn-order-secondary" onclick="window.print()">Invoice</button>
+                <button class="btn-order btn-order-secondary" onclick="downloadInvoice('${order.id}')">📥 Download Invoice</button>
               </div>
             </div>
           </div>
@@ -467,6 +468,95 @@
       }).join('');
     }
     loadOrders();
+
+    // Download invoice as PDF
+    window.downloadInvoice = async function(orderId) {
+      const order = await FirebaseOrders.getUserOrders(user.email).then(orders => orders.find(o => o.id === orderId));
+      if (!order) {
+        alert('Order not found');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Header
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('INVOICE', 105, 20, { align: 'center' });
+
+      // Store info
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('K Highway DIY Hardware Shop', 20, 35);
+      doc.text('United Kingdom', 20, 40);
+
+      // Order info
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Order Details', 20, 55);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
+      doc.text(\`Order #: \${order.orderId || order.id.slice(-8).toUpperCase()}\`, 20, 62);
+      doc.text(\`Date: \${new Date(order.date).toLocaleDateString('en-GB')}\`, 20, 68);
+      doc.text(\`Status: \${order.status.charAt(0).toUpperCase() + order.status.slice(1)}\`, 20, 74);
+
+      // Customer info
+      const shipping = order.shipping || order;
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Bill To:', 120, 55);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
+      doc.text(\`\${shipping.firstName || ''} \${shipping.lastName || ''}\`, 120, 62);
+      doc.text(\`\${shipping.address || ''}\`, 120, 68);
+      if (shipping.address2) doc.text(\`\${shipping.address2}\`, 120, 74);
+      doc.text(\`\${shipping.city || ''}, \${shipping.postcode || ''}\`, 120, shipping.address2 ? 80 : 74);
+
+      // Items table
+      let yPos = 95;
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Items', 20, yPos);
+      yPos += 7;
+
+      // Table headers
+      doc.setFontSize(10);
+      doc.text('Item', 20, yPos);
+      doc.text('Qty', 120, yPos);
+      doc.text('Price', 145, yPos);
+      doc.text('Total', 175, yPos);
+      yPos += 5;
+      doc.line(20, yPos, 190, yPos);
+      yPos += 7;
+
+      // Table rows
+      doc.setFont(undefined, 'normal');
+      (order.items || []).forEach(item => {
+        const itemName = item.name.length > 40 ? item.name.substring(0, 37) + '...' : item.name;
+        doc.text(itemName, 20, yPos);
+        doc.text(item.quantity.toString(), 120, yPos);
+        doc.text(\`£\${item.price.toFixed(2)}\`, 145, yPos);
+        doc.text(\`£\${(item.price * item.quantity).toFixed(2)}\`, 175, yPos);
+        yPos += 7;
+      });
+
+      // Total
+      yPos += 5;
+      doc.line(20, yPos, 190, yPos);
+      yPos += 10;
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(\`Total: £\${order.total.toFixed(2)}\`, 175, yPos, { align: 'right' });
+
+      // Footer
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text('Thank you for your business!', 105, 280, { align: 'center' });
+
+      // Download
+      doc.save(\`Invoice-\${order.orderId || order.id.slice(-8).toUpperCase()}.pdf\`);
+    };
 
     // Tab switching
     const tabButtons = document.querySelectorAll('[data-tab]');
