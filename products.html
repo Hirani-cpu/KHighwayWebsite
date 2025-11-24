@@ -142,7 +142,17 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="category.html">Categories</a></li>
-        <li><a href="products.html">Products</a></li>
+        <li class="dropdown">
+          <a href="products.html" class="active">Products</a>
+          <div class="dropdown-menu">
+            <a href="#window-handles">Window Handles</a>
+            <a href="#door-handles">Door Handles</a>
+            <a href="#letter-boxes">Letter Boxes</a>
+            <a href="#trickle-vents">Trickle Vents</a>
+            <a href="#lock-cylinders">Lock Cylinders</a>
+            <a href="#bolts">Bolts</a>
+          </div>
+        </li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
@@ -167,13 +177,49 @@
         </div>
         <select class="filter-select" id="categoryFilter">
           <option value="all">All Categories</option>
-          <!-- Category options will be loaded dynamically -->
+          <option value="window-handles">Window Handles</option>
+          <option value="door-handles">Door Handles</option>
+          <option value="letter-boxes">Letter Boxes</option>
+          <option value="trickle-vents">Trickle Vents</option>
+          <option value="lock-cylinders">Lock Cylinders</option>
+          <option value="bolts">Bolts</option>
         </select>
       </div>
 
-      <!-- Product categories will be loaded dynamically from admin panel -->
-      <div id="productSections">
-        <!-- Dynamic product sections will be inserted here -->
+      <!-- Window Handles -->
+      <h2 class="section-title" id="window-handles">Window Handles</h2>
+      <div class="products-grid reveal" data-category="window-handles">
+        <!-- Products loaded from Firestore -->
+      </div>
+
+      <!-- Door Handles -->
+      <h2 class="section-title" id="door-handles">Door Handles</h2>
+      <div class="products-grid reveal" data-category="door-handles">
+        <!-- Products loaded from Firestore -->
+      </div>
+
+      <!-- Letter Boxes -->
+      <h2 class="section-title" id="letter-boxes">Letter Boxes</h2>
+      <div class="products-grid reveal" data-category="letter-boxes">
+        <!-- Products loaded from Firestore -->
+      </div>
+
+      <!-- Trickle Vents -->
+      <h2 class="section-title" id="trickle-vents">Trickle Vents</h2>
+      <div class="products-grid reveal" data-category="trickle-vents">
+        <!-- Products loaded from Firestore -->
+      </div>
+
+      <!-- Lock Cylinders -->
+      <h2 class="section-title" id="lock-cylinders">Lock Cylinders</h2>
+      <div class="products-grid reveal" data-category="lock-cylinders">
+        <!-- Products loaded from Firestore -->
+      </div>
+
+      <!-- Bolts -->
+      <h2 class="section-title" id="bolts">Bolts</h2>
+      <div class="products-grid reveal" data-category="bolts">
+        <!-- Products loaded from Firestore -->
       </div>
     </div>
   </section>
@@ -197,7 +243,10 @@
         <div>
           <h4 class="footer-title">Categories</h4>
           <ul class="footer-links">
-            <!-- Categories will be loaded dynamically -->
+            <li><a href="#window-handles">Window Handles</a></li>
+            <li><a href="#door-handles">Door Handles</a></li>
+            <li><a href="#lock-cylinders">Lock Cylinders</a></li>
+            <li><a href="#letter-boxes">Letter Boxes</a></li>
           </ul>
         </div>
         <div>

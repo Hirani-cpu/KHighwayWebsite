@@ -20,7 +20,9 @@
       "Bash(python update_nav_styles.py:*)",
       "Bash(python fix_login_links.py:*)",
       "Bash(python remove_default_categories.py:*)",
-      "Bash(del remove_default_categories.py)"
+      "Bash(del remove_default_categories.py)",
+      "Bash(cat:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

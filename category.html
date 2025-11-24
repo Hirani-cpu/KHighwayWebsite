@@ -115,7 +115,17 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="category.html" class="active">Categories</a></li>
-        <li><a href="products.html">Products</a></li>
+        <li class="dropdown">
+          <a href="products.html">Products</a>
+          <div class="dropdown-menu">
+            <a href="products.html#window-handles">Window Handles</a>
+            <a href="products.html#door-handles">Door Handles</a>
+            <a href="products.html#letter-boxes">Letter Boxes</a>
+            <a href="products.html#trickle-vents">Trickle Vents</a>
+            <a href="products.html#lock-cylinders">Lock Cylinders</a>
+            <a href="products.html#bolts">Bolts</a>
+          </div>
+        </li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
@@ -133,7 +143,47 @@
   <section class="section">
     <div class="container">
       <div class="categories-grid">
-        <!-- Categories will be loaded dynamically from admin panel -->
+        <a href="products.html#window-handles" class="category-card reveal">
+          <div class="category-icon">🪟</div>
+          <h3 class="category-name">Window Handles</h3>
+          <p class="category-desc">Replacement handles for uPVC, aluminium and timber windows</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
+
+        <a href="products.html#door-handles" class="category-card reveal">
+          <div class="category-icon">🚪</div>
+          <h3 class="category-name">Door Handles</h3>
+          <p class="category-desc">Interior and exterior door handles in various finishes</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
+
+        <a href="products.html#letter-boxes" class="category-card reveal">
+          <div class="category-icon">📬</div>
+          <h3 class="category-name">Letter Boxes</h3>
+          <p class="category-desc">Quality letterboxes and mail slots for all door types</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
+
+        <a href="products.html#trickle-vents" class="category-card reveal">
+          <div class="category-icon">🌬️</div>
+          <h3 class="category-name">Trickle Vents</h3>
+          <p class="category-desc">Background ventilation solutions for windows</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
+
+        <a href="products.html#lock-cylinders" class="category-card reveal">
+          <div class="category-icon">🔐</div>
+          <h3 class="category-name">Lock Cylinders</h3>
+          <p class="category-desc">High-security euro profile cylinders and accessories</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
+
+        <a href="products.html#bolts" class="category-card reveal">
+          <div class="category-icon">🔩</div>
+          <h3 class="category-name">Bolts</h3>
+          <p class="category-desc">Door bolts, flush bolts and security bolts</p>
+          <span class="category-link">Browse Products →</span>
+        </a>
       </div>
     </div>
   </section>
@@ -160,7 +210,10 @@
         <div>
           <h4 class="footer-title">Categories</h4>
           <ul class="footer-links">
-            <!-- Categories will be loaded dynamically -->
+            <li><a href="products.html#window-handles">Window Handles</a></li>
+            <li><a href="products.html#door-handles">Door Handles</a></li>
+            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
+            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
           </ul>
         </div>
         <div>
