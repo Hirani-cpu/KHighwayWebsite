@@ -479,7 +479,7 @@ const Admin = {
   },
 
   // Show product modal
-  showProductModal(productId = null) {
+  async showProductModal(productId = null) {
     if (this.userRole !== 'masterAdmin') {
       alert('Only Master Admin can manage products');
       return;
@@ -494,6 +494,9 @@ const Admin = {
     document.getElementById('imagePreview').innerHTML = '';
     document.getElementById('existingImages').innerHTML = '';
 
+    // Load categories dynamically before showing the modal
+    await this.loadCategoriesForDropdown();
+
     if (productId) {
       this.loadProductForEdit(productId);
     }
@@ -505,6 +508,38 @@ const Admin = {
     document.getElementById('productModal').classList.remove('active');
     this.uploadedImages = [];
     this.editingProductId = null;
+  },
+
+  // Load categories from Firestore for the product dropdown
+  async loadCategoriesForDropdown() {
+    const categorySelect = document.getElementById('productCategory');
+    if (!categorySelect) return;
+
+    try {
+      // Keep the first "Select Category" option
+      categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+      // Load categories from Firestore
+      const categoriesQuery = query(collection(db, 'categories'), orderBy('order', 'asc'));
+      const snapshot = await getDocs(categoriesQuery);
+
+      if (snapshot.empty) {
+        categorySelect.innerHTML += '<option value="" disabled>No categories - Add categories first</option>';
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const category = doc.data();
+        const option = document.createElement('option');
+        option.value = category.name;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+      });
+
+      console.log('Categories loaded for dropdown:', snapshot.size);
+    } catch (error) {
+      console.error('Error loading categories for dropdown:', error);
+    }
   },
 
   async loadProductForEdit(productId) {
