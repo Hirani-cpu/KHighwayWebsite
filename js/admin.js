@@ -347,57 +347,141 @@ const Admin = {
     }
   },
 
+  // Store orders for filtering
+  allOrders: [],
+
   // Load orders
   async loadOrders() {
     try {
       const ordersSnap = await getDocs(collection(db, 'orders'));
-      const tbody = document.getElementById('ordersTable');
+      const container = document.getElementById('ordersContainer');
 
       if (ordersSnap.empty) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--gray-500);">No orders yet</td></tr>';
+        container.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--gray-500);">No orders yet</div>';
         return;
       }
 
       // Get all orders and sort by date descending
-      const orders = [];
+      this.allOrders = [];
       ordersSnap.forEach(doc => {
-        orders.push({ id: doc.id, ...doc.data() });
+        this.allOrders.push({ id: doc.id, ...doc.data() });
       });
-      orders.sort((a, b) => {
+      this.allOrders.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(a.date) || new Date(0);
         const dateB = b.createdAt?.toDate?.() || new Date(b.date) || new Date(0);
         return dateB - dateA;
       });
 
-      tbody.innerHTML = '';
-      orders.forEach(order => {
-        const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();
-        const itemCount = order.items?.length || 0;
-        tbody.innerHTML += `
-          <tr>
-            <td>#${order.id.slice(-6).toUpperCase()}</td>
-            <td>${order.customerName || order.email || 'Guest'}</td>
-            <td>${itemCount} items</td>
-            <td>£${order.total?.toFixed(2) || '0.00'}</td>
-            <td>
-              <select onchange="Admin.updateOrderStatus('${order.id}', this.value)" class="form-control" style="padding: 0.4rem; font-size: 0.8rem; width: auto;">
+      this.renderOrders(this.allOrders);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    }
+  },
+
+  // Filter orders by status
+  filterOrders(status) {
+    if (status === 'all') {
+      this.renderOrders(this.allOrders);
+    } else {
+      const filtered = this.allOrders.filter(o => o.status === status);
+      this.renderOrders(filtered);
+    }
+  },
+
+  // Render orders as cards
+  renderOrders(orders) {
+    const container = document.getElementById('ordersContainer');
+
+    if (orders.length === 0) {
+      container.innerHTML = '<div style="text-align: center; padding: 3rem; color: var(--gray-500);">No orders found</div>';
+      return;
+    }
+
+    container.innerHTML = `<div class="admin-orders-list">${orders.map(order => {
+      const date = order.createdAt?.toDate?.() || new Date(order.date) || new Date();
+      const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const statusClass = `order-status-${order.status || 'pending'}`;
+      const statusText = { pending: 'Pending', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled' }[order.status] || 'Pending';
+
+      // Render items
+      const itemsHtml = (order.items || []).map(item => `
+        <div class="admin-order-item">
+          <div class="admin-order-item-img">
+            <img src="${item.image || 'images/placeholder.jpg'}" alt="${item.name}">
+          </div>
+          <div class="admin-order-item-details">
+            <div class="admin-order-item-name">${item.name}</div>
+            <div class="admin-order-item-meta">Qty: ${item.quantity} × £${item.price?.toFixed(2) || '0.00'}</div>
+          </div>
+          <div class="admin-order-item-price">£${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
+        </div>
+      `).join('') || '<p style="color: var(--gray-500); font-size: 0.9rem;">No item details available</p>';
+
+      // Customer info
+      const shipping = order.shipping || order;
+      const customerName = order.customerName || `${shipping.firstName || ''} ${shipping.lastName || ''}`.trim() || 'Guest';
+      const email = order.email || order.userEmail || '';
+      const phone = shipping.phone || order.phone || '';
+      const address = shipping.address ? `${shipping.address}${shipping.address2 ? ', ' + shipping.address2 : ''}, ${shipping.city || ''}, ${shipping.postcode || ''}` : 'No address';
+
+      return `
+        <div class="admin-order-card">
+          <div class="admin-order-header">
+            <div class="admin-order-info">
+              <div class="admin-order-info-item">
+                <span class="admin-order-info-label">Order ID</span>
+                <span class="admin-order-info-value">#${order.orderId || order.id.slice(-8).toUpperCase()}</span>
+              </div>
+              <div class="admin-order-info-item">
+                <span class="admin-order-info-label">Date</span>
+                <span class="admin-order-info-value">${dateStr}</span>
+              </div>
+              <div class="admin-order-info-item">
+                <span class="admin-order-info-label">Customer</span>
+                <span class="admin-order-info-value">${customerName}</span>
+              </div>
+            </div>
+            <span class="order-status-badge ${statusClass}">${statusText}</span>
+          </div>
+          <div class="admin-order-body">
+            <div class="admin-order-items">
+              ${itemsHtml}
+            </div>
+            <div class="admin-order-customer">
+              <div class="admin-order-customer-title">Customer & Delivery Details</div>
+              <div class="admin-order-customer-info">
+                <div class="admin-order-customer-item">
+                  <strong>Email</strong>
+                  ${email || 'N/A'}
+                </div>
+                <div class="admin-order-customer-item">
+                  <strong>Phone</strong>
+                  ${phone || 'N/A'}
+                </div>
+                <div class="admin-order-customer-item" style="grid-column: 1/-1;">
+                  <strong>Delivery Address</strong>
+                  ${address}
+                </div>
+                ${order.deliveryMethod ? `<div class="admin-order-customer-item"><strong>Delivery Method</strong>${order.deliveryMethod}</div>` : ''}
+                ${order.deliveryInstructions ? `<div class="admin-order-customer-item"><strong>Instructions</strong>${order.deliveryInstructions}</div>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="admin-order-footer">
+            <div class="admin-order-total">Total: £${order.total?.toFixed(2) || '0.00'}</div>
+            <div class="admin-order-actions">
+              <select onchange="Admin.updateOrderStatus('${order.id}', this.value)" class="form-control" style="padding: 0.5rem; font-size: 0.85rem; width: auto;">
                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
                 <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                 <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
               </select>
-            </td>
-            <td>${date.toLocaleDateString()}</td>
-            <td>
-              <button class="btn btn-secondary" onclick="Admin.viewOrder('${order.id}')" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;">View</button>
-            </td>
-          </tr>
-        `;
-      });
-    } catch (error) {
-      console.error('Error loading orders:', error);
-    }
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('')}</div>`;
   },
 
   // Load users
@@ -932,28 +1016,17 @@ const Admin = {
         updatedAt: serverTimestamp(),
         updatedBy: this.user.uid
       });
+      // Update the order in the local array and re-render
+      const orderIndex = this.allOrders.findIndex(o => o.id === orderId);
+      if (orderIndex !== -1) {
+        this.allOrders[orderIndex].status = status;
+      }
+      // Re-apply current filter
+      const currentFilter = document.getElementById('orderStatusFilter').value;
+      this.filterOrders(currentFilter);
     } catch (error) {
       console.error('Error updating order status:', error);
       alert('Error updating order: ' + error.message);
-    }
-  },
-
-  // View order details
-  async viewOrder(orderId) {
-    try {
-      const orderDoc = await getDoc(doc(db, 'orders', orderId));
-      if (orderDoc.exists()) {
-        const order = orderDoc.data();
-        let itemsList = '';
-        if (order.items) {
-          order.items.forEach(item => {
-            itemsList += `- ${item.name} x ${item.quantity} @ £${item.price}\n`;
-          });
-        }
-        alert(`Order #${orderId.slice(-6).toUpperCase()}\n\nCustomer: ${order.customerName || order.email}\nTotal: £${order.total?.toFixed(2)}\nStatus: ${order.status}\n\nItems:\n${itemsList}`);
-      }
-    } catch (error) {
-      console.error('Error viewing order:', error);
     }
   },
 
