@@ -49,8 +49,8 @@ const CategoriesLoader = {
       console.log('Categories loaded:', snapshot.size);
 
       if (snapshot.empty) {
-        // If no categories in database, show default categories
-        this.showDefaultCategories(container);
+        // If no categories in database, show message
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">No categories available. Please add categories from the admin panel.</div>';
         return;
       }
 
@@ -79,8 +79,8 @@ const CategoriesLoader = {
 
     } catch (error) {
       console.error('Error loading categories:', error);
-      // Show default categories as fallback
-      this.showDefaultCategories(container);
+      // Show error message
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Error loading categories. Please check console for details.</div>';
     }
   },
 
@@ -98,22 +98,6 @@ const CategoriesLoader = {
     `;
   },
 
-  // Show default categories as fallback
-  showDefaultCategories(container) {
-    const defaultCategories = [
-      { id: 'window-handles', name: 'Window Handles', icon: '🪟' },
-      { id: 'door-handles', name: 'Door Handles', icon: '🚪' },
-      { id: 'letter-boxes', name: 'Letter Boxes', icon: '📬' },
-      { id: 'trickle-vents', name: 'Trickle Vents', icon: '🌬️' },
-      { id: 'lock-cylinders', name: 'Lock Cylinders', icon: '🔐' },
-      { id: 'bolts', name: 'Bolts', icon: '🔩' }
-    ];
-
-    container.innerHTML = '';
-    defaultCategories.forEach(cat => {
-      container.innerHTML += this.createCategoryCard(cat.id, cat);
-    });
-  },
 
   // Load categories for category page
   async loadCategoryPage() {
@@ -129,7 +113,7 @@ const CategoriesLoader = {
       console.log('Categories loaded:', snapshot.size);
 
       if (snapshot.empty) {
-        this.showDefaultCategoriesPage(container);
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">No categories available. Please add categories from the admin panel.</div>';
         return;
       }
 
@@ -158,7 +142,7 @@ const CategoriesLoader = {
 
     } catch (error) {
       console.error('Error loading categories:', error);
-      this.showDefaultCategoriesPage(container);
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Error loading categories. Please check console for details.</div>';
     }
   },
 
@@ -179,52 +163,6 @@ const CategoriesLoader = {
     `;
   },
 
-  // Show default categories for category page
-  showDefaultCategoriesPage(container) {
-    const defaultCategories = [
-      {
-        id: 'window-handles',
-        name: 'Window Handles',
-        icon: '🪟',
-        description: 'Replacement handles for uPVC, aluminium and timber windows'
-      },
-      {
-        id: 'door-handles',
-        name: 'Door Handles',
-        icon: '🚪',
-        description: 'Interior and exterior door handles in various finishes'
-      },
-      {
-        id: 'letter-boxes',
-        name: 'Letter Boxes',
-        icon: '📬',
-        description: 'Quality letter boxes and postal hardware'
-      },
-      {
-        id: 'trickle-vents',
-        name: 'Trickle Vents',
-        icon: '🌬️',
-        description: 'Ventilation solutions for windows and doors'
-      },
-      {
-        id: 'lock-cylinders',
-        name: 'Lock Cylinders',
-        icon: '🔐',
-        description: 'Euro cylinders and security hardware'
-      },
-      {
-        id: 'bolts',
-        name: 'Bolts',
-        icon: '🔩',
-        description: 'Door bolts, window bolts and security bolts'
-      }
-    ];
-
-    container.innerHTML = '';
-    defaultCategories.forEach(cat => {
-      container.innerHTML += this.createDetailedCategoryCard(cat.id, cat);
-    });
-  },
 
   // Initialize
   init() {

@@ -57,6 +57,9 @@ const ProductsLoader = {
   // Load products from Firestore
   async loadProducts() {
     try {
+      // Load categories for the filter first
+      await this.loadCategoryFilter();
+
       // Get all active products
       const productsQuery = query(
         collection(db, 'products'),
@@ -90,23 +93,54 @@ const ProductsLoader = {
     }
   },
 
+  // Load categories for filter dropdown
+  async loadCategoryFilter() {
+    try {
+      const categoryFilter = document.getElementById('categoryFilter');
+      if (!categoryFilter) return;
+
+      // Clear existing options except "All Categories"
+      categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
+      // Load categories from Firestore
+      const categoriesSnapshot = await getDocs(collection(db, 'categories'));
+
+      categoriesSnapshot.forEach(doc => {
+        const category = doc.data();
+        const option = document.createElement('option');
+        option.value = category.slug || doc.id;
+        option.textContent = category.name;
+        categoryFilter.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error loading category filter:', error);
+    }
+  },
+
   // Render products to the page
   renderProducts(productsByCategory) {
-    // Category slug mapping
-    const categorySlugMap = {
-      'Window Handles': 'window-handles',
-      'Door Handles': 'door-handles',
-      'Letter Boxes': 'letter-boxes',
-      'Trickle Vents': 'trickle-vents',
-      'Lock Cylinders': 'lock-cylinders',
-      'Bolts': 'bolts'
-    };
+    // Get product sections container
+    const productSections = document.getElementById('productSections');
+    if (productSections) {
+      productSections.innerHTML = '';
+    }
 
-    // For each category, find and update the products grid
+    // For each category, create a section and grid
     Object.keys(productsByCategory).forEach(category => {
-      const slug = categorySlugMap[category];
-      if (!slug) return;
+      // Generate slug from category name
+      const slug = category.toLowerCase().replace(/\s+/g, '-');
 
+      // Create section for this category
+      if (productSections) {
+        const section = document.createElement('div');
+        section.innerHTML = `
+          <h2 class="section-title" id="${slug}">${category}</h2>
+          <div class="products-grid reveal" data-category="${slug}"></div>
+        `;
+        productSections.appendChild(section);
+      }
+
+      // Find the grid for this category
       const grid = document.querySelector(`[data-category="${slug}"]`);
       if (!grid) return;
 

@@ -221,17 +221,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Home</a></li>
         <li><a href="category.html">Categories</a></li>
-        <li class="dropdown">
-          <a href="products.html">Products</a>
-          <div class="dropdown-menu">
-            <a href="products.html#window-handles">Window Handles</a>
-            <a href="products.html#door-handles">Door Handles</a>
-            <a href="products.html#letter-boxes">Letter Boxes</a>
-            <a href="products.html#trickle-vents">Trickle Vents</a>
-            <a href="products.html#lock-cylinders">Lock Cylinders</a>
-            <a href="products.html#bolts">Bolts</a>
-          </div>
-        </li>
+        <li><a href="products.html">Products</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
@@ -246,9 +236,9 @@
         <span>/</span>
         <a href="products.html">Products</a>
         <span>/</span>
-        <a href="products.html#window-handles">Window Handles</a>
+        <span id="categoryBreadcrumb"><!-- Category will be loaded dynamically --></span>
         <span>/</span>
-        <span>Espag Window Handle - White</span>
+        <span id="productBreadcrumb"><!-- Product name will be loaded dynamically --></span>
       </div>
     </div>
   </section>
@@ -259,22 +249,18 @@
         <!-- Product Gallery -->
         <div class="product-gallery">
           <div class="main-image">
-            <!-- Main product image -->
-            <img src="images/products/window-handles/espag-white.jpg" alt="Espag Window Handle - White" id="mainProductImg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
+            <!-- Main product image will be loaded dynamically -->
+            <img src="images/placeholder.jpg" alt="Product Image" id="mainProductImg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
           </div>
-          <div class="thumbnail-grid">
-            <!-- Add multiple product images for thumbnails -->
-            <div class="thumbnail active"><img src="images/products/window-handles/espag-white.jpg" alt="View 1" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
-            <div class="thumbnail"><img src="images/products/window-handles/espag-chrome.jpg" alt="View 2" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
-            <div class="thumbnail"><img src="images/products/window-handles/cockspur.jpg" alt="View 3" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
-            <div class="thumbnail"><img src="images/products/window-handles/inline-black.jpg" alt="View 4" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"></div>
+          <div class="thumbnail-grid" id="thumbnailGrid">
+            <!-- Thumbnails will be loaded dynamically -->
           </div>
         </div>
 
         <!-- Product Info -->
         <div class="product-info">
-          <div class="product-category">Window Handles</div>
-          <h1 class="product-title">Espag Window Handle - White</h1>
+          <div class="product-category" id="productCategory"><!-- Category will be loaded dynamically --></div>
+          <h1 class="product-title" id="productTitle"><!-- Product title will be loaded dynamically --></h1>
           <div class="product-price">
             £8.99
             <span class="old-price">£12.99</span>
@@ -420,43 +406,8 @@
   <section class="related-products">
     <div class="container">
       <h2 class="section-title">Related Products</h2>
-      <div class="products-grid">
-        <a href="product-detail.html?id=espag-chrome" class="product-card">
-          <div class="product-card-image">
-            <img src="images/products/window-handles/espag-chrome.jpg" alt="Espag Window Handle - Chrome" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="product-card-body">
-            <h3 class="product-card-name">Espag Window Handle - Chrome</h3>
-            <div class="product-card-price">£9.99</div>
-          </div>
-        </a>
-        <a href="product-detail.html?id=cockspur" class="product-card">
-          <div class="product-card-image">
-            <img src="images/products/window-handles/cockspur.jpg" alt="Cockspur Window Handle" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="product-card-body">
-            <h3 class="product-card-name">Cockspur Window Handle</h3>
-            <div class="product-card-price">£7.99</div>
-          </div>
-        </a>
-        <a href="product-detail.html?id=inline-black" class="product-card">
-          <div class="product-card-image">
-            <img src="images/products/window-handles/inline-black.jpg" alt="Inline Window Handle - Black" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="product-card-body">
-            <h3 class="product-card-name">Inline Window Handle - Black</h3>
-            <div class="product-card-price">£10.99</div>
-          </div>
-        </a>
-        <a href="product-detail.html?id=euro-brass" class="product-card">
-          <div class="product-card-image">
-            <img src="images/products/lock-cylinders/euro-35-brass.jpg" alt="Euro Cylinder - Brass" style="width: 100%; height: 100%; object-fit: cover;">
-          </div>
-          <div class="product-card-body">
-            <h3 class="product-card-name">Euro Cylinder - Brass</h3>
-            <div class="product-card-price">£14.99</div>
-          </div>
-        </a>
+      <div class="products-grid" id="relatedProductsGrid">
+        <!-- Related products will be loaded dynamically -->
       </div>
     </div>
   </section>
@@ -480,10 +431,7 @@
         <div>
           <h4 class="footer-title">Categories</h4>
           <ul class="footer-links">
-            <li><a href="products.html#window-handles">Window Handles</a></li>
-            <li><a href="products.html#door-handles">Door Handles</a></li>
-            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
-            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
+            <!-- Categories will be loaded dynamically -->
           </ul>
         </div>
         <div>

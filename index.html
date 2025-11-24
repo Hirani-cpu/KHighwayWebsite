@@ -1112,17 +1112,7 @@
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html" class="active">Home</a></li>
         <li><a href="category.html">Categories</a></li>
-        <li class="dropdown">
-          <a href="products.html">Products</a>
-          <div class="dropdown-menu">
-            <a href="products.html#window-handles">Window Handles</a>
-            <a href="products.html#door-handles">Door Handles</a>
-            <a href="products.html#letter-boxes">Letter Boxes</a>
-            <a href="products.html#trickle-vents">Trickle Vents</a>
-            <a href="products.html#lock-cylinders">Lock Cylinders</a>
-            <a href="products.html#bolts">Bolts</a>
-          </div>
-        </li>
+        <li><a href="products.html">Products</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
@@ -1179,31 +1169,7 @@
       </div>
 
       <div class="categories-grid reveal" id="categoriesGrid">
-        <!-- Categories will be loaded dynamically -->
-        <a href="products.html#window-handles" class="category-card">
-          <div class="category-icon">🪟</div>
-          <div class="category-name">Window Handles</div>
-        </a>
-        <a href="products.html#door-handles" class="category-card">
-          <div class="category-icon">🚪</div>
-          <div class="category-name">Door Handles</div>
-        </a>
-        <a href="products.html#letter-boxes" class="category-card">
-          <div class="category-icon">📬</div>
-          <div class="category-name">Letter Boxes</div>
-        </a>
-        <a href="products.html#trickle-vents" class="category-card">
-          <div class="category-icon">🌬️</div>
-          <div class="category-name">Trickle Vents</div>
-        </a>
-        <a href="products.html#lock-cylinders" class="category-card">
-          <div class="category-icon">🔐</div>
-          <div class="category-name">Lock Cylinders</div>
-        </a>
-        <a href="products.html#bolts" class="category-card">
-          <div class="category-icon">🔩</div>
-          <div class="category-name">Bolts</div>
-        </a>
+        <!-- Categories will be loaded dynamically from admin panel -->
       </div>
     </div>
   </section>
@@ -1217,54 +1183,8 @@
         <p class="section-subtitle">Quality hardware solutions for all your window and door needs</p>
       </div>
 
-      <div class="products-grid">
-        <article class="product-card reveal">
-          <div class="product-image">
-            <span>Window Handles</span>
-          </div>
-          <div class="product-body">
-            <h3 class="product-title">Window Handles</h3>
-            <p class="product-text">Premium replacement window handles suitable for various profiles and locking systems.</p>
-            <a href="products.html#window-handles" class="product-link">
-              View Collection
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
-        </article>
-
-        <article class="product-card reveal">
-          <div class="product-image">
-            <span>Door Handles</span>
-          </div>
-          <div class="product-body">
-            <h3 class="product-title">Door Handles</h3>
-            <p class="product-text">Exterior and interior door handles in multiple finishes for long-lasting durability.</p>
-            <a href="products.html#door-handles" class="product-link">
-              View Collection
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
-        </article>
-
-        <article class="product-card reveal">
-          <div class="product-image">
-            <span>Lock Cylinders</span>
-          </div>
-          <div class="product-body">
-            <h3 class="product-title">Lock Cylinders</h3>
-            <p class="product-text">High-security euro profile cylinders and accessories for residential doors.</p>
-            <a href="products.html#lock-cylinders" class="product-link">
-              View Collection
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
-        </article>
+      <div class="products-grid" id="featuredProductsGrid">
+        <!-- Featured products will be loaded dynamically from admin panel -->
       </div>
     </div>
   </section>
@@ -1362,11 +1282,8 @@
 
         <div>
           <h4 class="footer-title">Categories</h4>
-          <ul class="footer-links">
-            <li><a href="products.html#window-handles">Window Handles</a></li>
-            <li><a href="products.html#door-handles">Door Handles</a></li>
-            <li><a href="products.html#lock-cylinders">Lock Cylinders</a></li>
-            <li><a href="products.html#letter-boxes">Letter Boxes</a></li>
+          <ul class="footer-links" id="footerCategories">
+            <!-- Categories will be loaded dynamically -->
           </ul>
         </div>
 
