@@ -130,22 +130,36 @@ const FirebaseAuth = {
     const navLinks = document.getElementById('navLinks');
     if (!navLinks) return;
 
-    const existingAuthLink = navLinks.querySelector('.auth-link');
-    if (existingAuthLink) existingAuthLink.remove();
+    // Remove any existing auth links (both static and dynamic)
+    const existingAuthLinks = navLinks.querySelectorAll('.auth-nav-item');
+    existingAuthLinks.forEach(link => link.remove());
 
+    // Create new auth link
     const authLi = document.createElement('li');
-    authLi.className = 'auth-link';
+    authLi.className = 'auth-nav-item';
 
     if (this.isLoggedIn() && this.userProfile) {
-      authLi.innerHTML = `<a href="account.html">👤 ${this.userProfile.firstName}</a>`;
+      // User is logged in - show account link or dropdown
+      const firstName = this.userProfile.firstName || 'Account';
+      authLi.innerHTML = `
+        <div class="dropdown">
+          <a href="account.html" class="auth-link">👤 ${firstName}</a>
+          <div class="dropdown-menu">
+            <a href="account.html">My Account</a>
+            <a href="#" onclick="FirebaseAuth.logout(); window.location.href='index.html'; return false;">Logout</a>
+          </div>
+        </div>`;
     } else {
-      authLi.innerHTML = `<a href="login.html">Login</a>`;
+      // User is not logged in - show login link
+      authLi.innerHTML = `<a href="login.html" class="auth-link">Login</a>`;
     }
 
-    const cartLi = navLinks.querySelector('.cart-link')?.parentElement;
-    if (cartLi) {
-      navLinks.insertBefore(authLi, cartLi);
+    // Find the cart link and insert auth link before it
+    const cartLink = navLinks.querySelector('a[href="cart.html"]');
+    if (cartLink && cartLink.parentElement) {
+      navLinks.insertBefore(authLi, cartLink.parentElement);
     } else {
+      // If cart link not found, append to the end
       navLinks.appendChild(authLi);
     }
   }

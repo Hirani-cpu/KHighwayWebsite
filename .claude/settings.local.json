@@ -13,7 +13,12 @@
       "Bash(python -m http.server:*)",
       "WebFetch(domain:i.ibb.co)",
       "Bash(curl:*)",
-      "Bash(start chrome:*)"
+      "Bash(start chrome:*)",
+      "Bash(for file in category.html about.html contact.html cart.html checkout.html product-detail.html account.html signup.html login.html)",
+      "Bash(do echo \"$file\")",
+      "Bash(done)",
+      "Bash(python update_nav_styles.py:*)",
+      "Bash(python fix_login_links.py:*)"
     ],
     "deny": [],
     "ask": []
