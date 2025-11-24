@@ -1,55 +1,112 @@
-// Load categories dynamically from Firebase
-import { db, collection, getDocs, orderBy, query } from './firebase-config.js';
+// Categories Loader - Loads categories from Firestore
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
+// Firebase config - must match firebase-compat.js
+const firebaseConfig = {
+  apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+  authDomain: "k-highway-shop.firebaseapp.com",
+  projectId: "k-highway-shop",
+  storageBucket: "k-highway-shop.firebasestorage.app",
+  messagingSenderId: "568359321582",
+  appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Categories Loader object
 const CategoriesLoader = {
   // Default category icons mapping
   categoryIcons: {
-    'window-handles': '🪟',
-    'door-handles': '🚪',
-    'letter-boxes': '📬',
-    'trickle-vents': '🌬️',
-    'lock-cylinders': '🔐',
-    'bolts': '🔩',
-    'hinges': '🔧',
-    'locks': '🔒',
-    'handles': '🚪',
+    'window': '🪟',
+    'door': '🚪',
+    'letter': '📬',
+    'trickle': '🌬️',
+    'vent': '🌬️',
+    'lock': '🔐',
+    'cylinder': '🔐',
+    'bolt': '🔩',
+    'hinge': '🔧',
+    'handle': '🚪',
     'accessories': '🔨',
-    'tools': '🛠️',
+    'tool': '🛠️',
+    'hardware': '🔧',
+    'security': '🔒',
     'default': '📦'
   },
 
   // Get icon for category
-  getCategoryIcon(slug) {
-    // Try exact match first
-    if (this.categoryIcons[slug]) {
-      return this.categoryIcons[slug];
-    }
+  getCategoryIcon(slug, icon) {
+    // If icon is provided, use it
+    if (icon) return icon;
 
-    // Try to find partial match
-    for (const [key, icon] of Object.entries(this.categoryIcons)) {
-      if (slug.includes(key) || key.includes(slug)) {
-        return icon;
+    // Try to find matching icon based on slug/name
+    const lowerSlug = (slug || '').toLowerCase();
+
+    for (const [key, iconEmoji] of Object.entries(this.categoryIcons)) {
+      if (lowerSlug.includes(key)) {
+        return iconEmoji;
       }
     }
 
     return this.categoryIcons.default;
   },
 
+  // Initialize and load categories
+  async init() {
+    console.log('CategoriesLoader: Initializing...');
+
+    // Load categories immediately
+    await this.loadCategories();
+
+    // Also load footer categories if needed
+    await this.loadFooterCategories();
+  },
+
+  // Main load function
+  async loadCategories() {
+    // Determine which page we're on and load accordingly
+    const pathname = window.location.pathname.toLowerCase();
+
+    if (pathname.includes('category.html')) {
+      await this.loadCategoryPage();
+    } else if (pathname.includes('index.html') || pathname.endsWith('/')) {
+      await this.loadHomepageCategories();
+    }
+  },
+
   // Load categories for homepage
   async loadHomepageCategories() {
-    const container = document.querySelector('#categoriesGrid') || document.querySelector('.categories-grid');
-    if (!container) return;
+    console.log('Loading homepage categories...');
+
+    const container = document.querySelector('#categoriesGrid');
+    if (!container) {
+      console.log('Homepage categories container not found');
+      return;
+    }
 
     try {
       // Show loading state
       container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Loading categories...</div>';
 
       // Fetch categories from Firestore
-      const snapshot = await getDocs(collection(db, 'categories'));
-      console.log('Categories loaded:', snapshot.size);
+      const categoriesQuery = query(
+        collection(db, 'categories'),
+        orderBy('order', 'asc')
+      );
+
+      const snapshot = await getDocs(categoriesQuery);
+      console.log('Categories loaded from Firestore:', snapshot.size);
 
       if (snapshot.empty) {
-        // If no categories in database, show message
         container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">No categories available. Please add categories from the admin panel.</div>';
         return;
       }
@@ -57,38 +114,113 @@ const CategoriesLoader = {
       // Clear container
       container.innerHTML = '';
 
-      // Convert to array and sort by order
-      const categories = [];
-      snapshot.forEach(doc => {
-        categories.push({ id: doc.id, ...doc.data() });
-      });
-
-      // Sort by order field (if exists) or by name
-      categories.sort((a, b) => {
-        if (a.order !== undefined && b.order !== undefined) {
-          return a.order - b.order;
-        }
-        return (a.name || '').localeCompare(b.name || '');
-      });
-
       // Add each category
-      categories.forEach(category => {
-        const categoryCard = this.createCategoryCard(category.id, category);
+      snapshot.forEach(doc => {
+        const category = { id: doc.id, ...doc.data() };
+        const categoryCard = this.createCategoryCard(category);
         container.innerHTML += categoryCard;
       });
 
+      console.log('Homepage categories loaded successfully');
+
     } catch (error) {
-      console.error('Error loading categories:', error);
-      // Show error message
-      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Error loading categories. Please check console for details.</div>';
+      console.error('Error loading homepage categories:', error);
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;">Error loading categories: ${error.message}</div>`;
     }
   },
 
-  // Create category card HTML
-  createCategoryCard(id, category) {
-    const slug = category.slug || id;
-    const icon = category.icon || this.getCategoryIcon(slug);
-    const link = category.link || `products.html#${slug}`;
+  // Load categories for category page
+  async loadCategoryPage() {
+    console.log('Loading category page...');
+
+    const container = document.querySelector('.categories-grid');
+    if (!container) {
+      console.log('Category page container not found');
+      return;
+    }
+
+    try {
+      // Show loading state
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Loading categories...</div>';
+
+      // Fetch categories from Firestore
+      const categoriesQuery = query(
+        collection(db, 'categories'),
+        orderBy('order', 'asc')
+      );
+
+      const snapshot = await getDocs(categoriesQuery);
+      console.log('Categories loaded from Firestore:', snapshot.size);
+
+      if (snapshot.empty) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">No categories available. Please add categories from the admin panel.</div>';
+        return;
+      }
+
+      // Clear container
+      container.innerHTML = '';
+
+      // Add each category with description
+      snapshot.forEach(doc => {
+        const category = { id: doc.id, ...doc.data() };
+        const categoryCard = this.createDetailedCategoryCard(category);
+        container.innerHTML += categoryCard;
+      });
+
+      console.log('Category page loaded successfully');
+
+    } catch (error) {
+      console.error('Error loading category page:', error);
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: red;">Error loading categories: ${error.message}</div>`;
+    }
+  },
+
+  // Load categories for footer
+  async loadFooterCategories() {
+    console.log('Loading footer categories...');
+
+    const container = document.querySelector('#footerCategories');
+    if (!container) {
+      console.log('Footer categories container not found');
+      return;
+    }
+
+    try {
+      // Fetch categories from Firestore (limit to 4 for footer)
+      const categoriesQuery = query(
+        collection(db, 'categories'),
+        orderBy('order', 'asc')
+      );
+
+      const snapshot = await getDocs(categoriesQuery);
+
+      if (!snapshot.empty) {
+        container.innerHTML = '';
+        let count = 0;
+
+        snapshot.forEach(doc => {
+          if (count < 4) {
+            const category = doc.data();
+            const slug = category.slug || doc.id;
+            const link = `products.html#${slug}`;
+            container.innerHTML += `<li><a href="${link}">${category.name}</a></li>`;
+            count++;
+          }
+        });
+      }
+
+      console.log('Footer categories loaded successfully');
+
+    } catch (error) {
+      console.error('Error loading footer categories:', error);
+    }
+  },
+
+  // Create category card for homepage
+  createCategoryCard(category) {
+    const slug = category.slug || category.id;
+    const icon = this.getCategoryIcon(slug, category.icon);
+    const link = `products.html#${slug}`;
 
     return `
       <a href="${link}" class="category-card">
@@ -98,59 +230,11 @@ const CategoriesLoader = {
     `;
   },
 
-
-  // Load categories for category page
-  async loadCategoryPage() {
-    const container = document.querySelector('.categories-grid');
-    if (!container || !window.location.pathname.includes('category.html')) return;
-
-    try {
-      // Show loading state
-      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Loading categories...</div>';
-
-      // Fetch categories from Firestore
-      const snapshot = await getDocs(collection(db, 'categories'));
-      console.log('Categories loaded:', snapshot.size);
-
-      if (snapshot.empty) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">No categories available. Please add categories from the admin panel.</div>';
-        return;
-      }
-
-      // Clear container
-      container.innerHTML = '';
-
-      // Convert to array and sort by order
-      const categories = [];
-      snapshot.forEach(doc => {
-        categories.push({ id: doc.id, ...doc.data() });
-      });
-
-      // Sort by order field (if exists) or by name
-      categories.sort((a, b) => {
-        if (a.order !== undefined && b.order !== undefined) {
-          return a.order - b.order;
-        }
-        return (a.name || '').localeCompare(b.name || '');
-      });
-
-      // Add each category with description
-      categories.forEach(category => {
-        const categoryCard = this.createDetailedCategoryCard(category.id, category);
-        container.innerHTML += categoryCard;
-      });
-
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--gray-500);">Error loading categories. Please check console for details.</div>';
-    }
-  },
-
   // Create detailed category card for category page
-  createDetailedCategoryCard(id, category) {
-    const slug = category.slug || id;
-    const icon = category.icon || this.getCategoryIcon(slug);
-    const link = category.link || `products.html#${slug}`;
+  createDetailedCategoryCard(category) {
+    const slug = category.slug || category.id;
+    const icon = this.getCategoryIcon(slug, category.icon);
+    const link = `products.html#${slug}`;
     const description = category.description || `Browse our ${category.name.toLowerCase()} collection`;
 
     return `
@@ -161,47 +245,18 @@ const CategoriesLoader = {
         <span class="category-link">Browse Products →</span>
       </a>
     `;
-  },
-
-
-  // Initialize
-  init() {
-    // Wait for Firebase to be ready
-    const waitForFirebase = () => {
-      if (window.db || typeof db !== 'undefined') {
-        // Firebase is ready, load categories
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', () => this.loadCategories());
-        } else {
-          this.loadCategories();
-        }
-      } else {
-        // Wait a bit and try again
-        setTimeout(waitForFirebase, 100);
-      }
-    };
-
-    // Also listen for firebase-ready event
-    window.addEventListener('firebase-ready', () => {
-      this.loadCategories();
-    });
-
-    waitForFirebase();
-  },
-
-  // Main load function
-  async loadCategories() {
-    // Load categories based on current page
-    if (window.location.pathname.includes('category.html')) {
-      await this.loadCategoryPage();
-    } else {
-      await this.loadHomepageCategories();
-    }
   }
 };
 
 // Export for use in other modules
 export default CategoriesLoader;
 
-// Auto-initialize when script loads
-CategoriesLoader.init();
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    CategoriesLoader.init();
+  });
+} else {
+  // DOM is already ready
+  CategoriesLoader.init();
+}

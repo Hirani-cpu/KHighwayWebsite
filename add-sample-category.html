@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Sample Category</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    button {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeMt3Ahtg6FNRGY1cUuySoxUsJdzr7Z7A",
+      authDomain: "k-highway-shop.firebaseapp.com",
+      projectId: "k-highway-shop",
+      storageBucket: "k-highway-shop.firebasestorage.app",
+      messagingSenderId: "568359321582",
+      appId: "1:568359321582:web:faf2b48cb3556664b898ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.addSampleCategories = async function() {
+      const status = document.getElementById('status');
+      status.className = 'status info';
+      status.innerHTML = 'Adding sample categories...';
+
+      try {
+        const sampleCategories = [
+          {
+            name: 'Window Hardware',
+            slug: 'window-hardware',
+            description: 'Complete range of window handles, locks, hinges and accessories',
+            icon: '🪟',
+            order: 1,
+            createdAt: new Date()
+          },
+          {
+            name: 'Door Hardware',
+            slug: 'door-hardware',
+            description: 'Door handles, locks, letterboxes and all door accessories',
+            icon: '🚪',
+            order: 2,
+            createdAt: new Date()
+          },
+          {
+            name: 'Security',
+            slug: 'security',
+            description: 'Lock cylinders, padlocks, and security hardware',
+            icon: '🔒',
+            order: 3,
+            createdAt: new Date()
+          },
+          {
+            name: 'Tools & Accessories',
+            slug: 'tools-accessories',
+            description: 'Installation tools and hardware accessories',
+            icon: '🔧',
+            order: 4,
+            createdAt: new Date()
+          }
+        ];
+
+        let added = 0;
+        for (const category of sampleCategories) {
+          await addDoc(collection(db, 'categories'), category);
+          added++;
+        }
+
+        status.className = 'status success';
+        status.innerHTML = `Successfully added ${added} sample categories!<br>
+          <a href="index.html">Go to Homepage</a> |
+          <a href="category.html">View Categories Page</a>`;
+
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `Error adding categories: ${error.message}`;
+      }
+    };
+
+    window.checkCategories = async function() {
+      const status = document.getElementById('status');
+      status.className = 'status info';
+      status.innerHTML = 'Checking existing categories...';
+
+      try {
+        const snapshot = await getDocs(collection(db, 'categories'));
+
+        if (snapshot.empty) {
+          status.className = 'status info';
+          status.innerHTML = 'No categories found in database. Click "Add Sample Categories" to add some.';
+        } else {
+          let html = `<h3>Found ${snapshot.size} categories:</h3><ul>`;
+          snapshot.forEach(doc => {
+            const cat = doc.data();
+            html += `<li>${cat.name} (${cat.slug})</li>`;
+          });
+          html += '</ul>';
+          status.className = 'status success';
+          status.innerHTML = html;
+        }
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `Error checking categories: ${error.message}`;
+      }
+    };
+
+    window.clearCategories = async function() {
+      if (!confirm('Are you sure you want to delete ALL categories?')) return;
+
+      const status = document.getElementById('status');
+      status.className = 'status info';
+      status.innerHTML = 'Deleting all categories...';
+
+      try {
+        const snapshot = await getDocs(collection(db, 'categories'));
+        let deleted = 0;
+
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(doc(db, 'categories', docSnap.id));
+          deleted++;
+        }
+
+        status.className = 'status success';
+        status.innerHTML = `Deleted ${deleted} categories.`;
+
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `Error deleting categories: ${error.message}`;
+      }
+    };
+
+    // Check on load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkCategories();
+    });
+  </script>
+</head>
+<body>
+  <h1>Category Management Helper</h1>
+  <p>Use this page to quickly add sample categories to test the system.</p>
+
+  <div>
+    <button onclick="checkCategories()">Check Existing Categories</button>
+    <button onclick="addSampleCategories()">Add Sample Categories</button>
+    <button onclick="clearCategories()" style="background: #dc3545;">Clear All Categories</button>
+  </div>
+
+  <div id="status" class="status info">Loading...</div>
+
+  <hr style="margin-top: 30px;">
+  <p>
+    <strong>Navigation:</strong><br>
+    <a href="index.html">Homepage</a> |
+    <a href="category.html">Categories Page</a> |
+    <a href="products.html">Products Page</a> |
+    <a href="admin.html">Admin Panel</a>
+  </p>
+</body>
+</html>
