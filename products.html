@@ -65,7 +65,7 @@
     .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
     .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: all 0.4s ease; }
     .product-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); }
-    .product-image { height: 180px; background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .product-image { height: 220px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     .product-image::after { content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); transition: left 0.5s ease; }
     .product-card:hover .product-image::after { left: 100%; }
     .product-rating { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.95); padding: 0.35rem 0.6rem; border-radius: 6px; display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10; }
@@ -131,7 +131,7 @@
     .lightbox img { max-width: 90%; max-height: 90%; border-radius: 8px; transform: scale(0.9); transition: transform 0.3s ease; }
     .lightbox.active img { transform: scale(1); }
     .lightbox-close { position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; cursor: pointer; }
-    .product-image img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .product-image img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; padding: 10px; }
   </style>
 </head>
 <body>
