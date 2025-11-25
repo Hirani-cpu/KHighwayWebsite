@@ -1149,7 +1149,7 @@
           Discover our extensive collection of high-quality hardware components for uPVC, aluminium, and timber windows and doors. Fast UK delivery guaranteed.
         </p>
         <div class="hero-buttons">
-          <a href="#products" class="btn btn-primary">
+          <a href="products.html" class="btn btn-primary">
             Browse Products
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -1353,7 +1353,8 @@
 
         container.innerHTML = '';
         categories.forEach(cat => {
-          const slug = cat.slug || cat.id;
+          // Use category name to generate slug to match products page
+          const slug = cat.name.toLowerCase().replace(/\s+/g, '-');
           const icon = cat.icon || '📦';
           // Show image if available, otherwise show icon
           const mediaHtml = cat.image

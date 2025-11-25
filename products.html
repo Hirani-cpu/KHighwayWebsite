@@ -256,7 +256,9 @@
           const catSnap = await getDocs(collection(db, 'categories'));
           catSnap.forEach(doc => {
             const cat = doc.data();
-            filterSelect.innerHTML += `<option value="${cat.slug || doc.id}">${cat.name}</option>`;
+            // Use category name to generate slug to match section IDs
+            const slug = cat.name.toLowerCase().replace(/\s+/g, '-');
+            filterSelect.innerHTML += `<option value="${slug}">${cat.name}</option>`;
           });
         }
 
@@ -461,6 +463,44 @@
 
     searchInput.addEventListener('input', filterProducts);
     categoryFilter.addEventListener('change', filterProducts);
+
+    // Handle URL hash for category navigation from home page
+    function handleCategoryHash() {
+      const hash = window.location.hash.substring(1); // Remove the # symbol
+      if (hash) {
+        // Wait for products to load, then apply filter
+        const checkAndApply = () => {
+          const filterSelect = document.getElementById('categoryFilter');
+          const categorySection = document.getElementById(hash);
+
+          // Check if products have loaded
+          if (filterSelect && filterSelect.options.length > 1 && categorySection) {
+            // Set the filter dropdown to the category
+            const option = Array.from(filterSelect.options).find(opt => opt.value === hash);
+            if (option) {
+              filterSelect.value = hash;
+              filterProducts(); // Apply the filter
+
+              // Scroll to the category section with a slight delay
+              setTimeout(() => {
+                categorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 100);
+            }
+          } else {
+            // Products not loaded yet, try again
+            setTimeout(checkAndApply, 200);
+          }
+        };
+
+        checkAndApply();
+      }
+    }
+
+    // Check hash on page load
+    window.addEventListener('load', handleCategoryHash);
+
+    // Check hash when it changes (for navigation within the page)
+    window.addEventListener('hashchange', handleCategoryHash);
   </script>
 </body>
 </html>
