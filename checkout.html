@@ -475,20 +475,28 @@
       const shipping = getSelectedShipping();
       const total = subtotal + shipping;
 
+      console.log('Creating order with:', { total, subtotal, shipping, cartItems: cart.length });
+
       try {
         // Get customer email
         const customerEmail = document.getElementById('email').value.trim();
 
-        // Call Firebase Cloud Function to create Revolut order
-        const createOrder = firebase.functions().httpsCallable('createRevolutOrder');
-        const result = await createOrder({
+        const orderData = {
           amount: Math.round(total * 100), // Convert to smallest currency unit (pence)
           currency: 'GBP',
           items: cart,
           customerEmail: customerEmail
-        });
+        };
 
-        if (result.data.success) {
+        console.log('Sending order data:', orderData);
+
+        // Call Firebase Cloud Function to create Revolut order
+        const createOrder = firebase.functions().httpsCallable('createRevolutOrder');
+        const result = await createOrder(orderData);
+
+        console.log('Function result:', result);
+
+        if (result.data && result.data.success) {
           console.log('Revolut order created:', result.data.order_id);
           return result.data.public_id;
         } else {
@@ -497,6 +505,8 @@
         }
       } catch (error) {
         console.error('Failed to create Revolut order:', error);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
         alert('Failed to create order. Please try again or contact support.');
         return null;
       }

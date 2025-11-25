@@ -17,10 +17,16 @@ const REVOLUT_API_URL = 'https://sandbox-merchant.revolut.com/api/1.0/orders'; /
  */
 exports.createRevolutOrder = functions.https.onCall(async (data, context) => {
   try {
+    console.log('Received data:', JSON.stringify(data));
+    console.log('Data keys:', Object.keys(data));
+    console.log('Amount:', data.amount);
+    console.log('Currency:', data.currency);
+
     const {amount, currency, items, customerEmail} = data;
 
     // Validate input
     if (!amount || !currency) {
+      console.error('Validation failed - amount:', amount, 'currency:', currency);
       throw new functions.https.HttpsError('invalid-argument', 'Amount and currency are required');
     }
 

@@ -33,7 +33,8 @@
       "Bash(firebase projects:list:*)",
       "Bash(firebase use:*)",
       "Bash(firebase login:*)",
-      "Bash(firebase functions:list:*)"
+      "Bash(firebase functions:list:*)",
+      "Bash(firebase functions:log:*)"
     ],
     "deny": [],
     "ask": []
