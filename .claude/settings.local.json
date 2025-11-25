@@ -25,7 +25,10 @@
       "Bash(git checkout:*)",
       "Bash(for file in account.html cart.html category.html checkout.html contact.html login.html product-detail.html products.html signup.html)",
       "Bash(do)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "WebSearch",
+      "WebFetch(domain:developer.revolut.com)",
+      "Bash(firebase init:*)"
     ],
     "deny": [],
     "ask": []

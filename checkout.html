@@ -465,30 +465,41 @@
     // REVOLUT PAYMENT INTEGRATION
     // ============================================================
     // TODO: Replace these placeholder values with your actual Revolut credentials
-    const REVOLUT_PUBLIC_KEY = 'YOUR_REVOLUT_PUBLIC_KEY'; // Get from Revolut Dashboard
+    const REVOLUT_PUBLIC_KEY = 'pk_aXYF1V9yQfMqZhFIOGuGeWXfBzxmC0zdT6woriLRhoOvbLHQ'; // Get from Revolut Dashboard
     const REVOLUT_MODE = 'sandbox'; // Use 'sandbox' for testing, 'prod' for live
 
-    // Function to create order on your backend (you'll need to implement this)
+    // Function to create order via Firebase Cloud Function
     async function createRevolutOrder() {
-      // This should call your backend API to create an order via Revolut Merchant API
-      // For now, we'll return a mock order token
-      // TODO: Implement backend order creation endpoint
       const cart = Cart.getCart();
       const subtotal = Cart.getTotal();
       const shipping = getSelectedShipping();
       const total = subtotal + shipping;
 
-      // In production, you would call your backend:
-      // const response = await fetch('/api/create-revolut-order', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ amount: total * 100, currency: 'GBP', items: cart })
-      // });
-      // const order = await response.json();
-      // return order.public_id;
+      try {
+        // Get customer email
+        const customerEmail = document.getElementById('email').value.trim();
 
-      console.error('Backend order creation not implemented yet');
-      return null;
+        // Call Firebase Cloud Function to create Revolut order
+        const createOrder = firebase.functions().httpsCallable('createRevolutOrder');
+        const result = await createOrder({
+          amount: Math.round(total * 100), // Convert to smallest currency unit (pence)
+          currency: 'GBP',
+          items: cart,
+          customerEmail: customerEmail
+        });
+
+        if (result.data.success) {
+          console.log('Revolut order created:', result.data.order_id);
+          return result.data.public_id;
+        } else {
+          console.error('Order creation failed:', result.data);
+          return null;
+        }
+      } catch (error) {
+        console.error('Failed to create Revolut order:', error);
+        alert('Failed to create order. Please try again or contact support.');
+        return null;
+      }
     }
 
     // Handle successful payment
