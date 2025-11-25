@@ -22,7 +22,10 @@
       "Bash(python remove_default_categories.py:*)",
       "Bash(del remove_default_categories.py)",
       "Bash(cat:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(for file in account.html cart.html category.html checkout.html contact.html login.html product-detail.html products.html signup.html)",
+      "Bash(do)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
