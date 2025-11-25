@@ -550,50 +550,11 @@
     // Initialize Revolut Payments
     async function initializeRevolutPayments() {
       try {
-        // Initialize RevolutCheckout with public key
-        const instance = await RevolutCheckout(REVOLUT_PUBLIC_KEY, REVOLUT_MODE);
-
-        // Get cart data for payment
-        const getPaymentData = () => {
-          const cart = Cart.getCart();
-          const subtotal = Cart.getTotal();
-          const shipping = getSelectedShipping();
-          const total = subtotal + shipping;
-
-          return {
-            amount: Math.round(total * 100), // Amount in smallest currency unit (pence)
-            currency: 'GBP',
-            total: total
-          };
-        };
+        console.log('Initializing Revolut payments...');
 
         // ===== CARD PAYMENT =====
-        const cardField = instance.createCardField({
-          target: document.getElementById('revolut-card'),
-          onSuccess: async () => {
-            // Card payment successful - order ID will be in URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('_rr_oid') || 'CARD-' + Date.now();
-            await handlePaymentSuccess(orderId, 'Card Payment');
-          },
-          onError: (error) => {
-            console.error('Card payment error:', error);
-            alert(`Card payment failed: ${error.message || 'Please try again'}`);
-          },
-          onCancel: () => {
-            console.log('Card payment cancelled by user');
-          },
-          styles: {
-            default: {
-              color: '#334155',
-              '::placeholder': {
-                color: '#64748b'
-              }
-            }
-          }
-        });
-
-        // Show card submit button
+        // Initialize card field on demand when user clicks pay button
+        let cardFieldInstance = null;
         const cardSubmitBtn = document.getElementById('card-submit-button');
         cardSubmitBtn.style.display = 'block';
 
@@ -603,22 +564,68 @@
             return;
           }
 
-          const orderToken = await createRevolutOrder();
-          if (!orderToken) {
-            alert('Unable to create order. Please ensure backend is configured.');
-            return;
-          }
+          try {
+            cardSubmitBtn.disabled = true;
+            cardSubmitBtn.textContent = 'Creating order...';
 
-          cardField.submit({
-            email: document.getElementById('email').value.trim(),
-            name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
-            phone: document.getElementById('phone').value.trim(),
-            savePaymentMethodFor: 'merchant'
-          });
+            // Create order first
+            const orderToken = await createRevolutOrder();
+            if (!orderToken) {
+              alert('Unable to create order. Please try again.');
+              cardSubmitBtn.disabled = false;
+              cardSubmitBtn.textContent = 'Pay with Card';
+              return;
+            }
+
+            // Now initialize card field with order token
+            const instance = await RevolutCheckout(orderToken, REVOLUT_MODE);
+            cardFieldInstance = instance.createCardField({
+              target: document.getElementById('revolut-card'),
+              onSuccess: async () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('_rr_oid') || 'CARD-' + Date.now();
+                await handlePaymentSuccess(orderId, 'Card Payment');
+              },
+              onError: (error) => {
+                console.error('Card payment error:', error);
+                alert(`Card payment failed: ${error.message || 'Please try again'}`);
+                cardSubmitBtn.disabled = false;
+                cardSubmitBtn.textContent = 'Pay with Card';
+              },
+              onCancel: () => {
+                console.log('Card payment cancelled by user');
+                cardSubmitBtn.disabled = false;
+                cardSubmitBtn.textContent = 'Pay with Card';
+              }
+            });
+
+            cardSubmitBtn.textContent = 'Processing...';
+
+            // Submit the card field
+            cardFieldInstance.submit({
+              email: document.getElementById('email').value.trim(),
+              name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+              phone: document.getElementById('phone').value.trim()
+            });
+
+          } catch (error) {
+            console.error('Card payment initialization error:', error);
+            alert('Failed to initialize payment. Please try again.');
+            cardSubmitBtn.disabled = false;
+            cardSubmitBtn.textContent = 'Pay with Card';
+          }
+        });
+
+        // ===== REVOLUT PAY, APPLE PAY, GOOGLE PAY =====
+        // These use the Payments API which doesn't require order token upfront
+        const paymentsInstance = await RevolutCheckout.payments({
+          locale: 'en',
+          publicToken: REVOLUT_PUBLIC_KEY,
+          mode: REVOLUT_MODE
         });
 
         // ===== REVOLUT PAY =====
-        const revolutPay = instance.revolutPay({
+        const revolutPay = paymentsInstance.revolutPay({
           target: document.getElementById('revolut-pay'),
           createOrder: async () => {
             if (!validateForm()) {
@@ -648,65 +655,13 @@
           }
         });
 
-        // ===== APPLE PAY =====
-        if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
-          const applePay = instance.paymentRequest({
-            target: document.getElementById('apple-pay'),
-            requestShipping: true,
-            onSuccess: async (orderId) => {
-              await handlePaymentSuccess(orderId, 'Apple Pay');
-            },
-            onError: (error) => {
-              console.error('Apple Pay error:', error);
-              alert('Apple Pay failed. Please try another payment method.');
-            },
-            onCancel: () => {
-              console.log('Apple Pay cancelled');
-            },
-            buttonStyle: {
-              variant: 'apple-pay',
-              size: 'large'
-            },
-            validate: () => {
-              if (!validateForm()) {
-                alert('Please fill in all required fields before proceeding to payment.');
-                return false;
-              }
-              return true;
-            }
-          });
-        }
-
-        // ===== GOOGLE PAY =====
-        const googlePay = instance.paymentRequest({
-          target: document.getElementById('google-pay'),
-          requestShipping: true,
-          onSuccess: async (orderId) => {
-            await handlePaymentSuccess(orderId, 'Google Pay');
-          },
-          onError: (error) => {
-            console.error('Google Pay error:', error);
-            alert('Google Pay failed. Please try another payment method.');
-          },
-          onCancel: () => {
-            console.log('Google Pay cancelled');
-          },
-          buttonStyle: {
-            variant: 'google-pay',
-            size: 'large'
-          },
-          validate: () => {
-            if (!validateForm()) {
-              alert('Please fill in all required fields before proceeding to payment.');
-              return false;
-            }
-            return true;
-          }
-        });
+        console.log('Revolut payments initialized successfully');
 
       } catch (error) {
         console.error('Failed to initialize Revolut payments:', error);
-        alert('Payment system initialization failed. Please refresh the page or contact support.');
+        console.error('Error details:', error.message);
+        // Don't show alert on page load, just log the error
+        // Payment buttons will show appropriate errors when clicked
       }
     }
 
