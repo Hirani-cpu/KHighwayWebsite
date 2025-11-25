@@ -261,9 +261,13 @@
 
           <div class="payment-methods">
             <div class="payment-methods-title">Payment Method</div>
-            <!-- PayPal Button Container -->
-            <div id="paypal-button-container"></div>
-            <p class="payment-note">Secure payment powered by PayPal</p>
+            <!-- Revolut Payment Widgets -->
+            <div id="revolut-card" style="margin-bottom: 1rem;"></div>
+            <button id="card-submit-button" class="btn-primary" style="display: none; width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">Pay with Card</button>
+            <div id="revolut-pay" style="margin-bottom: 0.5rem;"></div>
+            <div id="apple-pay" style="margin-bottom: 0.5rem;"></div>
+            <div id="google-pay" style="margin-bottom: 0.5rem;"></div>
+            <p class="payment-note">Secure payment powered by Revolut</p>
           </div>
         </div>
       </div>
@@ -319,8 +323,8 @@
   <!-- EmailJS for notifications -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AVCvli_4wEz5U6uVBt6yVv3SCt6qmz68pvTpq2Dv8u-eUO-9CUqThZQevR-hkBYIXh36bKVuTUtuPGv8&currency=GBP"></script>
+  <!-- Revolut SDK -->
+  <script src="https://merchant.revolut.com/embed.js"></script>
 
   <script type="module">
     // Initialize EmailJS
@@ -457,111 +461,246 @@
       return isValid;
     }
 
-    // PayPal Buttons
-    paypal.Buttons({
-      style: {
-        layout: 'vertical',
-        color: 'blue',
-        shape: 'rect',
-        label: 'pay'
-      },
+    // ============================================================
+    // REVOLUT PAYMENT INTEGRATION
+    // ============================================================
+    // TODO: Replace these placeholder values with your actual Revolut credentials
+    const REVOLUT_PUBLIC_KEY = 'YOUR_REVOLUT_PUBLIC_KEY'; // Get from Revolut Dashboard
+    const REVOLUT_MODE = 'sandbox'; // Use 'sandbox' for testing, 'prod' for live
 
-      // Validate form before payment
-      onClick: function(data, actions) {
-        if (!validateForm()) {
-          alert('Please fill in all required fields before proceeding to payment.');
-          return actions.reject();
-        }
-        return actions.resolve();
-      },
+    // Function to create order on your backend (you'll need to implement this)
+    async function createRevolutOrder() {
+      // This should call your backend API to create an order via Revolut Merchant API
+      // For now, we'll return a mock order token
+      // TODO: Implement backend order creation endpoint
+      const cart = Cart.getCart();
+      const subtotal = Cart.getTotal();
+      const shipping = getSelectedShipping();
+      const total = subtotal + shipping;
 
-      // Create order
-      createOrder: function(data, actions) {
-        const cart = Cart.getCart();
-        const subtotal = Cart.getTotal();
-        const shipping = getSelectedShipping();
+      // In production, you would call your backend:
+      // const response = await fetch('/api/create-revolut-order', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ amount: total * 100, currency: 'GBP', items: cart })
+      // });
+      // const order = await response.json();
+      // return order.public_id;
 
-        return actions.order.create({
-          purchase_units: [{
-            description: 'K Highway DIY Hardware Shop Shop Order',
-            amount: {
-              currency_code: 'GBP',
-              value: (subtotal + shipping).toFixed(2),
-              breakdown: {
-                item_total: {
-                  currency_code: 'GBP',
-                  value: subtotal.toFixed(2)
-                },
-                shipping: {
-                  currency_code: 'GBP',
-                  value: shipping.toFixed(2)
-                }
-              }
-            },
-            items: cart.map(item => ({
-              name: item.name,
-              unit_amount: {
-                currency_code: 'GBP',
-                value: item.price.toFixed(2)
-              },
-              quantity: item.quantity.toString()
-            }))
-          }]
-        });
-      },
+      console.error('Backend order creation not implemented yet');
+      return null;
+    }
 
-      // Capture payment
-      onApprove: function(data, actions) {
-        return actions.order.capture().then(async function(details) {
-          // Payment successful
-          const orderId = details.id;
-          const cartItems = Cart.getCart();
-          const orderSubtotal = Cart.getTotal();
-          const orderShipping = getSelectedShipping();
+    // Handle successful payment
+    async function handlePaymentSuccess(orderId, paymentMethod) {
+      console.log(`Payment successful! Order ID: ${orderId}, Method: ${paymentMethod}`);
 
-          // Clear cart
-          Cart.clearCart();
+      const cartItems = Cart.getCart();
+      const orderSubtotal = Cart.getTotal();
+      const orderShipping = getSelectedShipping();
 
-          // Show success
-          document.getElementById('checkoutContent').style.display = 'none';
-          document.getElementById('orderSuccess').classList.add('show');
-          document.getElementById('orderId').textContent = orderId;
+      // Clear cart
+      Cart.clearCart();
 
-          // Save order to Firebase
-          const userEmail = (window.Auth && Auth.isLoggedIn()) ? Auth.getCurrentUser().email : document.getElementById('email').value;
-          const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
-          const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
+      // Show success
+      document.getElementById('checkoutContent').style.display = 'none';
+      document.getElementById('orderSuccess').classList.add('show');
+      document.getElementById('orderId').textContent = orderId;
 
-          const orderData = {
-            orderId: orderId,
-            userEmail: userEmail,
-            total: orderSubtotal + orderShipping,
-            deliveryMethod: selectedDelivery,
-            deliveryInstructions: deliveryInstructions,
-            items: cartItems,
-            firstName: document.getElementById('firstName').value.trim(),
-            lastName: document.getElementById('lastName').value.trim(),
-            address: document.getElementById('address').value.trim(),
-            address2: document.getElementById('address2').value.trim(),
-            city: document.getElementById('city').value.trim(),
-            postcode: document.getElementById('postcode').value.trim(),
-            country: document.getElementById('country').value,
-            phone: document.getElementById('phone').value.trim()
+      // Save order to Firebase
+      const userEmail = (window.Auth && Auth.isLoggedIn()) ? Auth.getCurrentUser().email : document.getElementById('email').value;
+      const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
+      const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
+
+      const orderData = {
+        orderId: orderId,
+        userEmail: userEmail,
+        total: orderSubtotal + orderShipping,
+        deliveryMethod: selectedDelivery,
+        deliveryInstructions: deliveryInstructions,
+        paymentMethod: paymentMethod,
+        items: cartItems,
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        address2: document.getElementById('address2').value.trim(),
+        city: document.getElementById('city').value.trim(),
+        postcode: document.getElementById('postcode').value.trim(),
+        country: document.getElementById('country').value,
+        phone: document.getElementById('phone').value.trim()
+      };
+
+      await FirebaseOrders.saveOrder(orderData);
+
+      // Send notification email to store owner
+      await sendOrderNotification(orderData);
+    }
+
+    // Initialize Revolut Payments
+    async function initializeRevolutPayments() {
+      try {
+        // Initialize RevolutCheckout with public key
+        const instance = await RevolutCheckout(REVOLUT_PUBLIC_KEY, REVOLUT_MODE);
+
+        // Get cart data for payment
+        const getPaymentData = () => {
+          const cart = Cart.getCart();
+          const subtotal = Cart.getTotal();
+          const shipping = getSelectedShipping();
+          const total = subtotal + shipping;
+
+          return {
+            amount: Math.round(total * 100), // Amount in smallest currency unit (pence)
+            currency: 'GBP',
+            total: total
           };
+        };
 
-          await FirebaseOrders.saveOrder(orderData);
-
-          // Send notification email to store owner
-          await sendOrderNotification(orderData);
+        // ===== CARD PAYMENT =====
+        const cardField = instance.createCardField({
+          target: document.getElementById('revolut-card'),
+          onSuccess: async () => {
+            // Card payment successful - order ID will be in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('_rr_oid') || 'CARD-' + Date.now();
+            await handlePaymentSuccess(orderId, 'Card Payment');
+          },
+          onError: (error) => {
+            console.error('Card payment error:', error);
+            alert(`Card payment failed: ${error.message || 'Please try again'}`);
+          },
+          onCancel: () => {
+            console.log('Card payment cancelled by user');
+          },
+          styles: {
+            default: {
+              color: '#334155',
+              '::placeholder': {
+                color: '#64748b'
+              }
+            }
+          }
         });
-      },
 
-      // Handle errors
-      onError: function(err) {
-        console.error('PayPal Error:', err);
-        alert('There was an error processing your payment. Please try again.');
+        // Show card submit button
+        const cardSubmitBtn = document.getElementById('card-submit-button');
+        cardSubmitBtn.style.display = 'block';
+
+        cardSubmitBtn.addEventListener('click', async () => {
+          if (!validateForm()) {
+            alert('Please fill in all required fields before proceeding to payment.');
+            return;
+          }
+
+          const orderToken = await createRevolutOrder();
+          if (!orderToken) {
+            alert('Unable to create order. Please ensure backend is configured.');
+            return;
+          }
+
+          cardField.submit({
+            email: document.getElementById('email').value.trim(),
+            name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
+            phone: document.getElementById('phone').value.trim(),
+            savePaymentMethodFor: 'merchant'
+          });
+        });
+
+        // ===== REVOLUT PAY =====
+        const revolutPay = instance.revolutPay({
+          target: document.getElementById('revolut-pay'),
+          createOrder: async () => {
+            if (!validateForm()) {
+              alert('Please fill in all required fields before proceeding to payment.');
+              throw new Error('Form validation failed');
+            }
+            const orderToken = await createRevolutOrder();
+            if (!orderToken) {
+              throw new Error('Unable to create order');
+            }
+            return { publicId: orderToken };
+          },
+          onSuccess: async (orderId) => {
+            await handlePaymentSuccess(orderId, 'Revolut Pay');
+          },
+          onError: (error) => {
+            console.error('Revolut Pay error:', error);
+            alert('Payment failed. Please try again.');
+          },
+          onCancel: () => {
+            console.log('Revolut Pay cancelled');
+          },
+          buttonStyle: {
+            size: 'large',
+            variant: 'dark',
+            radius: 'round'
+          }
+        });
+
+        // ===== APPLE PAY =====
+        if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+          const applePay = instance.paymentRequest({
+            target: document.getElementById('apple-pay'),
+            requestShipping: true,
+            onSuccess: async (orderId) => {
+              await handlePaymentSuccess(orderId, 'Apple Pay');
+            },
+            onError: (error) => {
+              console.error('Apple Pay error:', error);
+              alert('Apple Pay failed. Please try another payment method.');
+            },
+            onCancel: () => {
+              console.log('Apple Pay cancelled');
+            },
+            buttonStyle: {
+              variant: 'apple-pay',
+              size: 'large'
+            },
+            validate: () => {
+              if (!validateForm()) {
+                alert('Please fill in all required fields before proceeding to payment.');
+                return false;
+              }
+              return true;
+            }
+          });
+        }
+
+        // ===== GOOGLE PAY =====
+        const googlePay = instance.paymentRequest({
+          target: document.getElementById('google-pay'),
+          requestShipping: true,
+          onSuccess: async (orderId) => {
+            await handlePaymentSuccess(orderId, 'Google Pay');
+          },
+          onError: (error) => {
+            console.error('Google Pay error:', error);
+            alert('Google Pay failed. Please try another payment method.');
+          },
+          onCancel: () => {
+            console.log('Google Pay cancelled');
+          },
+          buttonStyle: {
+            variant: 'google-pay',
+            size: 'large'
+          },
+          validate: () => {
+            if (!validateForm()) {
+              alert('Please fill in all required fields before proceeding to payment.');
+              return false;
+            }
+            return true;
+          }
+        });
+
+      } catch (error) {
+        console.error('Failed to initialize Revolut payments:', error);
+        alert('Payment system initialization failed. Please refresh the page or contact support.');
       }
-    }).render('#paypal-button-container');
+    }
+
+    // Initialize payments when page loads
+    initializeRevolutPayments();
   </script>
 </body>
 </html>
