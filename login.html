@@ -191,7 +191,7 @@
     // Wait for Firebase to initialize
     window.addEventListener('firebase-ready', () => {
       if (FirebaseAuth.isLoggedIn()) {
-        window.location.href = 'account.html';
+        window.location.href = 'index.html';
       }
     });
 
@@ -208,7 +208,7 @@
       if (result.success) {
         alertBox.innerHTML = '<div class="alert alert-success">' + result.message + ' Redirecting...</div>';
         setTimeout(() => {
-          const returnUrl = new URLSearchParams(window.location.search).get('return') || 'account.html';
+          const returnUrl = new URLSearchParams(window.location.search).get('return') || 'index.html';
           window.location.href = returnUrl;
         }, 1000);
       } else {

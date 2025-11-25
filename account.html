@@ -148,7 +148,13 @@
       .nav-toggle { display: flex; }
       .form-row { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr; }
-      .sidebar-menu button { font-size: 0.85rem; padding: 0.75rem; }
+      .sidebar-menu button {
+        font-size: 0.85rem;
+        padding: 1rem 0.75rem;
+        min-height: 48px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+      }
     }
   </style>
 </head>
@@ -323,10 +329,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script type="module">
-    // Mobile nav
-    document.getElementById('navToggle').addEventListener('click', () => {
-      document.getElementById('navLinks').classList.toggle('open');
-    });
+    // Mobile nav - wait for DOM to be ready
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('open');
+      });
+    }
 
     // Wait for Firebase to initialize
     const checkAuth = setInterval(async () => {
@@ -562,21 +572,24 @@
     const tabButtons = document.querySelectorAll('[data-tab]');
     const tabContents = document.querySelectorAll('.content-section');
 
-    tabButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const tab = button.dataset.tab;
+    if (tabButtons.length > 0 && tabContents.length > 0) {
+      tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tab = button.dataset.tab;
 
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
 
-        tabContents.forEach(content => {
-          content.classList.remove('active');
-          if (content.id === tab) {
-            content.classList.add('active');
-          }
+          tabContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === tab) {
+              content.classList.add('active');
+            }
+          });
         });
       });
-    });
+    }
 
     // Profile form
     document.getElementById('profileForm').addEventListener('submit', async function(e) {
@@ -634,10 +647,14 @@
     });
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await Auth.logout();
-      window.location.href = 'index.html';
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await Auth.logout();
+        window.location.href = 'index.html';
+      });
+    }
     }
   </script>
 </body>
