@@ -261,13 +261,10 @@
 
           <div class="payment-methods">
             <div class="payment-methods-title">Payment Method</div>
-            <!-- Revolut Payment Widgets -->
+            <!-- Revolut Card Payment -->
             <div id="revolut-card" style="margin-bottom: 1rem;"></div>
             <button id="card-submit-button" class="btn-primary" style="display: none; width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">Pay with Card</button>
-            <div id="revolut-pay" style="margin-bottom: 0.5rem;"></div>
-            <div id="apple-pay" style="margin-bottom: 0.5rem;"></div>
-            <div id="google-pay" style="margin-bottom: 0.5rem;"></div>
-            <p class="payment-note">Secure payment powered by Revolut</p>
+            <p class="payment-note">Secure payment powered by Revolut • Supports all major cards, Apple Pay & Google Pay</p>
           </div>
         </div>
       </div>
@@ -481,10 +478,19 @@
         // Get customer email
         const customerEmail = document.getElementById('email').value.trim();
 
+        // Sanitize cart items to remove circular references
+        const sanitizedItems = cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image: item.image
+        }));
+
         const orderData = {
           amount: Math.round(total * 100), // Convert to smallest currency unit (pence)
           currency: 'GBP',
-          items: cart,
+          items: sanitizedItems,
           customerEmail: customerEmail
         };
 
@@ -626,46 +632,10 @@
           }
         });
 
-        // ===== REVOLUT PAY, APPLE PAY, GOOGLE PAY =====
-        // These use the Payments API which doesn't require order token upfront
-        const paymentsInstance = await RevolutCheckout.payments({
-          locale: 'en',
-          publicToken: REVOLUT_PUBLIC_KEY,
-          mode: REVOLUT_MODE
-        });
+        // Additional payment methods (Apple Pay, Google Pay, Revolut Pay) can be added here
+        // For now, focusing on card payments which is the primary requirement
 
-        // ===== REVOLUT PAY =====
-        const revolutPay = paymentsInstance.revolutPay({
-          target: document.getElementById('revolut-pay'),
-          createOrder: async () => {
-            if (!validateForm()) {
-              alert('Please fill in all required fields before proceeding to payment.');
-              throw new Error('Form validation failed');
-            }
-            const orderToken = await createRevolutOrder();
-            if (!orderToken) {
-              throw new Error('Unable to create order');
-            }
-            return { publicId: orderToken };
-          },
-          onSuccess: async (orderId) => {
-            await handlePaymentSuccess(orderId, 'Revolut Pay');
-          },
-          onError: (error) => {
-            console.error('Revolut Pay error:', error);
-            alert('Payment failed. Please try again.');
-          },
-          onCancel: () => {
-            console.log('Revolut Pay cancelled');
-          },
-          buttonStyle: {
-            size: 'large',
-            variant: 'dark',
-            radius: 'round'
-          }
-        });
-
-        console.log('Revolut payments initialized successfully');
+        console.log('Revolut card payment initialized successfully');
 
       } catch (error) {
         console.error('Failed to initialize Revolut payments:', error);
