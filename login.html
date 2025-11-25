@@ -191,6 +191,7 @@
     // Wait for Firebase to initialize
     window.addEventListener('firebase-ready', () => {
       if (FirebaseAuth.isLoggedIn()) {
+        // Always redirect to homepage if already logged in
         window.location.href = 'index.html';
       }
     });
@@ -207,8 +208,20 @@
 
       if (result.success) {
         alertBox.innerHTML = '<div class="alert alert-success">' + result.message + ' Redirecting...</div>';
+
+        // Get return URL before clearing it
+        let returnUrl = new URLSearchParams(window.location.search).get('return') || 'index.html';
+        // Don't redirect back to account.html after login - always go to homepage
+        if (returnUrl === 'account.html') {
+          returnUrl = 'index.html';
+        }
+
+        // Clear any return parameter from URL to prevent caching issues on mobile
+        if (window.location.search) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         setTimeout(() => {
-          const returnUrl = new URLSearchParams(window.location.search).get('return') || 'index.html';
           window.location.href = returnUrl;
         }, 1000);
       } else {
