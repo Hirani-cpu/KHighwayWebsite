@@ -140,7 +140,7 @@
         <li><a href="products.html">Products</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="cart.html" class="cart-link">🛒 Cart <span class="cart-count">0</span></a></li>
+        <li><a href="cart.html" class="cart-link">Cart <span class="cart-count">0</span></a></li>
       </ul>
     </div>
   </header>
@@ -261,10 +261,9 @@
 
           <div class="payment-methods">
             <div class="payment-methods-title">Payment Method</div>
-            <!-- Revolut Card Payment -->
-            <div id="revolut-card" style="margin-bottom: 1rem;"></div>
-            <button id="card-submit-button" class="btn-primary" style="display: none; width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">Pay with Card</button>
-            <p class="payment-note">Secure payment powered by Revolut • Supports all major cards, Apple Pay & Google Pay</p>
+            <!-- PayPal Button Container -->
+            <div id="paypal-button-container"></div>
+            <p class="payment-note">Secure payment powered by PayPal</p>
           </div>
         </div>
       </div>
@@ -320,8 +319,8 @@
   <!-- EmailJS for notifications -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <!-- Revolut SDK -->
-  <script src="https://merchant.revolut.com/embed.js"></script>
+  <!-- PayPal SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=AVCvli_4wEz5U6uVBt6yVv3SCt6qmz68pvTpq2Dv8u-eUO-9CUqThZQevR-hkBYIXh36bKVuTUtuPGv8&currency=GBP"></script>
 
   <script type="module">
     // Initialize EmailJS
@@ -458,195 +457,111 @@
       return isValid;
     }
 
-    // ============================================================
-    // REVOLUT PAYMENT INTEGRATION
-    // ============================================================
-    // TODO: Replace these placeholder values with your actual Revolut credentials
-    const REVOLUT_PUBLIC_KEY = 'pk_aXYF1V9yQfMqZhFIOGuGeWXfBzxmC0zdT6woriLRhoOvbLHQ'; // Get from Revolut Dashboard
-    const REVOLUT_MODE = 'sandbox'; // Use 'sandbox' for testing, 'prod' for live
+    // PayPal Buttons
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'pay'
+      },
 
-    // Function to create order via Firebase Cloud Function
-    async function createRevolutOrder() {
-      const cart = Cart.getCart();
-      const subtotal = Cart.getTotal();
-      const shipping = getSelectedShipping();
-      const total = subtotal + shipping;
-
-      console.log('Creating order with:', { total, subtotal, shipping, cartItems: cart.length });
-
-      try {
-        // Get customer email
-        const customerEmail = document.getElementById('email').value.trim();
-
-        // Sanitize cart items to remove circular references
-        const sanitizedItems = cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image
-        }));
-
-        const orderData = {
-          amount: Math.round(total * 100), // Convert to smallest currency unit (pence)
-          currency: 'GBP',
-          items: sanitizedItems,
-          customerEmail: customerEmail
-        };
-
-        console.log('Sending order data:', orderData);
-
-        // Call Firebase Cloud Function to create Revolut order
-        const createOrder = firebase.functions().httpsCallable('createRevolutOrder');
-        const result = await createOrder(orderData);
-
-        console.log('Function result:', result);
-
-        if (result.data && result.data.success) {
-          console.log('Revolut order created:', result.data.order_id);
-          return result.data.public_id;
-        } else {
-          console.error('Order creation failed:', result.data);
-          return null;
+      // Validate form before payment
+      onClick: function(data, actions) {
+        if (!validateForm()) {
+          alert('Please fill in all required fields before proceeding to payment.');
+          return actions.reject();
         }
-      } catch (error) {
-        console.error('Failed to create Revolut order:', error);
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        alert('Failed to create order. Please try again or contact support.');
-        return null;
-      }
-    }
+        return actions.resolve();
+      },
 
-    // Handle successful payment
-    async function handlePaymentSuccess(orderId, paymentMethod) {
-      console.log(`Payment successful! Order ID: ${orderId}, Method: ${paymentMethod}`);
+      // Create order
+      createOrder: function(data, actions) {
+        const cart = Cart.getCart();
+        const subtotal = Cart.getTotal();
+        const shipping = getSelectedShipping();
 
-      const cartItems = Cart.getCart();
-      const orderSubtotal = Cart.getTotal();
-      const orderShipping = getSelectedShipping();
-
-      // Clear cart
-      Cart.clearCart();
-
-      // Show success
-      document.getElementById('checkoutContent').style.display = 'none';
-      document.getElementById('orderSuccess').classList.add('show');
-      document.getElementById('orderId').textContent = orderId;
-
-      // Save order to Firebase
-      const userEmail = (window.Auth && Auth.isLoggedIn()) ? Auth.getCurrentUser().email : document.getElementById('email').value;
-      const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
-      const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
-
-      const orderData = {
-        orderId: orderId,
-        userEmail: userEmail,
-        total: orderSubtotal + orderShipping,
-        deliveryMethod: selectedDelivery,
-        deliveryInstructions: deliveryInstructions,
-        paymentMethod: paymentMethod,
-        items: cartItems,
-        firstName: document.getElementById('firstName').value.trim(),
-        lastName: document.getElementById('lastName').value.trim(),
-        address: document.getElementById('address').value.trim(),
-        address2: document.getElementById('address2').value.trim(),
-        city: document.getElementById('city').value.trim(),
-        postcode: document.getElementById('postcode').value.trim(),
-        country: document.getElementById('country').value,
-        phone: document.getElementById('phone').value.trim()
-      };
-
-      await FirebaseOrders.saveOrder(orderData);
-
-      // Send notification email to store owner
-      await sendOrderNotification(orderData);
-    }
-
-    // Initialize Revolut Payments
-    async function initializeRevolutPayments() {
-      try {
-        console.log('Initializing Revolut payments...');
-
-        // ===== CARD PAYMENT =====
-        // Initialize card field on demand when user clicks pay button
-        let cardFieldInstance = null;
-        const cardSubmitBtn = document.getElementById('card-submit-button');
-        cardSubmitBtn.style.display = 'block';
-
-        cardSubmitBtn.addEventListener('click', async () => {
-          if (!validateForm()) {
-            alert('Please fill in all required fields before proceeding to payment.');
-            return;
-          }
-
-          try {
-            cardSubmitBtn.disabled = true;
-            cardSubmitBtn.textContent = 'Creating order...';
-
-            // Create order first
-            const orderToken = await createRevolutOrder();
-            if (!orderToken) {
-              alert('Unable to create order. Please try again.');
-              cardSubmitBtn.disabled = false;
-              cardSubmitBtn.textContent = 'Pay with Card';
-              return;
-            }
-
-            // Now initialize card field with order token
-            const instance = await RevolutCheckout(orderToken, REVOLUT_MODE);
-            cardFieldInstance = instance.createCardField({
-              target: document.getElementById('revolut-card'),
-              onSuccess: async () => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const orderId = urlParams.get('_rr_oid') || 'CARD-' + Date.now();
-                await handlePaymentSuccess(orderId, 'Card Payment');
-              },
-              onError: (error) => {
-                console.error('Card payment error:', error);
-                alert(`Card payment failed: ${error.message || 'Please try again'}`);
-                cardSubmitBtn.disabled = false;
-                cardSubmitBtn.textContent = 'Pay with Card';
-              },
-              onCancel: () => {
-                console.log('Card payment cancelled by user');
-                cardSubmitBtn.disabled = false;
-                cardSubmitBtn.textContent = 'Pay with Card';
+        return actions.order.create({
+          purchase_units: [{
+            description: 'K Highway DIY Hardware Shop Shop Order',
+            amount: {
+              currency_code: 'GBP',
+              value: (subtotal + shipping).toFixed(2),
+              breakdown: {
+                item_total: {
+                  currency_code: 'GBP',
+                  value: subtotal.toFixed(2)
+                },
+                shipping: {
+                  currency_code: 'GBP',
+                  value: shipping.toFixed(2)
+                }
               }
-            });
-
-            cardSubmitBtn.textContent = 'Processing...';
-
-            // Submit the card field
-            cardFieldInstance.submit({
-              email: document.getElementById('email').value.trim(),
-              name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
-              phone: document.getElementById('phone').value.trim()
-            });
-
-          } catch (error) {
-            console.error('Card payment initialization error:', error);
-            alert('Failed to initialize payment. Please try again.');
-            cardSubmitBtn.disabled = false;
-            cardSubmitBtn.textContent = 'Pay with Card';
-          }
+            },
+            items: cart.map(item => ({
+              name: item.name,
+              unit_amount: {
+                currency_code: 'GBP',
+                value: item.price.toFixed(2)
+              },
+              quantity: item.quantity.toString()
+            }))
+          }]
         });
+      },
 
-        // Additional payment methods (Apple Pay, Google Pay, Revolut Pay) can be added here
-        // For now, focusing on card payments which is the primary requirement
+      // Capture payment
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(async function(details) {
+          // Payment successful
+          const orderId = details.id;
+          const cartItems = Cart.getCart();
+          const orderSubtotal = Cart.getTotal();
+          const orderShipping = getSelectedShipping();
 
-        console.log('Revolut card payment initialized successfully');
+          // Clear cart
+          Cart.clearCart();
 
-      } catch (error) {
-        console.error('Failed to initialize Revolut payments:', error);
-        console.error('Error details:', error.message);
-        // Don't show alert on page load, just log the error
-        // Payment buttons will show appropriate errors when clicked
+          // Show success
+          document.getElementById('checkoutContent').style.display = 'none';
+          document.getElementById('orderSuccess').classList.add('show');
+          document.getElementById('orderId').textContent = orderId;
+
+          // Save order to Firebase
+          const userEmail = (window.Auth && Auth.isLoggedIn()) ? Auth.getCurrentUser().email : document.getElementById('email').value;
+          const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
+          const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
+
+          const orderData = {
+            orderId: orderId,
+            userEmail: userEmail,
+            total: orderSubtotal + orderShipping,
+            deliveryMethod: selectedDelivery,
+            deliveryInstructions: deliveryInstructions,
+            items: cartItems,
+            firstName: document.getElementById('firstName').value.trim(),
+            lastName: document.getElementById('lastName').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            address2: document.getElementById('address2').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            postcode: document.getElementById('postcode').value.trim(),
+            country: document.getElementById('country').value,
+            phone: document.getElementById('phone').value.trim()
+          };
+
+          await FirebaseOrders.saveOrder(orderData);
+
+          // Send notification email to store owner
+          await sendOrderNotification(orderData);
+        });
+      },
+
+      // Handle errors
+      onError: function(err) {
+        console.error('PayPal Error:', err);
+        alert('There was an error processing your payment. Please try again.');
       }
-    }
-
-    // Initialize payments when page loads
-    initializeRevolutPayments();
+    }).render('#paypal-button-container');
   </script>
 </body>
 </html>
