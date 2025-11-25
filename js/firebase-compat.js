@@ -40,6 +40,7 @@ window.Auth = {
         }
         this._ready = true;
         this.updateNavigation();
+        window.dispatchEvent(new Event('firebase-ready'));
         resolve();
       });
     });
