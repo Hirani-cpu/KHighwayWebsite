@@ -512,9 +512,9 @@
       doc.text('Order Details', 20, 55);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
-      doc.text(\`Order #: \${order.orderId || order.id.slice(-8).toUpperCase()}\`, 20, 62);
-      doc.text(\`Date: \${new Date(order.date).toLocaleDateString('en-GB')}\`, 20, 68);
-      doc.text(\`Status: \${order.status.charAt(0).toUpperCase() + order.status.slice(1)}\`, 20, 74);
+      doc.text(`Order #: ${order.orderId || order.id.slice(-8).toUpperCase()}`, 20, 62);
+      doc.text(`Date: ${new Date(order.date).toLocaleDateString('en-GB')}`, 20, 68);
+      doc.text(`Status: ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`, 20, 74);
 
       // Customer info
       const shipping = order.shipping || order;
@@ -523,10 +523,10 @@
       doc.text('Bill To:', 120, 55);
       doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
-      doc.text(\`\${shipping.firstName || ''} \${shipping.lastName || ''}\`, 120, 62);
-      doc.text(\`\${shipping.address || ''}\`, 120, 68);
-      if (shipping.address2) doc.text(\`\${shipping.address2}\`, 120, 74);
-      doc.text(\`\${shipping.city || ''}, \${shipping.postcode || ''}\`, 120, shipping.address2 ? 80 : 74);
+      doc.text(`${shipping.firstName || ''} ${shipping.lastName || ''}`, 120, 62);
+      doc.text(`${shipping.address || ''}`, 120, 68);
+      if (shipping.address2) doc.text(`${shipping.address2}`, 120, 74);
+      doc.text(`${shipping.city || ''}, ${shipping.postcode || ''}`, 120, shipping.address2 ? 80 : 74);
 
       // Items table
       let yPos = 95;
@@ -551,8 +551,8 @@
         const itemName = item.name.length > 40 ? item.name.substring(0, 37) + '...' : item.name;
         doc.text(itemName, 20, yPos);
         doc.text(item.quantity.toString(), 120, yPos);
-        doc.text(\`£\${item.price.toFixed(2)}\`, 145, yPos);
-        doc.text(\`£\${(item.price * item.quantity).toFixed(2)}\`, 175, yPos);
+        doc.text(`£${item.price.toFixed(2)}`, 145, yPos);
+        doc.text(`£${(item.price * item.quantity).toFixed(2)}`, 175, yPos);
         yPos += 7;
       });
 
@@ -562,7 +562,7 @@
       yPos += 10;
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
-      doc.text(\`Total: £\${order.total.toFixed(2)}\`, 175, yPos, { align: 'right' });
+      doc.text(`Total: £${order.total.toFixed(2)}`, 175, yPos, { align: 'right' });
 
       // Footer
       doc.setFontSize(9);
@@ -570,7 +570,7 @@
       doc.text('Thank you for your business!', 105, 280, { align: 'center' });
 
       // Download
-      doc.save(\`Invoice-\${order.orderId || order.id.slice(-8).toUpperCase()}.pdf\`);
+      doc.save(`Invoice-${order.orderId || order.id.slice(-8).toUpperCase()}.pdf`);
     };
 
     // Tab switching
