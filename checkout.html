@@ -331,14 +331,14 @@
   <script type="module">
     // Initialize EmailJS
     (function() {
-      emailjs.init("YOUR_PUBLIC_KEY"); // You'll need to replace this with your EmailJS public key
+      emailjs.init("iyJfrVDFe3d2AL7fI"); // EmailJS Public Key
     })();
 
     // Function to send order notification email
     async function sendOrderNotification(orderData) {
       try {
         // Send email to store owner
-        await emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+        await emailjs.send("service_cktpvl2", "template_m3h1soe", {
           to_email: "info@khighwaywd.co.uk", // Your email address
           order_id: orderData.orderId,
           customer_name: `${orderData.firstName} ${orderData.lastName}`,
