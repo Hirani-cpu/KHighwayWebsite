@@ -322,10 +322,44 @@
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
 
+  <!-- EmailJS for notifications -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
   <!-- PayPal SDK -->
   <script src="https://www.paypal.com/sdk/js?client-id=AVCvli_4wEz5U6uVBt6yVv3SCt6qmz68pvTpq2Dv8u-eUO-9CUqThZQevR-hkBYIXh36bKVuTUtuPGv8&currency=GBP"></script>
 
   <script type="module">
+    // Initialize EmailJS
+    (function() {
+      emailjs.init("YOUR_PUBLIC_KEY"); // You'll need to replace this with your EmailJS public key
+    })();
+
+    // Function to send order notification email
+    async function sendOrderNotification(orderData) {
+      try {
+        // Send email to store owner
+        await emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+          to_email: "info@khighwaywd.co.uk", // Your email address
+          order_id: orderData.orderId,
+          customer_name: `${orderData.firstName} ${orderData.lastName}`,
+          customer_email: orderData.userEmail,
+          customer_phone: orderData.phone,
+          total_amount: `£${orderData.total.toFixed(2)}`,
+          delivery_method: orderData.deliveryMethod,
+          items_count: orderData.items.length,
+          items_details: orderData.items.map(item =>
+            `${item.name} (Qty: ${item.quantity}) - £${(item.price * item.quantity).toFixed(2)}`
+          ).join('\n'),
+          customer_address: `${orderData.address}, ${orderData.city}, ${orderData.postcode}`,
+          order_date: new Date().toLocaleString('en-GB')
+        });
+        console.log('Order notification sent successfully');
+      } catch (error) {
+        console.error('Failed to send notification:', error);
+        // Don't fail the order if email fails
+      }
+    }
+
     // Mobile nav
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
@@ -504,7 +538,7 @@
           const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
           const deliveryInstructions = document.getElementById('deliveryInstructions').value.trim();
 
-          await FirebaseOrders.saveOrder({
+          const orderData = {
             orderId: orderId,
             userEmail: userEmail,
             total: orderSubtotal + orderShipping,
@@ -519,7 +553,12 @@
             postcode: document.getElementById('postcode').value.trim(),
             country: document.getElementById('country').value,
             phone: document.getElementById('phone').value.trim()
-          });
+          };
+
+          await FirebaseOrders.saveOrder(orderData);
+
+          // Send notification email to store owner
+          await sendOrderNotification(orderData);
         });
       },
 
