@@ -342,16 +342,21 @@
     const checkAuth = setInterval(async () => {
       if (window.Auth && window.Auth._ready) {
         clearInterval(checkAuth);
+        console.log('Auth is ready');
         if (!Auth.isLoggedIn()) {
+          console.log('Not logged in, redirecting to login');
           window.location.href = 'login.html';
           return;
         }
+        console.log('User is logged in, initializing account');
         initAccount();
       }
     }, 100);
 
     async function initAccount() {
+    console.log('initAccount called');
     const user = Auth.getCurrentUser();
+    console.log('User:', user);
 
     // Set user name
     document.getElementById('userName').textContent = user.firstName;
@@ -571,10 +576,14 @@
     // Tab switching
     const tabButtons = document.querySelectorAll('[data-tab]');
     const tabContents = document.querySelectorAll('.content-section');
+    console.log('Tab buttons found:', tabButtons.length);
+    console.log('Tab contents found:', tabContents.length);
 
     if (tabButtons.length > 0 && tabContents.length > 0) {
+      console.log('Setting up tab button listeners');
       tabButtons.forEach(button => {
         button.addEventListener('click', () => {
+          console.log('Tab clicked:', button.dataset.tab);
           const tab = button.dataset.tab;
 
           tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -588,6 +597,9 @@
           });
         });
       });
+      console.log('Tab button listeners set up successfully');
+    } else {
+      console.error('Tab buttons or contents not found!');
     }
 
     // Profile form
@@ -647,12 +659,18 @@
 
     // Logout
     const logoutBtn = document.getElementById('logoutBtn');
+    console.log('Logout button found:', !!logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', async () => {
+        console.log('Logout clicked');
         await Auth.logout();
         window.location.href = 'index.html';
       });
+      console.log('Logout button listener set up successfully');
+    } else {
+      console.error('Logout button not found!');
     }
+    console.log('initAccount completed');
     }
   </script>
 </body>
