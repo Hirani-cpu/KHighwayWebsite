@@ -71,17 +71,32 @@ exports.createRevolutOrder = functions.https.onCall(async (data, context) => {
     };
 
   } catch (error) {
-    console.error('Failed to create Revolut order:', error.response?.data || error.message);
+    // Extract safe error information without circular references
+    const errorMessage = error.message || 'Unknown error';
+    const statusCode = error.response?.status;
+    const errorData = error.response?.data;
+
+    console.error('Failed to create Revolut order');
+    console.error('Error message:', errorMessage);
+    console.error('Status code:', statusCode);
+    console.error('Error data:', errorData);
 
     // Handle Revolut API errors
-    if (error.response) {
+    if (error.response && error.response.data) {
+      const apiErrorMsg = typeof error.response.data === 'string'
+        ? error.response.data
+        : error.response.data.message || JSON.stringify(error.response.data);
+
       throw new functions.https.HttpsError(
         'internal',
-        `Revolut API error: ${error.response.data?.message || error.response.statusText}`
+        `Revolut API error (${statusCode}): ${apiErrorMsg}`
       );
     }
 
-    // Handle other errors
-    throw new functions.https.HttpsError('internal', `Failed to create order: ${error.message}`);
+    // Handle other errors (network, timeout, etc.)
+    throw new functions.https.HttpsError(
+      'internal',
+      `Failed to create order: ${errorMessage}`
+    );
   }
 });
