@@ -1,11 +1,11 @@
-const {onCall, HttpsError} = require('firebase-functions/v2/https');
+const functions = require('firebase-functions');
 const axios = require('axios');
 
 // ============================================================
 // REVOLUT ORDER CREATION CLOUD FUNCTION
 // ============================================================
 // TODO: Add your Revolut Secret API Key here (NEVER expose this in frontend!)
-const REVOLUT_SECRET_KEY = 'YOUR_REVOLUT_SECRET_KEY'; // Replace with your actual secret key
+const REVOLUT_SECRET_KEY = 'sk_uVRhIXrLP_mVviLhi6aIT3UFKopsZq6w4mk9AEXcyfqna--dH2Jy3SOC9cdeAA5F'; // Replace with your actual secret key
 const REVOLUT_API_URL = 'https://sandbox-merchant.revolut.com/api/1.0/orders'; // Use sandbox for testing
 
 // Change to production URL when going live:
@@ -15,17 +15,17 @@ const REVOLUT_API_URL = 'https://sandbox-merchant.revolut.com/api/1.0/orders'; /
  * Cloud Function to create a Revolut order
  * This must be called from the frontend before initiating payment
  */
-exports.createRevolutOrder = onCall({cors: true}, async (request) => {
+exports.createRevolutOrder = functions.https.onCall(async (data, context) => {
   try {
-    const {amount, currency, items, customerEmail} = request.data;
+    const {amount, currency, items, customerEmail} = data;
 
     // Validate input
     if (!amount || !currency) {
-      throw new HttpsError('invalid-argument', 'Amount and currency are required');
+      throw new functions.https.HttpsError('invalid-argument', 'Amount and currency are required');
     }
 
     if (amount <= 0) {
-      throw new HttpsError('invalid-argument', 'Amount must be greater than 0');
+      throw new functions.https.HttpsError('invalid-argument', 'Amount must be greater than 0');
     }
 
     // Create order with Revolut Merchant API
@@ -69,13 +69,13 @@ exports.createRevolutOrder = onCall({cors: true}, async (request) => {
 
     // Handle Revolut API errors
     if (error.response) {
-      throw new HttpsError(
+      throw new functions.https.HttpsError(
         'internal',
         `Revolut API error: ${error.response.data?.message || error.response.statusText}`
       );
     }
 
     // Handle other errors
-    throw new HttpsError('internal', `Failed to create order: ${error.message}`);
+    throw new functions.https.HttpsError('internal', `Failed to create order: ${error.message}`);
   }
 });

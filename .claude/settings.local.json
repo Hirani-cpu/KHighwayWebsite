@@ -28,7 +28,12 @@
       "Bash(echo:*)",
       "WebSearch",
       "WebFetch(domain:developer.revolut.com)",
-      "Bash(firebase init:*)"
+      "Bash(firebase init:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(firebase projects:list:*)",
+      "Bash(firebase use:*)",
+      "Bash(firebase login:*)",
+      "Bash(firebase functions:list:*)"
     ],
     "deny": [],
     "ask": []
