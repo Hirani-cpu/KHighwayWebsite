@@ -114,7 +114,7 @@
     .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: all 0.4s ease; }
     .product-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-xl); }
     .product-image { height: 220px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-    .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 1rem; }
+    .product-image img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; padding: 10px; }
     .product-image::after { content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); transition: left 0.5s ease; }
     .product-card:hover .product-image::after { left: 100%; }
     .product-rating { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.95); padding: 0.35rem 0.6rem; border-radius: 6px; display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10; }
@@ -371,9 +371,11 @@
           priceDisplay = `£${parseFloat(product.price || 0).toFixed(2)}`;
         }
 
+        const img = product.images?.[0] || 'images/placeholder.jpg';
+
         card.innerHTML = `
           <div class="product-image">
-            ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}">` : '<span>No Image</span>'}
+            <img src="${img}" alt="${product.name}">
             ${product.rating ? `
               <div class="product-rating">
                 <span class="star">⭐</span>
