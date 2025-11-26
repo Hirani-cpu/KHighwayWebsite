@@ -54,5 +54,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isMasterAdmin();
     }
+
+    // Messages collection - anyone can create (contact form), only masterAdmin can read/update/delete
+    match /messages/{messageId} {
+      allow create: if true;
+      allow read, update, delete: if isMasterAdmin();
+    }
   }
 }
