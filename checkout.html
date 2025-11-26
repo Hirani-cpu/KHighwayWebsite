@@ -203,13 +203,31 @@
             <button type="submit" class="search-btn" aria-label="Search">🔍</button>
           </form>
         </li>
-        <li class="auth-link"><a href="login.html">Login</a></li>
+        <li class="auth-link"><a href="login.html" id="authLink">Login</a></li>
 
 
         <li><a href="cart.html" class="cart-link">Cart <span class="cart-count">0</span></a></li>
       </ul>
     </div>
   </header>
+  <!-- Instant auth link update from cache -->
+  <script>
+    (function() {
+      try {
+        const cached = sessionStorage.getItem('authCache');
+        if (cached) {
+          const data = JSON.parse(cached);
+          if (data.isLoggedIn) {
+            const authLink = document.getElementById('authLink');
+            if (authLink) {
+              authLink.href = 'account.html';
+              authLink.textContent = '👤 ' + (data.firstName || data.name || 'Account');
+            }
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <section class="checkout-section" id="checkoutContent">
     <div class="container">
