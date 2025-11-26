@@ -53,6 +53,7 @@ window.Auth = {
     try {
       const cred = await createUserWithEmailAndPassword(auth, data.email, data.password);
       await setDoc(doc(db, 'users', cred.user.uid), {
+        email: data.email,
         firstName: data.firstName, lastName: data.lastName,
         phone: data.phone || '', address: data.address || '',
         address2: data.address2 || '', city: data.city || '',

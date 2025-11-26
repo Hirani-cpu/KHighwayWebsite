@@ -577,10 +577,13 @@ const Admin = {
         const date = user.createdAt?.toDate?.() || new Date();
         const roleBadge = user.role === 'masterAdmin' ? 'badge-danger' :
                          user.role === 'admin' ? 'badge-warning' : 'badge-info';
+        const userName = user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`
+          : user.firstName || user.lastName || user.name || 'No name';
         tbody.innerHTML += `
           <tr>
-            <td>${user.name || 'No name'}</td>
-            <td>${user.email}</td>
+            <td>${userName}</td>
+            <td>${user.email || 'No email'}</td>
             <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
             <td>${date.toLocaleDateString()}</td>
             <td>${user.orderCount || 0}</td>
