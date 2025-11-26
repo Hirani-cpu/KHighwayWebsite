@@ -567,21 +567,39 @@ const Admin = {
       const ordersSnap = await getDocs(collection(db, 'orders'));
       const tbody = document.getElementById('usersTable');
 
+      console.log('Total users:', usersSnap.size);
+      console.log('Total orders:', ordersSnap.size);
+
       if (usersSnap.empty) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--gray-500);">No users yet</td></tr>';
         return;
       }
 
-      // Create a map of orders by email
+      // Create a map of orders by email and by name
       const ordersByEmail = {};
+      const ordersByName = {};
       ordersSnap.forEach(doc => {
         const order = doc.data();
         const email = (order.userEmail || order.email || '').toLowerCase();
+
+        // Map by email
         if (email) {
           if (!ordersByEmail[email]) {
             ordersByEmail[email] = [];
           }
           ordersByEmail[email].push(order);
+        }
+
+        // Map by name (for users without email in Firestore)
+        const orderName = `${(order.firstName || '').toLowerCase()}_${(order.lastName || '').toLowerCase()}`;
+        if (orderName !== '_') {
+          if (!ordersByName[orderName]) {
+            ordersByName[orderName] = {
+              email: email,
+              orders: []
+            };
+          }
+          ordersByName[orderName].orders.push(order);
         }
       });
 
@@ -599,14 +617,15 @@ const Admin = {
         // Try to get email from user data or from orders
         let userEmail = user.email || '';
         if (!userEmail) {
-          // Try to find email from orders (in case it's an old user)
-          const userOrders = ordersSnap.docs.find(orderDoc => {
-            const order = orderDoc.data();
-            return order.userId === userId ||
-                   (order.firstName === user.firstName && order.lastName === user.lastName);
-          });
-          if (userOrders) {
-            userEmail = userOrders.data().userEmail || userOrders.data().email || '';
+          // Try to find email from orders by matching names
+          const nameKey = `${(user.firstName || '').toLowerCase()}_${(user.lastName || '').toLowerCase()}`;
+          console.log(`User without email: ${userName}, nameKey: ${nameKey}`);
+          if (ordersByName[nameKey]) {
+            userEmail = ordersByName[nameKey].email || '';
+            console.log(`Found email from orders: ${userEmail}`);
+          } else {
+            console.log(`No orders found for nameKey: ${nameKey}`);
+            console.log('Available nameKeys:', Object.keys(ordersByName));
           }
         }
 
