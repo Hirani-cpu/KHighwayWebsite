@@ -36,7 +36,8 @@
       "Bash(firebase functions:list:*)",
       "Bash(firebase functions:log:*)",
       "Bash(python add_search_bar.py:*)",
-      "Bash(del:*)"
+      "Bash(del:*)",
+      "Bash(python check_search_css.py:*)"
     ],
     "deny": [],
     "ask": []
