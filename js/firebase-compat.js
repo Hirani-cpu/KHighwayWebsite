@@ -23,6 +23,10 @@ window.Auth = {
   _ready: false,
 
   async _init() {
+    // Load cached auth state immediately and update navigation
+    this.loadCachedAuthState();
+    this.updateNavigation();
+
     return new Promise(resolve => {
       onAuthStateChanged(auth, async (user) => {
         this._user = user;
@@ -42,8 +46,13 @@ window.Auth = {
             }
           }
           this._profile = docSnap.exists() ? { ...docSnap.data(), email: user.email } : null;
+
+          // Cache the auth state
+          this.cacheAuthState();
         } else {
           this._profile = null;
+          // Clear cache when logged out
+          this.clearCachedAuthState();
         }
         this._ready = true;
         this.updateNavigation();
@@ -51,6 +60,39 @@ window.Auth = {
         resolve();
       });
     });
+  },
+
+  // Cache auth state in sessionStorage
+  cacheAuthState() {
+    if (this._profile) {
+      sessionStorage.setItem('authCache', JSON.stringify({
+        firstName: this._profile.firstName,
+        name: this._profile.name,
+        isLoggedIn: true
+      }));
+    }
+  },
+
+  // Load cached auth state
+  loadCachedAuthState() {
+    try {
+      const cached = sessionStorage.getItem('authCache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (data.isLoggedIn) {
+          // Temporarily set profile from cache until Firebase loads
+          this._profile = { firstName: data.firstName, name: data.name };
+          this._user = { uid: 'loading' }; // Temporary user object
+        }
+      }
+    } catch (e) {
+      console.log('No cached auth state');
+    }
+  },
+
+  // Clear cached auth state
+  clearCachedAuthState() {
+    sessionStorage.removeItem('authCache');
   },
 
   isLoggedIn() { return this._user !== null; },
@@ -88,6 +130,8 @@ window.Auth = {
     if (window.Cart) {
       Cart.updateCartCount();
     }
+    // Clear cached auth state
+    this.clearCachedAuthState();
     await signOut(auth);
   },
 
