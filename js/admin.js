@@ -572,11 +572,18 @@ const Admin = {
         return;
       }
 
-      // Create a map of orders by email
+      // Create a map of emails by name from orders
+      const emailsByName = {};
       const ordersByEmail = {};
       ordersSnap.forEach(doc => {
         const order = doc.data();
         const email = (order.userEmail || order.email || '').toLowerCase();
+        const nameKey = `${(order.firstName || '').toLowerCase()}_${(order.lastName || '').toLowerCase()}`;
+
+        if (nameKey !== '_' && email && !emailsByName[nameKey]) {
+          emailsByName[nameKey] = email;
+        }
+
         if (email) {
           if (!ordersByEmail[email]) {
             ordersByEmail[email] = [];
@@ -595,8 +602,12 @@ const Admin = {
           ? `${user.firstName} ${user.lastName}`
           : user.firstName || user.lastName || user.name || 'No name';
 
-        // Get email directly from user document
-        const userEmail = user.email || '';
+        // Get email from user document, or find it from orders by matching name
+        let userEmail = user.email || '';
+        if (!userEmail && user.firstName && user.lastName) {
+          const nameKey = `${user.firstName.toLowerCase()}_${user.lastName.toLowerCase()}`;
+          userEmail = emailsByName[nameKey] || '';
+        }
 
         // Count orders for this user
         const userOrderCount = userEmail ? (ordersByEmail[userEmail.toLowerCase()]?.length || 0) : 0;
@@ -604,7 +615,7 @@ const Admin = {
         tbody.innerHTML += `
           <tr>
             <td>${userName}</td>
-            <td>${userEmail || '<span style="color: #ef4444;">No email - Click "Update Missing Emails"</span>'}</td>
+            <td>${userEmail || '<span style="color: #ef4444;">No email found</span>'}</td>
             <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
             <td>${date.toLocaleDateString()}</td>
             <td>${userOrderCount}</td>
@@ -613,87 +624,6 @@ const Admin = {
       });
     } catch (error) {
       console.error('Error loading users:', error);
-    }
-  },
-
-  // Update all user emails from orders
-  async updateAllUserEmails() {
-    if (!confirm('This will update all users without emails by finding their email from orders. Continue?')) {
-      return;
-    }
-
-    try {
-      console.log('Starting email update process...');
-      const usersSnap = await getDocs(collection(db, 'users'));
-      const ordersSnap = await getDocs(collection(db, 'orders'));
-
-      console.log(`Found ${usersSnap.size} users and ${ordersSnap.size} orders`);
-
-      let updatedCount = 0;
-      let skippedCount = 0;
-      let notFoundCount = 0;
-      const errors = [];
-
-      // Create a map of emails by name from orders
-      const emailsByName = {};
-      ordersSnap.forEach(orderDoc => {
-        const order = orderDoc.data();
-        const orderNameKey = `${(order.firstName || '').toLowerCase()}_${(order.lastName || '').toLowerCase()}`;
-        const email = order.userEmail || order.email || null;
-
-        if (orderNameKey !== '_' && email && !emailsByName[orderNameKey]) {
-          emailsByName[orderNameKey] = email;
-        }
-      });
-
-      console.log('Emails found from orders:', emailsByName);
-
-      // Update users
-      for (const userDoc of usersSnap.docs) {
-        const user = userDoc.data();
-        const userId = userDoc.id;
-
-        // Skip if user already has email
-        if (user.email) {
-          skippedCount++;
-          continue;
-        }
-
-        // Find email from orders by matching name
-        const nameKey = `${(user.firstName || '').toLowerCase()}_${(user.lastName || '').toLowerCase()}`;
-        const foundEmail = emailsByName[nameKey];
-
-        if (foundEmail) {
-          try {
-            await updateDoc(doc(db, 'users', userId), { email: foundEmail });
-            console.log(`✓ Updated user ${user.firstName} ${user.lastName} with email: ${foundEmail}`);
-            updatedCount++;
-          } catch (updateError) {
-            console.error(`✗ Failed to update user ${userId}:`, updateError);
-            errors.push(`${user.firstName} ${user.lastName}: ${updateError.message}`);
-          }
-        } else {
-          console.log(`✗ No email found for ${user.firstName} ${user.lastName} (nameKey: ${nameKey})`);
-          notFoundCount++;
-        }
-      }
-
-      console.log('Email update complete!');
-      console.log(`Updated: ${updatedCount}, Skipped: ${skippedCount}, Not found: ${notFoundCount}`);
-
-      if (errors.length > 0) {
-        console.error('Errors during update:', errors);
-      }
-
-      alert(`Email update complete!\n\nUpdated: ${updatedCount} users\nSkipped: ${skippedCount} users (already had email)\nNot found: ${notFoundCount} users (no matching orders)\n${errors.length > 0 ? '\nErrors: ' + errors.length + ' (check console)' : ''}`);
-
-      // Reload users table
-      await this.loadUsers();
-
-    } catch (error) {
-      console.error('Error updating user emails:', error);
-      console.error('Error details:', error.message, error.code);
-      alert(`Error updating user emails:\n${error.message}\n\nCheck console for full details.`);
     }
   },
 

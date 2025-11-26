@@ -11,8 +11,8 @@ service cloud.firestore {
     // Users collection
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-      // Allow master admin to read all users
-      allow read: if isMasterAdmin();
+      // Allow master admin to read and update all users
+      allow read, update: if isMasterAdmin();
     }
 
     // Products collection - anyone can read, only masterAdmin can write
