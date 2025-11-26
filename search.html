@@ -172,7 +172,7 @@
     <div class="container nav-bar">
       <a href="index.html" class="logo">
         <img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">
-        K Highway DIY Hardware Shop
+        <span class="store-name-text">K Highway DIY Hardware Shop</span>
       </a>
 
       <div class="nav-toggle" id="navToggle">
@@ -199,10 +199,12 @@
       </ul>
     </div>
   </header>
-  <!-- Instant auth link update from cache -->
+  
+  <!-- Instant auth link and store name update from cache -->
   <script>
     (function() {
       try {
+        // Update auth link
         const cached = sessionStorage.getItem('authCache');
         if (cached) {
           const data = JSON.parse(cached);
@@ -213,6 +215,16 @@
               authLink.textContent = '👤 ' + (data.firstName || data.name || 'Account');
             }
           }
+        }
+
+        // Update store name
+        const storeCache = sessionStorage.getItem('storeNameCache');
+        if (storeCache) {
+          const storeName = storeCache;
+          document.querySelectorAll('.store-name-text').forEach(el => {
+            el.textContent = storeName;
+          });
+          document.title = storeName;
         }
       } catch (e) {}
     })();
@@ -253,7 +265,7 @@
         <div class="footer-brand">
           <div class="logo" style="color: white;">
             <img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">
-            K Highway DIY Hardware Shop
+        <span class="store-name-text">K Highway DIY Hardware Shop</span>
           </div>
           <p>Your trusted source for quality window and door hardware parts.</p>
         </div>

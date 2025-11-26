@@ -339,10 +339,12 @@
           <button class="btn-logout" onclick="Admin.logout()">Logout</button>
         </div>
       </header>
-  <!-- Instant auth link update from cache -->
+  
+  <!-- Instant auth link and store name update from cache -->
   <script>
     (function() {
       try {
+        // Update auth link
         const cached = sessionStorage.getItem('authCache');
         if (cached) {
           const data = JSON.parse(cached);
@@ -353,6 +355,16 @@
               authLink.textContent = '👤 ' + (data.firstName || data.name || 'Account');
             }
           }
+        }
+
+        // Update store name
+        const storeCache = sessionStorage.getItem('storeNameCache');
+        if (storeCache) {
+          const storeName = storeCache;
+          document.querySelectorAll('.store-name-text').forEach(el => {
+            el.textContent = storeName;
+          });
+          document.title = storeName;
         }
       } catch (e) {}
     })();

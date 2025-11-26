@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python add_inline_auth_script.py:*)"
+      "Bash(python add_inline_auth_script.py:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
