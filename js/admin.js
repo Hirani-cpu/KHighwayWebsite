@@ -209,6 +209,9 @@ const Admin = {
       case 'settings':
         await this.loadSettings();
         break;
+      case 'messages':
+        await this.loadMessages();
+        break;
     }
   },
 
@@ -228,6 +231,9 @@ const Admin = {
       document.getElementById('totalReviews').textContent = reviewsSnap.size;
 
       await this.loadRecentOrders();
+
+      // Load messages to update unread badge
+      await this.loadMessages();
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     }
@@ -1054,6 +1060,151 @@ const Admin = {
       variations.forEach(variation => {
         this.addVariationRow(variation);
       });
+    }
+  },
+
+  // ===== MESSAGES MANAGEMENT =====
+  allMessages: [],
+  filteredMessages: [],
+
+  async loadMessages() {
+    try {
+      const messagesRef = collection(db, 'messages');
+      const q = query(messagesRef, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+
+      this.allMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      this.filteredMessages = [...this.allMessages];
+      this.renderMessages();
+      this.updateUnreadBadge();
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      const container = document.getElementById('messagesContainer');
+      if (container) {
+        container.innerHTML = '<p style="text-align: center; color: var(--gray-500);">Error loading messages</p>';
+      }
+    }
+  },
+
+  renderMessages() {
+    const container = document.getElementById('messagesContainer');
+    if (!container) return;
+
+    if (this.filteredMessages.length === 0) {
+      container.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--gray-500);">No messages found</p>';
+      return;
+    }
+
+    container.innerHTML = this.filteredMessages.map(msg => {
+      const date = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date();
+      const dateStr = date.toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      const isUnread = msg.status === 'unread';
+      const subjectLabels = {
+        'general': 'General Inquiry',
+        'product': 'Product Question',
+        'order': 'Order Status',
+        'returns': 'Returns & Refunds',
+        'other': 'Other'
+      };
+
+      return `
+        <div class="message-card ${isUnread ? 'unread' : ''}" data-id="${msg.id}">
+          <div class="message-card-header">
+            <div>
+              <div class="message-sender">${msg.firstName} ${msg.lastName}</div>
+              <div class="message-email">${msg.email}${msg.phone ? ` • ${msg.phone}` : ''}</div>
+              <span class="message-subject">${subjectLabels[msg.subject] || msg.subject}</span>
+            </div>
+            <div class="message-date">${dateStr}</div>
+          </div>
+          <div class="message-content">${this.escapeHtml(msg.message)}</div>
+          <div class="message-actions">
+            ${isUnread ? `<button class="btn btn-primary btn-sm" onclick="Admin.markMessageRead('${msg.id}')">Mark as Read</button>` : ''}
+            <button class="btn btn-secondary btn-sm" onclick="Admin.replyToMessage('${msg.email}')">Reply via Email</button>
+            <button class="btn btn-danger btn-sm" onclick="Admin.deleteMessage('${msg.id}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  },
+
+  filterMessages(status) {
+    if (status === 'all') {
+      this.filteredMessages = [...this.allMessages];
+    } else {
+      this.filteredMessages = this.allMessages.filter(m => m.status === status);
+    }
+    this.renderMessages();
+  },
+
+  async markMessageRead(messageId) {
+    try {
+      await updateDoc(doc(db, 'messages', messageId), { status: 'read' });
+      const msg = this.allMessages.find(m => m.id === messageId);
+      if (msg) msg.status = 'read';
+      this.filterMessages(document.getElementById('messageStatusFilter').value);
+      this.updateUnreadBadge();
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      alert('Error updating message');
+    }
+  },
+
+  async markAllMessagesRead() {
+    try {
+      const unreadMessages = this.allMessages.filter(m => m.status === 'unread');
+      for (const msg of unreadMessages) {
+        await updateDoc(doc(db, 'messages', msg.id), { status: 'read' });
+        msg.status = 'read';
+      }
+      this.filterMessages(document.getElementById('messageStatusFilter').value);
+      this.updateUnreadBadge();
+    } catch (error) {
+      console.error('Error marking all messages as read:', error);
+      alert('Error updating messages');
+    }
+  },
+
+  async deleteMessage(messageId) {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      await deleteDoc(doc(db, 'messages', messageId));
+      this.allMessages = this.allMessages.filter(m => m.id !== messageId);
+      this.filterMessages(document.getElementById('messageStatusFilter').value);
+      this.updateUnreadBadge();
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      alert('Error deleting message');
+    }
+  },
+
+  replyToMessage(email) {
+    window.open(`mailto:${email}`, '_blank');
+  },
+
+  updateUnreadBadge() {
+    const unreadCount = this.allMessages.filter(m => m.status === 'unread').length;
+    const badge = document.getElementById('unreadBadge');
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
     }
   },
 

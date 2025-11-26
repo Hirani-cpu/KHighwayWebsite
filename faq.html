@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FAQ - K Highway DIY Hardware Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Frequently asked questions about K Highway DIY Hardware Shop products and services." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --success: #10b981;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--gray-700); background: var(--light); }
+    a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+    ul { list-style: none; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; transition: all 0.3s ease; min-height: 72px; }
+    header.scrolled { box-shadow: var(--shadow-lg); }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; height: 72px; }
+    .logo { font-weight: 800; font-size: 1.1rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; white-space: nowrap; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; flex-wrap: nowrap; }
+    .nav-links > li > a { font-weight: 500; color: var(--gray-700); padding: 0.5rem 0; position: relative; font-size: 0.9rem; white-space: nowrap; }
+    .nav-links > li > a:hover { color: var(--primary); }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 0.5rem; }
+    .nav-toggle span { width: 25px; height: 2px; background: var(--secondary); }
+    .cart-link { position: relative; display: inline-flex; align-items: center; gap: 0.25rem; }
+    .cart-count { position: absolute; top: -8px; right: -12px; background: var(--accent); color: white; font-size: 0.65rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    .page-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8rem 0 4rem; text-align: center; color: white; }
+    .page-hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+    .page-hero p { font-size: 1.1rem; opacity: 0.9; }
+
+    .content-section { padding: 4rem 0; }
+
+    .faq-categories { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 3rem; }
+    .faq-category-btn { padding: 0.75rem 1.5rem; background: white; border: 2px solid var(--gray-200); border-radius: 50px; font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.3s ease; }
+    .faq-category-btn:hover, .faq-category-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .faq-section { margin-bottom: 3rem; }
+    .faq-section-title { font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .faq-section-title span { font-size: 1.75rem; }
+
+    .faq-item { background: white; border-radius: 12px; margin-bottom: 1rem; box-shadow: var(--shadow); overflow: hidden; }
+    .faq-question { padding: 1.25rem 1.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--secondary); transition: all 0.3s ease; }
+    .faq-question:hover { background: var(--gray-100); }
+    .faq-question .icon { font-size: 1.25rem; transition: transform 0.3s ease; }
+    .faq-item.open .faq-question .icon { transform: rotate(45deg); }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .faq-answer-content { padding: 0 1.5rem 1.25rem; color: var(--gray-700); border-top: 1px solid var(--gray-200); padding-top: 1.25rem; }
+    .faq-answer-content ul { margin: 1rem 0 0 1.5rem; list-style: disc; }
+    .faq-answer-content li { margin-bottom: 0.5rem; }
+
+    .contact-cta { background: white; border-radius: 16px; padding: 3rem; box-shadow: var(--shadow); text-align: center; margin-top: 3rem; }
+    .contact-cta h2 { font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 1rem; }
+    .contact-cta p { color: var(--gray-500); margin-bottom: 1.5rem; }
+    .btn-primary { display: inline-block; padding: 1rem 2rem; background: var(--primary); color: white; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    footer { background: var(--secondary); color: white; padding: 4rem 0 2rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand p { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem; }
+    .footer-title { font-weight: 600; margin-bottom: 1.5rem; }
+    .footer-links li { margin-bottom: 0.75rem; }
+    .footer-links a { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
+    .footer-links a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
+
+    @media (max-width: 768px) {
+      .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: white; flex-direction: column; padding: 1rem; gap: 0; box-shadow: var(--shadow-lg); display: none; }
+      .nav-links.open { display: flex; }
+      .nav-links > li { width: 100%; }
+      .nav-links > li > a { display: block; padding: 1rem; }
+      .nav-toggle { display: flex; }
+      .page-hero h1 { font-size: 2rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .faq-categories { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="container nav-bar">
+      <a href="index.html" class="logo"><img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">K Highway DIY Hardware Shop</a>
+      <div class="nav-toggle" id="navToggle"><span></span><span></span><span></span></div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="category.html">Categories</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">Cart <span class="cart-count">0</span></a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Frequently Asked Questions</h1>
+      <p>Find answers to common questions about our products and services</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="container">
+
+      <!-- Orders & Payments -->
+      <div class="faq-section">
+        <h2 class="faq-section-title"><span>🛒</span> Orders & Payments</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>What payment methods do you accept?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              We accept payments via PayPal, which includes:
+              <ul>
+                <li>PayPal balance</li>
+                <li>Credit cards (Visa, Mastercard, American Express)</li>
+                <li>Debit cards</li>
+                <li>Pay Later options through PayPal</li>
+              </ul>
+              All payments are processed securely through PayPal's encrypted payment system.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How can I track my order?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Once your order has been dispatched, you'll receive an email with your tracking number and a link to track your parcel on the Royal Mail website. You can also view your order status by logging into your account on our website.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Can I cancel or modify my order?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              If you need to cancel or modify your order, please contact us as soon as possible. If your order hasn't been dispatched yet, we can usually make changes. Once an order has been shipped, you'll need to wait for delivery and then request a return if needed.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Do you offer bulk discounts?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Yes! For large orders or trade customers, we offer competitive bulk pricing. Please <a href="contact.html" style="color: var(--primary); font-weight: 600;">contact us</a> with your requirements and we'll provide a custom quote.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping & Delivery -->
+      <div class="faq-section">
+        <h2 class="faq-section-title"><span>🚚</span> Shipping & Delivery</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How much does shipping cost?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              We offer several shipping options:
+              <ul>
+                <li><strong>Click & Collect:</strong> FREE</li>
+                <li><strong>Royal Mail Tracked 24:</strong> £7.00 (1-2 working days)</li>
+                <li><strong>Royal Mail Tracked 48:</strong> £5.00 (2-3 working days)</li>
+              </ul>
+              Orders over £50 qualify for free standard delivery!
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How long will delivery take?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Orders placed before 2pm on working days are typically dispatched the same day. Delivery times depend on your chosen shipping method - Royal Mail Tracked 24 arrives within 1-2 working days, while Tracked 48 takes 2-3 working days.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Do you deliver internationally?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Currently, we deliver to the United Kingdom and Ireland. For international deliveries outside of these areas, please <a href="contact.html" style="color: var(--primary); font-weight: 600;">contact us</a> for a quote and available options.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Returns & Refunds -->
+      <div class="faq-section">
+        <h2 class="faq-section-title"><span>🔄</span> Returns & Refunds</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>What is your returns policy?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              We offer a 30-day money-back guarantee. If you're not satisfied with your purchase, you can return any unused item in its original packaging within 30 days of delivery for a full refund. See our <a href="returns.html" style="color: var(--primary); font-weight: 600;">Returns page</a> for full details.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I return an item?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              To return an item:
+              <ul>
+                <li>Contact us with your order number and reason for return</li>
+                <li>We'll send you a return authorisation within 24 hours</li>
+                <li>Pack the item securely and send it back using a tracked service</li>
+                <li>Receive your refund within 5-7 working days of us receiving the item</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>What if my item arrives damaged?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              If your item arrives damaged, please contact us within 48 hours of delivery with photos of the damage. We'll arrange a free collection and send a replacement or full refund immediately. Please keep all original packaging until the issue is resolved.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div class="faq-section">
+        <h2 class="faq-section-title"><span>🔧</span> Products</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I know which part I need?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              If you're unsure which part you need, you can:
+              <ul>
+                <li>Check the product descriptions and specifications on our website</li>
+                <li>Take a photo of your existing hardware and send it to us</li>
+                <li>Contact us with measurements and details of your window/door type</li>
+              </ul>
+              Our team is happy to help you find the right part!
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Are your products compatible with all window types?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Most of our products are designed for standard uPVC and aluminium windows and doors. Each product listing includes compatibility information. If you're unsure, please contact us with details of your window/door type and we'll advise on compatibility.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Do you provide installation guides?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Many of our products come with installation instructions. For more complex installations, we recommend consulting a professional. If you need guidance, feel free to contact us and we'll do our best to help.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div class="faq-section">
+        <h2 class="faq-section-title"><span>👤</span> Account</h2>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>Do I need an account to order?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              No, you can checkout as a guest. However, creating an account allows you to track orders, save your details for faster checkout, and view your order history.
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How do I reset my password?</span>
+            <span class="icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <div class="faq-answer-content">
+              Click on the "Login" link and then select "Forgot Password". Enter your email address and we'll send you a link to reset your password. If you don't receive the email, check your spam folder or contact us for assistance.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-cta">
+        <h2>Still have questions?</h2>
+        <p>Can't find the answer you're looking for? Our friendly team is here to help.</p>
+        <a href="contact.html" class="btn-primary">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;"><img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">K Highway DIY Hardware Shop</div>
+          <p>Your trusted source for quality window and door hardware parts.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Support</h4>
+          <ul class="footer-links">
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="shipping.html">Shipping Info</a></li>
+            <li><a href="returns.html">Returns</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 K Highway DIY Hardware Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script>
+    // Mobile nav
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+    }
+
+    // Header scroll
+    window.addEventListener('scroll', () => {
+      document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // FAQ Accordion
+    document.querySelectorAll('.faq-question').forEach(question => {
+      question.addEventListener('click', () => {
+        const item = question.parentElement;
+        const answer = item.querySelector('.faq-answer');
+        const isOpen = item.classList.contains('open');
+
+        // Close all other items
+        document.querySelectorAll('.faq-item').forEach(otherItem => {
+          if (otherItem !== item) {
+            otherItem.classList.remove('open');
+            otherItem.querySelector('.faq-answer').style.maxHeight = null;
+          }
+        });
+
+        // Toggle current item
+        if (isOpen) {
+          item.classList.remove('open');
+          answer.style.maxHeight = null;
+        } else {
+          item.classList.add('open');
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

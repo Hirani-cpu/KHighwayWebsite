@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Returns & Refunds - K Highway DIY Hardware Shop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Returns and refunds policy for K Highway DIY Hardware Shop." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #0f172a;
+      --accent: #f59e0b;
+      --light: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; line-height: 1.6; color: var(--gray-700); background: var(--light); }
+    a { text-decoration: none; color: inherit; transition: all 0.3s ease; }
+    ul { list-style: none; }
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); position: fixed; top: 0; left: 0; right: 0; z-index: 1000; transition: all 0.3s ease; min-height: 72px; }
+    header.scrolled { box-shadow: var(--shadow-lg); }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; height: 72px; }
+    .logo { font-weight: 800; font-size: 1.1rem; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; white-space: nowrap; }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 1.25rem; align-items: center; flex-wrap: nowrap; }
+    .nav-links > li > a { font-weight: 500; color: var(--gray-700); padding: 0.5rem 0; position: relative; font-size: 0.9rem; white-space: nowrap; }
+    .nav-links > li > a:hover { color: var(--primary); }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 0.5rem; }
+    .nav-toggle span { width: 25px; height: 2px; background: var(--secondary); }
+    .cart-link { position: relative; display: inline-flex; align-items: center; gap: 0.25rem; }
+    .cart-count { position: absolute; top: -8px; right: -12px; background: var(--accent); color: white; font-size: 0.65rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+    .page-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8rem 0 4rem; text-align: center; color: white; }
+    .page-hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
+    .page-hero p { font-size: 1.1rem; opacity: 0.9; }
+
+    .content-section { padding: 4rem 0; }
+    .content-card { background: white; border-radius: 16px; padding: 2.5rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+    .content-card h2 { font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .content-card h2 span { font-size: 1.75rem; }
+    .content-card h3 { font-size: 1.1rem; font-weight: 600; color: var(--secondary); margin: 1.5rem 0 0.75rem; }
+    .content-card p { margin-bottom: 1rem; color: var(--gray-700); }
+    .content-card ul { margin: 1rem 0 1rem 1.5rem; list-style: disc; }
+    .content-card li { margin-bottom: 0.5rem; color: var(--gray-700); }
+
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+    .step { background: var(--gray-100); padding: 1.5rem; border-radius: 12px; text-align: center; }
+    .step-number { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 1rem; }
+    .step h4 { font-weight: 600; color: var(--secondary); margin-bottom: 0.5rem; }
+    .step p { font-size: 0.9rem; color: var(--gray-500); margin: 0; }
+
+    .info-box { padding: 1.25rem; border-radius: 8px; margin: 1.5rem 0; }
+    .info-box.success { background: #f0fdf4; border-left: 4px solid var(--success); }
+    .info-box.warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+    .info-box.danger { background: #fef2f2; border-left: 4px solid var(--danger); }
+    .info-box p { margin: 0; }
+
+    .btn-primary { display: inline-block; padding: 1rem 2rem; background: var(--primary); color: white; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    footer { background: var(--secondary); color: white; padding: 4rem 0 2rem; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+    .footer-brand p { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem; }
+    .footer-title { font-weight: 600; margin-bottom: 1.5rem; }
+    .footer-links li { margin-bottom: 0.75rem; }
+    .footer-links a { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; }
+    .footer-links a:hover { color: white; }
+    .footer-bottom { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 2rem; text-align: center; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem; }
+
+    @media (max-width: 768px) {
+      .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: white; flex-direction: column; padding: 1rem; gap: 0; box-shadow: var(--shadow-lg); display: none; }
+      .nav-links.open { display: flex; }
+      .nav-links > li { width: 100%; }
+      .nav-links > li > a { display: block; padding: 1rem; }
+      .nav-toggle { display: flex; }
+      .page-hero h1 { font-size: 2rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="container nav-bar">
+      <a href="index.html" class="logo"><img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">K Highway DIY Hardware Shop</a>
+      <div class="nav-toggle" id="navToggle"><span></span><span></span><span></span></div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="category.html">Categories</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="cart.html" class="cart-link">Cart <span class="cart-count">0</span></a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Returns & Refunds</h1>
+      <p>Our hassle-free returns policy</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="container">
+      <div class="content-card">
+        <h2><span>🔄</span> Our Returns Policy</h2>
+        <p>We want you to be completely satisfied with your purchase. If for any reason you're not happy with your order, you can return it within <strong>30 days</strong> of delivery for a full refund or exchange.</p>
+
+        <div class="info-box success">
+          <p><strong>30-Day Money-Back Guarantee:</strong> Return any unused item within 30 days for a full refund, no questions asked.</p>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h2><span>📋</span> Return Conditions</h2>
+        <p>To be eligible for a return, items must be:</p>
+        <ul>
+          <li>In original, unused condition</li>
+          <li>In original packaging with all tags attached</li>
+          <li>Accompanied by proof of purchase (order confirmation or receipt)</li>
+          <li>Returned within 30 days of delivery</li>
+        </ul>
+
+        <div class="info-box warning">
+          <p><strong>Please Note:</strong> Items that have been installed, modified, or show signs of use cannot be returned for a refund.</p>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h2><span>📝</span> How to Return an Item</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h4>Contact Us</h4>
+            <p>Email us at info@khighwaywd.co.uk with your order number and reason for return</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h4>Get Approval</h4>
+            <p>We'll send you a return authorisation and instructions within 24 hours</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h4>Pack & Ship</h4>
+            <p>Pack the item securely and send it back to us using a tracked service</p>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <h4>Get Refunded</h4>
+            <p>Receive your refund within 5-7 working days of us receiving the item</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h2><span>💷</span> Refund Information</h2>
+        <h3>Refund Timeline</h3>
+        <ul>
+          <li>Refunds are processed within 5-7 working days of receiving your return</li>
+          <li>The refund will be credited to your original payment method</li>
+          <li>Bank processing times may add an additional 3-5 working days</li>
+        </ul>
+
+        <h3>What We Refund</h3>
+        <ul>
+          <li>Full product price for items returned in original condition</li>
+          <li>Original shipping costs (only if the return is due to our error)</li>
+        </ul>
+
+        <h3>Return Shipping Costs</h3>
+        <ul>
+          <li>Standard returns: Customer pays return shipping</li>
+          <li>Faulty or incorrect items: We cover return shipping costs</li>
+        </ul>
+      </div>
+
+      <div class="content-card">
+        <h2><span>⚠️</span> Damaged or Faulty Items</h2>
+        <p>If you receive a damaged or faulty item, please:</p>
+        <ul>
+          <li>Contact us within 48 hours of delivery</li>
+          <li>Provide photos of the damage or fault</li>
+          <li>Keep all original packaging</li>
+        </ul>
+        <p>We will arrange a free collection and send a replacement or full refund immediately.</p>
+
+        <div class="info-box danger">
+          <p><strong>Important:</strong> Please inspect your delivery upon arrival. Report any visible damage to the courier before signing.</p>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h2><span>🔄</span> Exchanges</h2>
+        <p>Want to exchange for a different item? No problem!</p>
+        <ul>
+          <li>Follow the same return process above</li>
+          <li>Let us know what item you'd like instead</li>
+          <li>We'll ship the replacement once we receive your return</li>
+          <li>Any price difference will be refunded or charged accordingly</li>
+        </ul>
+      </div>
+
+      <div class="content-card" style="text-align: center;">
+        <h2 style="justify-content: center;"><span>❓</span> Need Help?</h2>
+        <p>If you have any questions about returns or need assistance, our team is here to help.</p>
+        <a href="contact.html" class="btn-primary">Contact Us</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo" style="color: white;"><img src="images/logo/k-highway-logo.png" alt="K Highway Logo" class="logo-icon" style="object-fit: contain; background: white; width: 50px; height: 50px;">K Highway DIY Hardware Shop</div>
+          <p>Your trusted source for quality window and door hardware parts.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-title">Support</h4>
+          <ul class="footer-links">
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="shipping.html">Shipping Info</a></li>
+            <li><a href="returns.html">Returns</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 K Highway DIY Hardware Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script>
+    // Mobile nav
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+    }
+
+    // Header scroll
+    window.addEventListener('scroll', () => {
+      document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
+    });
+  </script>
+</body>
+</html>
