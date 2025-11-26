@@ -729,6 +729,15 @@ Spindle Type: 7mm square"></textarea>
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
-  <script type="module" src="js/admin.js"></script>
+  <script type="module" src="js/admin.js">
+    // Search Functionality
+    function handleSearch(event) {
+      event.preventDefault();
+      const searchQuery = document.getElementById('searchInput').value.trim();
+      if (searchQuery) {
+        window.location.href = `search.html?q=${encodeURIComponent(searchQuery)}`;
+      }
+    }
+</script>
 </body>
 </html>

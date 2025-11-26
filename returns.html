@@ -47,6 +47,56 @@
     .cart-link { position: relative; display: inline-flex; align-items: center; gap: 0.25rem; }
     .cart-count { position: absolute; top: -8px; right: -12px; background: var(--accent); color: white; font-size: 0.65rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
 
+    /* Search Bar */
+    .search-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      transition: all 0.3s ease;
+      flex: 0 1 300px;
+      max-width: 300px;
+    }
+
+    .search-container:focus-within {
+      background: white;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .search-input {
+      border: none;
+      background: transparent;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--gray-700);
+      width: 100%;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: var(--gray-500);
+    }
+
+    .search-btn {
+      background: none;
+      border: none;
+      color: var(--gray-500);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s ease;
+    }
+
+    .search-btn:hover {
+      color: var(--primary);
+    }
+
+
     .page-hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8rem 0 4rem; text-align: center; color: white; }
     .page-hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 1rem; }
     .page-hero p { font-size: 1.1rem; opacity: 0.9; }
@@ -90,6 +140,14 @@
       .nav-links > li { width: 100%; }
       .nav-links > li > a { display: block; padding: 1rem; }
       .nav-toggle { display: flex; }
+
+      .search-container {
+        order: -1;
+        max-width: 100%;
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
       .page-hero h1 { font-size: 2rem; }
       .footer-grid { grid-template-columns: 1fr; }
     }
@@ -105,7 +163,13 @@
         <li><a href="category.html">Categories</a></li>
         <li><a href="products.html">Products</a></li>
         <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="contact.html">Contact</a></li>        <li>
+          <form class="search-container" id="searchForm" onsubmit="handleSearch(event)">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search products..." autocomplete="off">
+            <button type="submit" class="search-btn" aria-label="Search">🔍</button>
+          </form>
+        </li>
+
         <li><a href="cart.html" class="cart-link">Cart <span class="cart-count">0</span></a></li>
       </ul>
     </div>
@@ -271,6 +335,16 @@
     window.addEventListener('scroll', () => {
       document.getElementById('header').classList.toggle('scrolled', window.scrollY > 50);
     });
+  
+    // Search Functionality
+    function handleSearch(event) {
+      event.preventDefault();
+      const searchQuery = document.getElementById('searchInput').value.trim();
+      if (searchQuery) {
+        window.location.href = `search.html?q=${encodeURIComponent(searchQuery)}`;
+      }
+    }
+
   </script>
 </body>
 </html>
