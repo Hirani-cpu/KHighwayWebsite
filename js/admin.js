@@ -623,12 +623,32 @@ const Admin = {
     }
 
     try {
+      console.log('Starting email update process...');
       const usersSnap = await getDocs(collection(db, 'users'));
       const ordersSnap = await getDocs(collection(db, 'orders'));
 
+      console.log(`Found ${usersSnap.size} users and ${ordersSnap.size} orders`);
+
       let updatedCount = 0;
       let skippedCount = 0;
+      let notFoundCount = 0;
+      const errors = [];
 
+      // Create a map of emails by name from orders
+      const emailsByName = {};
+      ordersSnap.forEach(orderDoc => {
+        const order = orderDoc.data();
+        const orderNameKey = `${(order.firstName || '').toLowerCase()}_${(order.lastName || '').toLowerCase()}`;
+        const email = order.userEmail || order.email || null;
+
+        if (orderNameKey !== '_' && email && !emailsByName[orderNameKey]) {
+          emailsByName[orderNameKey] = email;
+        }
+      });
+
+      console.log('Emails found from orders:', emailsByName);
+
+      // Update users
       for (const userDoc of usersSnap.docs) {
         const user = userDoc.data();
         const userId = userDoc.id;
@@ -641,34 +661,39 @@ const Admin = {
 
         // Find email from orders by matching name
         const nameKey = `${(user.firstName || '').toLowerCase()}_${(user.lastName || '').toLowerCase()}`;
-        let foundEmail = null;
+        const foundEmail = emailsByName[nameKey];
 
-        for (const orderDoc of ordersSnap.docs) {
-          const order = orderDoc.data();
-          const orderNameKey = `${(order.firstName || '').toLowerCase()}_${(order.lastName || '').toLowerCase()}`;
-
-          if (orderNameKey === nameKey && orderNameKey !== '_') {
-            foundEmail = order.userEmail || order.email || null;
-            if (foundEmail) break;
-          }
-        }
-
-        // Update user document with found email
         if (foundEmail) {
-          await updateDoc(doc(db, 'users', userId), { email: foundEmail });
-          console.log(`Updated user ${user.firstName} ${user.lastName} with email: ${foundEmail}`);
-          updatedCount++;
+          try {
+            await updateDoc(doc(db, 'users', userId), { email: foundEmail });
+            console.log(`✓ Updated user ${user.firstName} ${user.lastName} with email: ${foundEmail}`);
+            updatedCount++;
+          } catch (updateError) {
+            console.error(`✗ Failed to update user ${userId}:`, updateError);
+            errors.push(`${user.firstName} ${user.lastName}: ${updateError.message}`);
+          }
+        } else {
+          console.log(`✗ No email found for ${user.firstName} ${user.lastName} (nameKey: ${nameKey})`);
+          notFoundCount++;
         }
       }
 
-      alert(`Email update complete!\nUpdated: ${updatedCount} users\nSkipped: ${skippedCount} users (already had email)\nNot found: ${usersSnap.size - updatedCount - skippedCount} users`);
+      console.log('Email update complete!');
+      console.log(`Updated: ${updatedCount}, Skipped: ${skippedCount}, Not found: ${notFoundCount}`);
+
+      if (errors.length > 0) {
+        console.error('Errors during update:', errors);
+      }
+
+      alert(`Email update complete!\n\nUpdated: ${updatedCount} users\nSkipped: ${skippedCount} users (already had email)\nNot found: ${notFoundCount} users (no matching orders)\n${errors.length > 0 ? '\nErrors: ' + errors.length + ' (check console)' : ''}`);
 
       // Reload users table
       await this.loadUsers();
 
     } catch (error) {
       console.error('Error updating user emails:', error);
-      alert('Error updating user emails. Check console for details.');
+      console.error('Error details:', error.message, error.code);
+      alert(`Error updating user emails:\n${error.message}\n\nCheck console for full details.`);
     }
   },
 
