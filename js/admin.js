@@ -742,9 +742,6 @@ const Admin = {
           document.getElementById('productSpecs').value = '';
         }
 
-        // Load eBay URL
-        document.getElementById('productEbayUrl').value = product.ebayUrl || '';
-
         // Show existing images
         if (product.images && product.images.length > 0) {
           const existingDiv = document.getElementById('existingImages');
@@ -910,7 +907,6 @@ const Admin = {
         images: allImages,
         features: features,
         specifications: specifications,
-        ebayUrl: document.getElementById('productEbayUrl').value.trim(),
         hasVariations: hasVariations,
         variations: variations,
         updatedAt: serverTimestamp(),
