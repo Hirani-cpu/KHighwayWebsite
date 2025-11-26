@@ -114,14 +114,14 @@ window.Auth = {
     const existingAdmin = navLinks.querySelector('.admin-link');
     if (existingAdmin) existingAdmin.remove();
 
-    // Add admin link if user is masterAdmin
-    if (this.isLoggedIn() && this._profile && this._profile.role === 'masterAdmin') {
-      const adminLi = document.createElement('li');
-      adminLi.className = 'admin-link';
-      adminLi.innerHTML = `<a href="admin.html" style="color: #f59e0b;">⚙️ Admin</a>`;
-      const cart = navLinks.querySelector('.cart-link')?.parentElement;
-      cart ? navLinks.insertBefore(adminLi, cart) : navLinks.appendChild(adminLi);
-    }
+    // Admin link removed - now accessible from Account page sidebar only
+    // if (this.isLoggedIn() && this._profile && this._profile.role === 'masterAdmin') {
+    //   const adminLi = document.createElement('li');
+    //   adminLi.className = 'admin-link';
+    //   adminLi.innerHTML = `<a href="admin.html" style="color: #f59e0b;">⚙️ Admin</a>`;
+    //   const cart = navLinks.querySelector('.cart-link')?.parentElement;
+    //   cart ? navLinks.insertBefore(adminLi, cart) : navLinks.appendChild(adminLi);
+    // }
 
     // Add auth link
     const li = document.createElement('li');
