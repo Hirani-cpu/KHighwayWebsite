@@ -148,11 +148,19 @@ const Admin = {
         reader.onload = (event) => {
           const imgContainer = document.createElement('div');
           imgContainer.className = 'preview-image';
+          imgContainer.draggable = true;
+          imgContainer.dataset.fileName = file.name;
+
+          const isPrimary = preview.children.length === 0;
           imgContainer.innerHTML = `
             <img src="${event.target.result}" alt="Preview">
             <button type="button" class="remove-image" onclick="Admin.removePreviewImage(this, '${file.name}')">&times;</button>
+            ${isPrimary ? '<span class="primary-badge">PRIMARY</span>' : ''}
+            <span class="drag-handle">⋮⋮</span>
             <span class="image-name">${file.name}</span>
           `;
+
+          this.addDragListeners(imgContainer);
           preview.appendChild(imgContainer);
         };
         reader.readAsDataURL(file);
@@ -165,6 +173,142 @@ const Admin = {
   removePreviewImage(btn, fileName) {
     btn.parentElement.remove();
     this.uploadedImages = this.uploadedImages.filter(f => f.name !== fileName);
+    this.updatePrimaryBadges();
+  },
+
+  // Add drag and drop listeners
+  addDragListeners(element) {
+    element.addEventListener('dragstart', (e) => {
+      element.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', element.innerHTML);
+    });
+
+    element.addEventListener('dragend', (e) => {
+      element.classList.remove('dragging');
+    });
+
+    element.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const preview = document.getElementById('imagePreview');
+      const dragging = preview.querySelector('.dragging');
+      const afterElement = this.getDragAfterElement(preview, e.clientY);
+
+      if (afterElement == null) {
+        preview.appendChild(dragging);
+      } else {
+        preview.insertBefore(dragging, afterElement);
+      }
+    });
+
+    element.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.reorderUploadedImages();
+      this.updatePrimaryBadges();
+    });
+  },
+
+  // Get element after drag position
+  getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.preview-image:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  },
+
+  // Reorder uploaded images array based on DOM order
+  reorderUploadedImages() {
+    const preview = document.getElementById('imagePreview');
+    const orderedFileNames = Array.from(preview.children).map(child => child.dataset.fileName);
+
+    this.uploadedImages.sort((a, b) => {
+      return orderedFileNames.indexOf(a.name) - orderedFileNames.indexOf(b.name);
+    });
+  },
+
+  // Update primary badges
+  updatePrimaryBadges() {
+    const preview = document.getElementById('imagePreview');
+    const images = preview.querySelectorAll('.preview-image');
+
+    images.forEach((img, index) => {
+      const existingBadge = img.querySelector('.primary-badge');
+      if (index === 0 && !existingBadge) {
+        const badge = document.createElement('span');
+        badge.className = 'primary-badge';
+        badge.textContent = 'PRIMARY';
+        img.insertBefore(badge, img.querySelector('.drag-handle'));
+      } else if (index !== 0 && existingBadge) {
+        existingBadge.remove();
+      }
+    });
+  },
+
+  // Update primary badges for existing images
+  updatePrimaryBadgesExisting() {
+    const existingGrid = document.getElementById('existingImagesGrid');
+    if (!existingGrid) return;
+    const images = existingGrid.querySelectorAll('.preview-image:not([data-delete="true"])');
+
+    images.forEach((img, index) => {
+      const existingBadge = img.querySelector('.primary-badge');
+      if (index === 0 && !existingBadge) {
+        const badge = document.createElement('span');
+        badge.className = 'primary-badge';
+        badge.textContent = 'PRIMARY';
+        img.insertBefore(badge, img.querySelector('.drag-handle'));
+      } else if (index !== 0 && existingBadge) {
+        existingBadge.remove();
+      }
+    });
+
+    // Remove badges from deleted images
+    const deletedImages = existingGrid.querySelectorAll('.preview-image[data-delete="true"]');
+    deletedImages.forEach(img => {
+      const badge = img.querySelector('.primary-badge');
+      if (badge) badge.remove();
+    });
+  },
+
+  // Add drag and drop listeners for existing images
+  addDragListenersExisting(element) {
+    element.addEventListener('dragstart', (e) => {
+      element.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', element.innerHTML);
+    });
+
+    element.addEventListener('dragend', (e) => {
+      element.classList.remove('dragging');
+    });
+
+    element.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const existingGrid = document.getElementById('existingImagesGrid');
+      const dragging = existingGrid.querySelector('.dragging');
+      const afterElement = this.getDragAfterElement(existingGrid, e.clientY);
+
+      if (afterElement == null) {
+        existingGrid.appendChild(dragging);
+      } else {
+        existingGrid.insertBefore(dragging, afterElement);
+      }
+    });
+
+    element.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.updatePrimaryBadgesExisting();
+    });
   },
 
   // Show section
@@ -786,14 +930,22 @@ const Admin = {
         // Show existing images
         if (product.images && product.images.length > 0) {
           const existingDiv = document.getElementById('existingImages');
-          existingDiv.innerHTML = '<p style="margin-bottom: 0.5rem; font-weight: 600;">Current Images:</p>';
+          existingDiv.innerHTML = '<p style="margin-bottom: 0.5rem; font-weight: 600;">Current Images:</p><div class="image-preview-grid" id="existingImagesGrid"></div>';
+          const existingGrid = document.getElementById('existingImagesGrid');
+
           product.images.forEach((url, index) => {
-            existingDiv.innerHTML += `
-              <div class="preview-image existing">
-                <img src="${url}" alt="Product image ${index + 1}">
-                <button type="button" class="remove-image" onclick="Admin.markImageForDeletion(this, '${url}')">&times;</button>
-              </div>
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'preview-image existing';
+            imgContainer.draggable = true;
+            imgContainer.dataset.imageUrl = url;
+            imgContainer.innerHTML = `
+              <img src="${url}" alt="Product image ${index + 1}">
+              <button type="button" class="remove-image" onclick="Admin.markImageForDeletion(this, '${url}')">&times;</button>
+              ${index === 0 ? '<span class="primary-badge">PRIMARY</span>' : ''}
+              <span class="drag-handle">⋮⋮</span>
             `;
+            this.addDragListenersExisting(imgContainer);
+            existingGrid.appendChild(imgContainer);
           });
         }
 
@@ -814,6 +966,7 @@ const Admin = {
     btn.parentElement.dataset.delete = 'true';
     btn.innerHTML = '↩';
     btn.onclick = () => this.unmarkImageForDeletion(btn, url);
+    this.updatePrimaryBadgesExisting();
   },
 
   unmarkImageForDeletion(btn, url) {
@@ -821,6 +974,7 @@ const Admin = {
     delete btn.parentElement.dataset.delete;
     btn.innerHTML = '&times;';
     btn.onclick = () => this.markImageForDeletion(btn, url);
+    this.updatePrimaryBadgesExisting();
   },
 
   // Upload images to Firebase Storage
@@ -879,13 +1033,19 @@ const Admin = {
                        document.getElementById('productSku').value.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
                        name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now();
 
-      // Get existing images (excluding deleted ones)
+      // Get existing images in DOM order (excluding deleted ones)
       let existingImages = [];
       if (this.editingProductId) {
-        const existingImgDivs = document.querySelectorAll('#existingImages .preview-image:not([data-delete="true"]) img');
-        existingImgDivs.forEach(img => {
-          existingImages.push(img.src);
-        });
+        const existingGrid = document.getElementById('existingImagesGrid');
+        if (existingGrid) {
+          const existingImgDivs = existingGrid.querySelectorAll('.preview-image:not([data-delete="true"])');
+          existingImgDivs.forEach(div => {
+            const img = div.querySelector('img');
+            if (img) {
+              existingImages.push(img.src);
+            }
+          });
+        }
       }
 
       // Upload new images
