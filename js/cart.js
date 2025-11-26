@@ -16,43 +16,81 @@ const Cart = {
     }
   },
 
-  // Add item to cart
+  // Add item to cart (supports variations)
   addItem: function(product) {
     const cart = this.getCart();
-    const existingItem = cart.find(item => item.id === product.id);
+
+    // For products with variations, match by both id AND variationId
+    // For products without variations, match by id only
+    const existingItem = cart.find(item => {
+      if (product.variationId) {
+        // Product has variation - match both product ID and variation ID
+        return item.id === product.id && item.variationId === product.variationId;
+      } else {
+        // No variation - match product ID only (and ensure existing item has no variation)
+        return item.id === product.id && !item.variationId;
+      }
+    });
 
     if (existingItem) {
       existingItem.quantity += product.quantity || 1;
     } else {
-      cart.push({
+      const cartItem = {
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
         quantity: product.quantity || 1
-      });
+      };
+
+      // Add variation data if present
+      if (product.variationId) {
+        cartItem.variationId = product.variationId;
+        cartItem.variationLabel = product.variationLabel;
+      }
+
+      cart.push(cartItem);
     }
 
     this.saveCart(cart);
-    this.showNotification(`${product.name} added to cart!`);
+
+    // Show notification with variation label if applicable
+    const notificationName = product.variationLabel
+      ? `${product.name} (${product.variationLabel})`
+      : product.name;
+    this.showNotification(`${notificationName} added to cart!`);
     return true;
   },
 
-  // Remove item from cart
-  removeItem: function(productId) {
+  // Remove item from cart (supports variations)
+  removeItem: function(productId, variationId = null) {
     let cart = this.getCart();
-    cart = cart.filter(item => item.id !== productId);
+    cart = cart.filter(item => {
+      if (variationId) {
+        // Remove item matching both product ID and variation ID
+        return !(item.id === productId && item.variationId === variationId);
+      } else {
+        // Remove item matching product ID (with no variation)
+        return !(item.id === productId && !item.variationId);
+      }
+    });
     this.saveCart(cart);
   },
 
-  // Update item quantity
-  updateQuantity: function(productId, quantity) {
+  // Update item quantity (supports variations)
+  updateQuantity: function(productId, quantity, variationId = null) {
     const cart = this.getCart();
-    const item = cart.find(item => item.id === productId);
+    const item = cart.find(i => {
+      if (variationId) {
+        return i.id === productId && i.variationId === variationId;
+      } else {
+        return i.id === productId && !i.variationId;
+      }
+    });
 
     if (item) {
       if (quantity <= 0) {
-        this.removeItem(productId);
+        this.removeItem(productId, variationId);
       } else {
         item.quantity = quantity;
         this.saveCart(cart);

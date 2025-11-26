@@ -50,6 +50,7 @@ const Admin = {
   userRole: null,
   uploadedImages: [],
   editingProductId: null,
+  variationCounter: 0, // Counter for unique variation row IDs
 
   // Initialize admin panel
   async init() {
@@ -471,7 +472,7 @@ const Admin = {
       const statusClass = `order-status-${order.status || 'pending'}`;
       const statusText = { pending: 'Pending', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled' }[order.status] || 'Pending';
 
-      // Render items
+      // Render items (includes variation label if present)
       const itemsHtml = (order.items || []).map(item => `
         <div class="admin-order-item">
           <div class="admin-order-item-img">
@@ -479,6 +480,7 @@ const Admin = {
           </div>
           <div class="admin-order-item-details">
             <div class="admin-order-item-name">${item.name}</div>
+            ${item.variationLabel ? `<div class="admin-order-item-variation" style="font-size: 0.75rem; color: var(--gray-500);">Pack: ${item.variationLabel}</div>` : ''}
             <div class="admin-order-item-meta">Qty: ${item.quantity} × £${item.price?.toFixed(2) || '0.00'}</div>
           </div>
           <div class="admin-order-item-price">£${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</div>
@@ -658,6 +660,9 @@ const Admin = {
     document.getElementById('imagePreview').innerHTML = '';
     document.getElementById('existingImages').innerHTML = '';
 
+    // Clear variations section
+    this.clearVariationsSection();
+
     // Load categories dynamically before showing the modal
     await this.loadCategoriesForDropdown();
 
@@ -752,6 +757,11 @@ const Admin = {
               </div>
             `;
           });
+        }
+
+        // Load variations if product has them
+        if (product.hasVariations && product.variations && product.variations.length > 0) {
+          this.loadVariationsToForm(product.variations);
         }
       }
     } catch (error) {
@@ -876,6 +886,18 @@ const Admin = {
         });
       }
 
+      // Handle variations
+      const hasVariations = document.getElementById('hasVariations').checked;
+      const variations = hasVariations ? this.getVariationsFromForm() : [];
+
+      // Validate variations if enabled
+      if (hasVariations && variations.length === 0) {
+        alert('Please add at least one variation with a label and price');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Product';
+        return;
+      }
+
       const productData = {
         name: name,
         description: document.getElementById('productDescription').value.trim(),
@@ -889,6 +911,8 @@ const Admin = {
         features: features,
         specifications: specifications,
         ebayUrl: document.getElementById('productEbayUrl').value.trim(),
+        hasVariations: hasVariations,
+        variations: variations,
         updatedAt: serverTimestamp(),
         updatedBy: this.user.uid
       };
@@ -916,6 +940,125 @@ const Admin = {
 
   async editProduct(productId) {
     this.showProductModal(productId);
+  },
+
+  // Toggle variations section visibility
+  toggleVariationsSection() {
+    const checkbox = document.getElementById('hasVariations');
+    const section = document.getElementById('variationsSection');
+
+    if (checkbox.checked) {
+      section.style.display = 'block';
+      // Add header row and first variation if none exist
+      const list = document.getElementById('variationsList');
+      if (list.children.length === 0) {
+        this.renderVariationsHeader();
+        this.addVariationRow();
+      }
+    } else {
+      section.style.display = 'none';
+    }
+  },
+
+  // Render the header row for variations
+  renderVariationsHeader() {
+    const list = document.getElementById('variationsList');
+    const headerExists = list.querySelector('.variation-row-header');
+    if (!headerExists) {
+      const header = document.createElement('div');
+      header.className = 'variation-row-header';
+      header.innerHTML = `
+        <span>Label (e.g., 10pcs)</span>
+        <span>Price (£)</span>
+        <span>Stock</span>
+        <span></span>
+      `;
+      list.insertBefore(header, list.firstChild);
+    }
+  },
+
+  // Add a new variation row
+  addVariationRow(data = {}) {
+    const list = document.getElementById('variationsList');
+    this.variationCounter++;
+
+    // Ensure header exists
+    this.renderVariationsHeader();
+
+    const row = document.createElement('div');
+    row.className = 'variation-row';
+    row.dataset.variationId = data.id || `new-${this.variationCounter}`;
+
+    row.innerHTML = `
+      <input type="text" class="variation-label-input" placeholder="e.g., 10pcs" value="${data.label || ''}" required>
+      <input type="number" class="variation-price-input" placeholder="0.00" step="0.01" min="0" value="${data.price || ''}" required>
+      <input type="number" class="variation-stock-input" placeholder="0" min="0" value="${data.stock || 0}">
+      <button type="button" class="btn-remove-variation" onclick="Admin.removeVariationRow(this)" title="Remove variation">&times;</button>
+    `;
+
+    list.appendChild(row);
+  },
+
+  // Remove a variation row
+  removeVariationRow(btn) {
+    const row = btn.closest('.variation-row');
+    if (row) {
+      row.remove();
+      // If no more variations, uncheck the toggle
+      const list = document.getElementById('variationsList');
+      const rows = list.querySelectorAll('.variation-row');
+      if (rows.length === 0) {
+        document.getElementById('hasVariations').checked = false;
+        document.getElementById('variationsSection').style.display = 'none';
+      }
+    }
+  },
+
+  // Get all variations from the form
+  getVariationsFromForm() {
+    const list = document.getElementById('variationsList');
+    const rows = list.querySelectorAll('.variation-row');
+    const variations = [];
+
+    rows.forEach((row, index) => {
+      const label = row.querySelector('.variation-label-input').value.trim();
+      const price = parseFloat(row.querySelector('.variation-price-input').value) || 0;
+      const stock = parseInt(row.querySelector('.variation-stock-input').value) || 0;
+
+      if (label && price > 0) {
+        variations.push({
+          id: row.dataset.variationId || `var-${index}`,
+          label: label,
+          price: price,
+          stock: stock
+        });
+      }
+    });
+
+    return variations;
+  },
+
+  // Clear variations section
+  clearVariationsSection() {
+    const list = document.getElementById('variationsList');
+    list.innerHTML = '';
+    document.getElementById('hasVariations').checked = false;
+    document.getElementById('variationsSection').style.display = 'none';
+    this.variationCounter = 0;
+  },
+
+  // Load variations into the form (for editing)
+  loadVariationsToForm(variations) {
+    this.clearVariationsSection();
+
+    if (variations && variations.length > 0) {
+      document.getElementById('hasVariations').checked = true;
+      document.getElementById('variationsSection').style.display = 'block';
+
+      variations.forEach(variation => {
+        this.addVariationRow(variation);
+      });
+    }
   },
 
   async deleteProduct(productId) {

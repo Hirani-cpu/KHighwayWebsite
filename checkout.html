@@ -341,9 +341,10 @@
           total_amount: `£${orderData.total.toFixed(2)}`,
           delivery_method: orderData.deliveryMethod,
           items_count: orderData.items.length,
-          items_details: orderData.items.map(item =>
-            `${item.name} (Qty: ${item.quantity}) - £${(item.price * item.quantity).toFixed(2)}`
-          ).join('\n'),
+          items_details: orderData.items.map(item => {
+            const variationInfo = item.variationLabel ? ` [${item.variationLabel}]` : '';
+            return `${item.name}${variationInfo} (Qty: ${item.quantity}) - £${(item.price * item.quantity).toFixed(2)}`;
+          }).join('\n'),
           customer_address: `${orderData.address}, ${orderData.city}, ${orderData.postcode}`,
           order_date: new Date().toLocaleString('en-GB')
         });
@@ -406,6 +407,7 @@
           </div>
           <div class="summary-item-details">
             <div class="summary-item-name">${item.name}</div>
+            ${item.variationLabel ? `<div class="summary-item-variation" style="font-size: 0.8rem; color: #64748b;">${item.variationLabel}</div>` : ''}
             <div class="summary-item-qty">Qty: ${item.quantity}</div>
           </div>
           <div class="summary-item-price">£${(item.price * item.quantity).toFixed(2)}</div>
@@ -499,7 +501,7 @@
               }
             },
             items: cart.map(item => ({
-              name: item.name,
+              name: item.variationLabel ? `${item.name} (${item.variationLabel})` : item.name,
               unit_amount: {
                 currency_code: 'GBP',
                 value: item.price.toFixed(2)
