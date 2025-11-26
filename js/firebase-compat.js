@@ -126,14 +126,18 @@ window.Auth = {
       cart ? navLinks.insertBefore(authLi, cart) : navLinks.appendChild(authLi);
     }
 
-    // Update the auth link content
+    // Update the auth link content smoothly
     const authLink = authLi.querySelector('a') || document.createElement('a');
-    authLink.href = this.isLoggedIn() && this._profile ? 'account.html' : 'login.html';
-    authLink.textContent = this.isLoggedIn() && this._profile
+    const newHref = this.isLoggedIn() && this._profile ? 'account.html' : 'login.html';
+    const newText = this.isLoggedIn() && this._profile
       ? `👤 ${this._profile.firstName || this._profile.name || 'Account'}`
       : 'Login';
-    authLink.style.visibility = 'visible';
-    authLink.style.transition = 'opacity 0.2s ease';
+
+    // Only update if content has changed to avoid flickering
+    if (authLink.href !== newHref || authLink.textContent !== newText) {
+      authLink.href = newHref;
+      authLink.textContent = newText;
+    }
 
     if (!authLi.querySelector('a')) {
       authLi.appendChild(authLink);
