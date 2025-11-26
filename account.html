@@ -127,9 +127,9 @@
     .btn-primary:hover { background: var(--primary-dark); }
     .btn-secondary { padding: 0.875rem 1.5rem; background: var(--gray-100); color: var(--gray-700); border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; }
     .btn-secondary:hover { background: var(--gray-200); }
-    .btn-admin { display: none; padding: 0.875rem 1.5rem; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: inherit; margin-top: 1rem; }
-    .btn-admin:hover { background: #d97706; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-    .btn-admin.visible { display: inline-block; }
+    .btn-admin-sidebar { width: 100%; text-align: left; padding: 1rem 1.5rem; background: transparent; border: none; color: var(--gray-700); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; border-radius: 8px; font-family: inherit; }
+    .btn-admin-sidebar:hover { background: var(--accent); color: white; }
+    .btn-admin-sidebar .icon { font-size: 1.1rem; margin-right: 0.75rem; }
 
     .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
     .alert-error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
@@ -260,6 +260,9 @@
             <button type="button" data-tab="security">
               <span class="icon">🔒</span> Security
             </button>
+            <button type="button" class="btn-admin-sidebar" id="adminPanelBtn" onclick="window.location.href='admin.html'" style="display: none;">
+              <span class="icon">🔐</span> Admin Panel
+            </button>
             <hr>
             <button type="button" class="btn-logout" id="logoutBtn">
               <span class="icon">🚪</span> Logout
@@ -318,9 +321,6 @@
               </div>
               <button type="submit" class="btn-primary">Save Changes</button>
             </form>
-            <button type="button" class="btn-admin" id="adminPanelBtn" onclick="window.location.href='admin.html'">
-              🔐 Admin Panel
-            </button>
           </div>
 
           <!-- Orders Section -->
@@ -441,7 +441,7 @@
 
     // Show admin panel button if user is master admin
     if (user.role === 'masterAdmin') {
-      document.getElementById('adminPanelBtn').classList.add('visible');
+      document.getElementById('adminPanelBtn').style.display = 'block';
     }
 
     // Load orders
