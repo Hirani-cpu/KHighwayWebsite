@@ -116,29 +116,32 @@ window.Auth = {
     const navLinks = document.getElementById('navLinks');
     if (!navLinks) return;
 
-    // Remove existing auth and admin links
-    const existing = navLinks.querySelector('.auth-link');
-    if (existing) existing.remove();
+    // Find or create auth link
+    let authLi = navLinks.querySelector('.auth-link');
+    if (!authLi) {
+      // Create if doesn't exist (for pages without placeholder)
+      authLi = document.createElement('li');
+      authLi.className = 'auth-link';
+      const cart = navLinks.querySelector('.cart-link')?.parentElement;
+      cart ? navLinks.insertBefore(authLi, cart) : navLinks.appendChild(authLi);
+    }
+
+    // Update the auth link content
+    const authLink = authLi.querySelector('a') || document.createElement('a');
+    authLink.href = this.isLoggedIn() && this._profile ? 'account.html' : 'login.html';
+    authLink.textContent = this.isLoggedIn() && this._profile
+      ? `👤 ${this._profile.firstName || this._profile.name || 'Account'}`
+      : 'Login';
+    authLink.style.visibility = 'visible';
+    authLink.style.transition = 'opacity 0.2s ease';
+
+    if (!authLi.querySelector('a')) {
+      authLi.appendChild(authLink);
+    }
+
+    // Remove admin link if exists (no longer used in nav)
     const existingAdmin = navLinks.querySelector('.admin-link');
     if (existingAdmin) existingAdmin.remove();
-
-    // Admin link removed - now accessible from Account page sidebar only
-    // if (this.isLoggedIn() && this._profile && this._profile.role === 'masterAdmin') {
-    //   const adminLi = document.createElement('li');
-    //   adminLi.className = 'admin-link';
-    //   adminLi.innerHTML = `<a href="admin.html" style="color: #f59e0b;">⚙️ Admin</a>`;
-    //   const cart = navLinks.querySelector('.cart-link')?.parentElement;
-    //   cart ? navLinks.insertBefore(adminLi, cart) : navLinks.appendChild(adminLi);
-    // }
-
-    // Add auth link
-    const li = document.createElement('li');
-    li.className = 'auth-link';
-    li.innerHTML = this.isLoggedIn() && this._profile
-      ? `<a href="account.html">👤 ${this._profile.firstName || this._profile.name || 'Account'}</a>`
-      : `<a href="login.html">Login</a>`;
-    const cart = navLinks.querySelector('.cart-link')?.parentElement;
-    cart ? navLinks.insertBefore(li, cart) : navLinks.appendChild(li);
   }
 };
 
