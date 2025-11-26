@@ -564,6 +564,7 @@ const Admin = {
   async loadUsers() {
     try {
       const usersSnap = await getDocs(collection(db, 'users'));
+      const ordersSnap = await getDocs(collection(db, 'orders'));
       const tbody = document.getElementById('usersTable');
 
       if (usersSnap.empty) {
@@ -571,22 +572,54 @@ const Admin = {
         return;
       }
 
+      // Create a map of orders by email
+      const ordersByEmail = {};
+      ordersSnap.forEach(doc => {
+        const order = doc.data();
+        const email = (order.userEmail || order.email || '').toLowerCase();
+        if (email) {
+          if (!ordersByEmail[email]) {
+            ordersByEmail[email] = [];
+          }
+          ordersByEmail[email].push(order);
+        }
+      });
+
       tbody.innerHTML = '';
       usersSnap.forEach(doc => {
         const user = doc.data();
+        const userId = doc.id;
         const date = user.createdAt?.toDate?.() || new Date();
         const roleBadge = user.role === 'masterAdmin' ? 'badge-danger' :
                          user.role === 'admin' ? 'badge-warning' : 'badge-info';
         const userName = user.firstName && user.lastName
           ? `${user.firstName} ${user.lastName}`
           : user.firstName || user.lastName || user.name || 'No name';
+
+        // Try to get email from user data or from orders
+        let userEmail = user.email || '';
+        if (!userEmail) {
+          // Try to find email from orders (in case it's an old user)
+          const userOrders = ordersSnap.docs.find(orderDoc => {
+            const order = orderDoc.data();
+            return order.userId === userId ||
+                   (order.firstName === user.firstName && order.lastName === user.lastName);
+          });
+          if (userOrders) {
+            userEmail = userOrders.data().userEmail || userOrders.data().email || '';
+          }
+        }
+
+        // Count orders for this user
+        const userOrderCount = userEmail ? (ordersByEmail[userEmail.toLowerCase()]?.length || 0) : 0;
+
         tbody.innerHTML += `
           <tr>
             <td>${userName}</td>
-            <td>${user.email || 'No email'}</td>
+            <td>${userEmail || 'No email'}</td>
             <td><span class="badge ${roleBadge}">${user.role || 'user'}</span></td>
             <td>${date.toLocaleDateString()}</td>
-            <td>${user.orderCount || 0}</td>
+            <td>${userOrderCount}</td>
           </tr>
         `;
       });

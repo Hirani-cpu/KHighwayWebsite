@@ -33,6 +33,13 @@ window.Auth = {
           if (docSnap.exists()) {
             console.log('User data:', docSnap.data());
             console.log('Role:', docSnap.data().role);
+
+            // Update email in Firestore if missing (for existing users)
+            const userData = docSnap.data();
+            if (!userData.email && user.email) {
+              await updateDoc(doc(db, 'users', user.uid), { email: user.email });
+              console.log('Updated email for existing user');
+            }
           }
           this._profile = docSnap.exists() ? { ...docSnap.data(), email: user.email } : null;
         } else {
