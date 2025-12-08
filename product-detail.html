@@ -136,6 +136,11 @@
     .product-title { font-size: 2.5rem; font-weight: 800; color: var(--secondary); margin-bottom: 1rem; line-height: 1.2; }
     .product-price { font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; }
     .product-price .old-price { font-size: 1.25rem; color: var(--gray-500); text-decoration: line-through; margin-left: 0.75rem; font-weight: 500; }
+
+    /* Sale Price Styles for Product Detail */
+    .product-price .sale-price-value { color: #ef4444; }
+    .product-price .original-price-value { font-size: 1.25rem; color: var(--gray-500); text-decoration: line-through; margin-left: 0.75rem; font-weight: 500; }
+    .sale-badge-large { display: inline-block; background: #ef4444; color: white; font-size: 0.9rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: 6px; margin-left: 1rem; }
     .stock-status { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; }
     .stock-status.in-stock { background: rgba(16, 185, 129, 0.1); color: var(--success); }
     .stock-status.out-stock { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
@@ -568,6 +573,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/sales.js"></script>
   <script type="module">
     import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
@@ -680,14 +686,55 @@
           `;
         }).join('');
 
-        // Show "From £X.XX" with lowest price initially
-        const lowestPrice = Math.min(...variationData.combinations.map(c => c.price));
-        const highestPrice = Math.max(...variationData.combinations.map(c => c.price));
+        // Show "From £X.XX" with lowest price initially (with sale if applicable)
+        let lowestPrice = Math.min(...variationData.combinations.map(c => c.price));
+        let highestPrice = Math.max(...variationData.combinations.map(c => c.price));
 
-        if (lowestPrice === highestPrice) {
-          document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)}`;
+        // Check if product has sale
+        if (window.Sales) {
+          try {
+            const lowestSaleInfo = await window.Sales.calculateSalePrice(product.id, lowestPrice);
+            const highestSaleInfo = await window.Sales.calculateSalePrice(product.id, highestPrice);
+
+            if (lowestSaleInfo.hasDiscount || highestSaleInfo.hasDiscount) {
+              const finalLowest = lowestSaleInfo.hasDiscount ? lowestSaleInfo.salePrice : lowestPrice;
+              const finalHighest = highestSaleInfo.hasDiscount ? highestSaleInfo.salePrice : highestPrice;
+
+              if (finalLowest === finalHighest) {
+                document.querySelector('.product-price').innerHTML = `
+                  <span class="sale-price-value">£${finalLowest.toFixed(2)}</span>
+                  ${lowestSaleInfo.hasDiscount ? `<span class="original-price-value">£${lowestPrice.toFixed(2)}</span>` : ''}
+                `;
+              } else {
+                document.querySelector('.product-price').innerHTML = `
+                  <span class="sale-price-value">£${finalLowest.toFixed(2)} - £${finalHighest.toFixed(2)}</span>
+                  <span class="original-price-value">£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}</span>
+                `;
+              }
+            } else {
+              // No sale
+              if (lowestPrice === highestPrice) {
+                document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)}`;
+              } else {
+                document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}`;
+              }
+            }
+          } catch (error) {
+            console.error('Error calculating variation sale prices:', error);
+            // Fallback to regular prices
+            if (lowestPrice === highestPrice) {
+              document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)}`;
+            } else {
+              document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}`;
+            }
+          }
         } else {
-          document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}`;
+          // No Sales module
+          if (lowestPrice === highestPrice) {
+            document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)}`;
+          } else {
+            document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}`;
+          }
         }
 
         // Hide stock status initially until combination is selected
@@ -727,8 +774,57 @@
         });
       }
     } else {
-      // No variations - show regular price
-      document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)}`;
+      // No variations - show regular price with sale if applicable
+      await applySalePrice(product.id, product.price);
+    }
+
+    // Helper function to apply sale price
+    async function applySalePrice(productId, originalPrice) {
+      if (!window.Sales) {
+        document.querySelector('.product-price').innerHTML = `£${originalPrice.toFixed(2)}`;
+        return;
+      }
+
+      const saleInfo = await window.Sales.calculateSalePrice(productId, originalPrice);
+      const priceElement = document.querySelector('.product-price');
+
+      if (saleInfo.hasDiscount) {
+        const savingsPercent = ((saleInfo.discountAmount / saleInfo.originalPrice) * 100).toFixed(0);
+        priceElement.innerHTML = `
+          <span class="sale-price-value">£${saleInfo.salePrice.toFixed(2)}</span>
+          <span class="original-price-value">£${saleInfo.originalPrice.toFixed(2)}</span>
+          <span class="sale-badge-large">Save ${savingsPercent}%</span>
+        `;
+      } else {
+        priceElement.innerHTML = `£${originalPrice.toFixed(2)}`;
+      }
+    }
+
+    // Helper function to update variation combination price with sale
+    async function updateCombinationPrice(originalPrice) {
+      if (!window.Sales) {
+        document.querySelector('.product-price').innerHTML = `£${originalPrice.toFixed(2)}`;
+        return;
+      }
+
+      try {
+        const saleInfo = await window.Sales.calculateSalePrice(product.id, originalPrice);
+        const priceElement = document.querySelector('.product-price');
+
+        if (saleInfo.hasDiscount) {
+          const savingsPercent = ((saleInfo.discountAmount / saleInfo.originalPrice) * 100).toFixed(0);
+          priceElement.innerHTML = `
+            <span class="sale-price-value">£${saleInfo.salePrice.toFixed(2)}</span>
+            <span class="original-price-value">£${saleInfo.originalPrice.toFixed(2)}</span>
+            <span class="sale-badge-large">Save ${savingsPercent}%</span>
+          `;
+        } else {
+          priceElement.innerHTML = `£${originalPrice.toFixed(2)}`;
+        }
+      } catch (error) {
+        console.error('Error updating combination price with sale:', error);
+        document.querySelector('.product-price').innerHTML = `£${originalPrice.toFixed(2)}`;
+      }
     }
 
     // Function to find matching combination based on selected attributes
@@ -761,8 +857,8 @@
 
       // Update display
       if (selectedCombination) {
-        // Update price to exact combination price
-        document.querySelector('.product-price').innerHTML = `£${selectedCombination.price.toFixed(2)}`;
+        // Update price to exact combination price with sale if applicable
+        updateCombinationPrice(selectedCombination.price);
 
         // Show and update stock status
         const stockStatus = document.querySelector('.stock-status');
@@ -910,6 +1006,8 @@
         }).join(', ');
 
         // Add to cart with combination data
+        // Note: We store the original price here. Sale prices are calculated dynamically
+        // in cart.html and checkout.html to ensure prices are always current
         Cart.addItem({
           id: product.id,
           name: product.name,
@@ -922,6 +1020,8 @@
         });
       } else {
         // No variations - add normally
+        // Note: We store the original price here. Sale prices are calculated dynamically
+        // in cart.html and checkout.html to ensure prices are always current
         Cart.addItem({
           id: product.id,
           name: product.name,

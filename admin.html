@@ -315,6 +315,10 @@
             <span class="nav-item-icon">🏷️</span>
             Categories
           </div>
+          <div class="nav-item" data-section="sales">
+            <span class="nav-item-icon">🏷️</span>
+            Sales & Discounts
+          </div>
           <div class="nav-item" data-section="orders">
             <span class="nav-item-icon">🛒</span>
             Orders
@@ -555,6 +559,35 @@
         </div>
       </section>
 
+      <!-- Sales Section -->
+      <section class="admin-section" id="section-sales">
+        <div class="panel">
+          <div class="panel-header">
+            <h3 class="panel-title">Sales & Discounts Management</h3>
+            <button class="btn btn-primary" onclick="Admin.showSaleModal()">+ Create Sale</button>
+          </div>
+          <div class="panel-body">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Sale Name</th>
+                  <th>Type</th>
+                  <th>Value</th>
+                  <th>Products</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="salesTable">
+                <tr><td colspan="8" style="text-align: center; color: var(--gray-500);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- Settings Section -->
       <section class="admin-section" id="section-settings">
         <div class="panel">
@@ -784,6 +817,78 @@ Spindle Type: 7mm square"></textarea>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="Admin.closeCategoryModal()">Cancel</button>
         <button class="btn btn-primary" onclick="Admin.saveCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sale Modal -->
+  <div class="modal-overlay" id="saleModal">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="saleModalTitle">Create Sale</h3>
+        <button class="modal-close" onclick="Admin.closeSaleModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="saleForm">
+          <input type="hidden" id="saleId">
+
+          <div class="form-group">
+            <label>Sale Name *</label>
+            <input type="text" class="form-control" id="saleName" required placeholder="e.g., Summer Sale 2025">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Discount Type *</label>
+              <select class="form-control" id="saleType" required onchange="Admin.updateSaleTypeLabel()">
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount (£)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><span id="saleValueLabel">Discount Percentage (%)</span> *</label>
+              <input type="number" class="form-control" id="saleValue" step="0.01" min="0" required placeholder="e.g., 20">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date *</label>
+              <input type="datetime-local" class="form-control" id="saleStartDate" required>
+            </div>
+            <div class="form-group">
+              <label>End Date *</label>
+              <input type="datetime-local" class="form-control" id="saleEndDate" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Select Products *</label>
+            <div style="border: 2px solid var(--gray-200); border-radius: 8px; padding: 1rem; max-height: 300px; overflow-y: auto;">
+              <div style="margin-bottom: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; padding: 0.5rem; background: var(--gray-100); border-radius: 6px; cursor: pointer;">
+                  <input type="checkbox" id="selectAllProducts" onchange="Admin.toggleAllProducts(this)">
+                  Select All Products
+                </label>
+              </div>
+              <div id="productsList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Products will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Status *</label>
+            <select class="form-control" id="saleStatus" required>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Admin.closeSaleModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="Admin.saveSale()">Save Sale</button>
       </div>
     </div>
   </div>

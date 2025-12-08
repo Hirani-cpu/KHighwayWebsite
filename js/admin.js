@@ -374,8 +374,10 @@ const Admin = {
       dashboard: 'Dashboard',
       products: 'Products',
       categories: 'Categories',
+      sales: 'Sales & Discounts',
       orders: 'Orders',
       users: 'Users',
+      messages: 'Messages',
       settings: 'Store Settings'
     };
     document.getElementById('sectionTitle').textContent = titles[sectionId] || 'Dashboard';
@@ -391,6 +393,9 @@ const Admin = {
         break;
       case 'categories':
         await this.loadCategories();
+        break;
+      case 'sales':
+        await this.loadSales();
         break;
       case 'orders':
         await this.loadOrders();
@@ -1791,6 +1796,270 @@ const Admin = {
     } catch (error) {
       console.error('Error updating order status:', error);
       alert('Error updating order: ' + error.message);
+    }
+  },
+
+  // ============= SALES MANAGEMENT =============
+
+  // Load all sales
+  async loadSales() {
+    try {
+      const salesSnapshot = await getDocs(collection(db, 'sales'));
+      const salesTable = document.getElementById('salesTable');
+
+      if (salesSnapshot.empty) {
+        salesTable.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--gray-500);">No sales yet. Click "Create Sale" to get started.</td></tr>';
+        return;
+      }
+
+      salesTable.innerHTML = '';
+      salesSnapshot.forEach(doc => {
+        const sale = { id: doc.id, ...doc.data() };
+        const startDate = sale.startDate?.toDate ? sale.startDate.toDate() : new Date(sale.startDate);
+        const endDate = sale.endDate?.toDate ? sale.endDate.toDate() : new Date(sale.endDate);
+        const now = new Date();
+
+        // Determine actual status
+        let actualStatus = sale.status;
+        if (sale.status === 'active') {
+          if (now < startDate) actualStatus = 'scheduled';
+          else if (now > endDate) actualStatus = 'expired';
+        }
+
+        const statusClass = actualStatus === 'active' ? 'badge-success' :
+                           actualStatus === 'scheduled' ? 'badge-info' :
+                           actualStatus === 'expired' ? 'badge-warning' : 'badge-danger';
+
+        const valueDisplay = sale.type === 'percentage' ? `${sale.value}%` : `£${sale.value}`;
+
+        salesTable.innerHTML += `
+          <tr>
+            <td style="font-weight: 600;">${sale.name}</td>
+            <td>${sale.type === 'percentage' ? 'Percentage' : 'Fixed Amount'}</td>
+            <td style="font-weight: 700; color: var(--success);">${valueDisplay}</td>
+            <td>${sale.products?.length || 0} products</td>
+            <td style="font-size: 0.85rem;">${startDate.toLocaleDateString()}</td>
+            <td style="font-size: 0.85rem;">${endDate.toLocaleDateString()}</td>
+            <td><span class="badge ${statusClass}">${actualStatus.toUpperCase()}</span></td>
+            <td>
+              <button class="btn btn-sm btn-secondary" onclick="Admin.editSale('${sale.id}')">Edit</button>
+              ${this.userRole === 'masterAdmin' ? `<button class="btn btn-sm btn-danger" onclick="Admin.deleteSale('${sale.id}')">Delete</button>` : ''}
+            </td>
+          </tr>
+        `;
+      });
+    } catch (error) {
+      console.error('Error loading sales:', error);
+      document.getElementById('salesTable').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Error loading sales</td></tr>';
+    }
+  },
+
+  // Show sale modal
+  async showSaleModal(saleId = null) {
+    const modal = document.getElementById('saleModal');
+    const title = document.getElementById('saleModalTitle');
+    const form = document.getElementById('saleForm');
+
+    form.reset();
+    document.getElementById('saleId').value = '';
+
+    // Load products list
+    await this.loadProductsForSale();
+
+    if (saleId) {
+      title.textContent = 'Edit Sale';
+      const saleDoc = await getDoc(doc(db, 'sales', saleId));
+      if (saleDoc.exists()) {
+        const sale = saleDoc.data();
+        document.getElementById('saleId').value = saleId;
+        document.getElementById('saleName').value = sale.name;
+        document.getElementById('saleType').value = sale.type;
+        document.getElementById('saleValue').value = sale.value;
+        document.getElementById('saleStatus').value = sale.status;
+
+        // Convert Firestore timestamps to datetime-local format
+        const startDate = sale.startDate?.toDate ? sale.startDate.toDate() : new Date(sale.startDate);
+        const endDate = sale.endDate?.toDate ? sale.endDate.toDate() : new Date(sale.endDate);
+
+        document.getElementById('saleStartDate').value = this.formatDateTimeLocal(startDate);
+        document.getElementById('saleEndDate').value = this.formatDateTimeLocal(endDate);
+
+        // Check selected products
+        if (sale.products && sale.products.length > 0) {
+          sale.products.forEach(productId => {
+            const checkbox = document.querySelector(`input[name="saleProduct"][value="${productId}"]`);
+            if (checkbox) checkbox.checked = true;
+          });
+        }
+
+        this.updateSaleTypeLabel();
+      }
+    } else {
+      title.textContent = 'Create Sale';
+      // Set default dates (start: now, end: 7 days from now)
+      const now = new Date();
+      const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      document.getElementById('saleStartDate').value = this.formatDateTimeLocal(now);
+      document.getElementById('saleEndDate').value = this.formatDateTimeLocal(weekLater);
+    }
+
+    modal.classList.add('active');
+  },
+
+  // Format date for datetime-local input
+  formatDateTimeLocal(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  },
+
+  // Load products for sale selection
+  async loadProductsForSale() {
+    try {
+      const productsSnapshot = await getDocs(collection(db, 'products'));
+      const productsList = document.getElementById('productsList');
+
+      if (productsSnapshot.empty) {
+        productsList.innerHTML = '<p style="color: var(--gray-500); text-align: center;">No products available</p>';
+        return;
+      }
+
+      productsList.innerHTML = '';
+      productsSnapshot.forEach(doc => {
+        const product = { id: doc.id, ...doc.data() };
+        productsList.innerHTML += `
+          <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: white; border: 1px solid var(--gray-200); border-radius: 6px; cursor: pointer;">
+            <input type="checkbox" name="saleProduct" value="${product.id}">
+            <span style="flex: 1; font-size: 0.9rem;">${product.name}</span>
+            <span style="color: var(--gray-500); font-size: 0.85rem;">£${product.price?.toFixed(2) || '0.00'}</span>
+          </label>
+        `;
+      });
+    } catch (error) {
+      console.error('Error loading products for sale:', error);
+    }
+  },
+
+  // Toggle all products selection
+  toggleAllProducts(checkbox) {
+    const productCheckboxes = document.querySelectorAll('input[name="saleProduct"]');
+    productCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+  },
+
+  // Update sale type label
+  updateSaleTypeLabel() {
+    const saleType = document.getElementById('saleType').value;
+    const label = document.getElementById('saleValueLabel');
+    const input = document.getElementById('saleValue');
+
+    if (saleType === 'percentage') {
+      label.textContent = 'Discount Percentage (%)';
+      input.placeholder = 'e.g., 20';
+      input.max = '100';
+    } else {
+      label.textContent = 'Discount Amount (£)';
+      input.placeholder = 'e.g., 10.00';
+      input.removeAttribute('max');
+    }
+  },
+
+  // Close sale modal
+  closeSaleModal() {
+    document.getElementById('saleModal').classList.remove('active');
+  },
+
+  // Save sale
+  async saveSale() {
+    const saleId = document.getElementById('saleId').value;
+    const name = document.getElementById('saleName').value;
+    const type = document.getElementById('saleType').value;
+    const value = parseFloat(document.getElementById('saleValue').value);
+    const startDate = new Date(document.getElementById('saleStartDate').value);
+    const endDate = new Date(document.getElementById('saleEndDate').value);
+    const status = document.getElementById('saleStatus').value;
+
+    // Get selected products
+    const selectedProducts = Array.from(document.querySelectorAll('input[name="saleProduct"]:checked'))
+      .map(cb => cb.value);
+
+    // Validation
+    if (!name || !value || !startDate || !endDate || selectedProducts.length === 0) {
+      alert('Please fill all required fields and select at least one product');
+      return;
+    }
+
+    if (endDate <= startDate) {
+      alert('End date must be after start date');
+      return;
+    }
+
+    if (type === 'percentage' && (value < 0 || value > 100)) {
+      alert('Percentage must be between 0 and 100');
+      return;
+    }
+
+    if (type === 'fixed' && value < 0) {
+      alert('Fixed amount must be positive');
+      return;
+    }
+
+    try {
+      const saleData = {
+        name,
+        type,
+        value,
+        startDate,
+        endDate,
+        status,
+        products: selectedProducts,
+        updatedAt: serverTimestamp(),
+        updatedBy: this.user.uid
+      };
+
+      if (saleId) {
+        await updateDoc(doc(db, 'sales', saleId), saleData);
+        alert('Sale updated successfully!');
+      } else {
+        await setDoc(doc(db, 'sales', `sale_${Date.now()}`), {
+          ...saleData,
+          createdAt: serverTimestamp(),
+          createdBy: this.user.uid
+        });
+        alert('Sale created successfully!');
+      }
+
+      this.closeSaleModal();
+      this.loadSales();
+    } catch (error) {
+      console.error('Error saving sale:', error);
+      alert('Error saving sale: ' + error.message);
+    }
+  },
+
+  // Edit sale
+  async editSale(saleId) {
+    this.showSaleModal(saleId);
+  },
+
+  // Delete sale
+  async deleteSale(saleId) {
+    if (this.userRole !== 'masterAdmin') {
+      alert('Only Master Admin can delete sales');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this sale?')) return;
+
+    try {
+      await deleteDoc(doc(db, 'sales', saleId));
+      alert('Sale deleted successfully!');
+      this.loadSales();
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      alert('Error deleting sale: ' + error.message);
     }
   },
 

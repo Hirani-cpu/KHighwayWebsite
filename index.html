@@ -623,6 +623,27 @@
       overflow: hidden;
     }
 
+    /* Sale Badge on Product Card */
+    .product-sale-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #ef4444;
+      color: white;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+      z-index: 10;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
     .product-image::after {
       content: "";
       position: absolute;
@@ -1412,6 +1433,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/sales.js"></script>
   <script type="module">
     // Load categories and store settings
     import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';

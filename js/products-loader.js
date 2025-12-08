@@ -118,7 +118,7 @@ const ProductsLoader = {
   },
 
   // Render products to the page
-  renderProducts(productsByCategory) {
+  async renderProducts(productsByCategory) {
     // Get product sections container
     const productSections = document.getElementById('productSections');
     if (productSections) {
@@ -126,7 +126,7 @@ const ProductsLoader = {
     }
 
     // For each category, create a section and grid
-    Object.keys(productsByCategory).forEach(category => {
+    for (const category of Object.keys(productsByCategory)) {
       // Generate slug from category name
       const slug = category.toLowerCase().replace(/\s+/g, '-');
 
@@ -147,14 +147,15 @@ const ProductsLoader = {
       // Clear existing products
       grid.innerHTML = '';
 
-      // Add products
-      productsByCategory[category].forEach(product => {
+      // Add products with sale prices
+      for (const product of productsByCategory[category]) {
         const mainImage = product.images?.[0] || 'images/placeholder.jpg';
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
 
-        // Determine price display
+        // Determine price display and check for sales
         let priceDisplay;
+        let saleBadgeHTML = '';
 
         if (product.hasVariations && product.variationData?.combinations) {
           // Product has variations - show price range
@@ -168,12 +169,32 @@ const ProductsLoader = {
             priceDisplay = `£${minPrice.toFixed(2)} - £${maxPrice.toFixed(2)}`;
           }
         } else {
-          // Regular product - show price
-          priceDisplay = `£${product.price.toFixed(2)}`;
+          // Regular product - check for sale
+          if (window.Sales) {
+            try {
+              const saleInfo = await window.Sales.calculateSalePrice(product.id, product.price);
+              if (saleInfo.hasDiscount) {
+                const savingsPercent = ((saleInfo.discountAmount / saleInfo.originalPrice) * 100).toFixed(0);
+                saleBadgeHTML = `<div class="product-sale-badge">${savingsPercent}% OFF</div>`;
+                priceDisplay = `
+                  <span style="text-decoration: line-through; color: #64748b; font-size: 0.9rem;">£${saleInfo.originalPrice.toFixed(2)}</span>
+                  <span style="color: #ef4444; font-weight: 700; margin-left: 0.5rem;">£${saleInfo.salePrice.toFixed(2)}</span>
+                `;
+              } else {
+                priceDisplay = `£${product.price.toFixed(2)}`;
+              }
+            } catch (error) {
+              console.error('Error calculating sale for product:', error);
+              priceDisplay = `£${product.price.toFixed(2)}`;
+            }
+          } else {
+            priceDisplay = `£${product.price.toFixed(2)}`;
+          }
         }
 
         productCard.innerHTML = `
           <div class="product-image">
+            ${saleBadgeHTML}
             <img src="${mainImage}" alt="${product.name}">
           </div>
           <div class="product-body">
@@ -193,8 +214,8 @@ const ProductsLoader = {
         productCard.dataset.hasVariations = product.hasVariations ? 'true' : 'false';
 
         grid.appendChild(productCard);
-      });
-    });
+      }
+    }
   },
 
   // Get a single product by ID

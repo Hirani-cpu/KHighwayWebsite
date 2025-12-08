@@ -68,6 +68,11 @@
     .product-image { height: 220px; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
     .product-image::after { content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent); transition: left 0.5s ease; }
     .product-card:hover .product-image::after { left: 100%; }
+
+    /* Sale Badge on Product Card */
+    .product-sale-badge { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; padding: 0.4rem 0.7rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); z-index: 10; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
     .product-rating { position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.95); padding: 0.35rem 0.6rem; border-radius: 6px; display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10; }
     .product-rating .star { color: #f59e0b; }
     .product-rating .rating-value { color: var(--secondary); }
@@ -76,6 +81,14 @@
     .product-body { padding: 1.25rem; }
     .product-name { font-size: 1rem; font-weight: 600; color: var(--secondary); margin-bottom: 0.5rem; }
     .product-price { color: var(--primary); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.75rem; }
+
+    /* Sale Price Styles */
+    .price-container { margin-bottom: 0.75rem; }
+    .price-with-sale { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .original-price { color: var(--gray-500); font-size: 0.9rem; text-decoration: line-through; }
+    .sale-price { color: var(--danger); font-weight: 700; font-size: 1.1rem; }
+    .sale-badge { display: inline-block; background: var(--danger); color: white; font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 4px; margin-top: 0.25rem; }
+
     .product-btn { display: block; text-align: center; background: var(--primary); color: white; padding: 0.625rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; border: none; cursor: pointer; width: 100%; }
     .product-btn:hover { background: var(--primary-dark); }
     .product-actions { display: flex; gap: 0.5rem; }
@@ -317,6 +330,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/sales.js"></script>
   <script type="module">
     // Load products and store settings
     import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -373,29 +387,67 @@
         });
 
         container.innerHTML = '';
-        Object.keys(productsByCategory).forEach(category => {
+
+        // Process categories sequentially to handle async properly
+        for (const category of Object.keys(productsByCategory)) {
           const slug = category.toLowerCase().replace(/\s+/g, '-');
           const section = document.createElement('div');
           section.innerHTML = `<h2 class="section-title" id="${slug}">${category}</h2><div class="products-grid" data-category="${slug}"></div>`;
           container.appendChild(section);
 
           const grid = section.querySelector('.products-grid');
-          productsByCategory[category].forEach(product => {
+
+          // Load products with sale prices
+          for (const product of productsByCategory[category]) {
             const img = product.images?.[0] || 'images/placeholder.jpg';
+
+            // Get sale price if available
+            let priceHTML = `<div class="product-price">£${product.price.toFixed(2)}</div>`;
+            let saleBadgeHTML = '';
+
+            if (window.Sales) {
+              try {
+                const saleInfo = await window.Sales.calculateSalePrice(product.id, product.price);
+                if (saleInfo.hasDiscount) {
+                  const savingsPercent = ((saleInfo.discountAmount / saleInfo.originalPrice) * 100).toFixed(0);
+
+                  // Sale badge for product image
+                  saleBadgeHTML = `<div class="product-sale-badge">${savingsPercent}% OFF</div>`;
+
+                  // Price with sale
+                  priceHTML = `
+                    <div class="price-container">
+                      <div class="price-with-sale">
+                        <span class="original-price">£${saleInfo.originalPrice.toFixed(2)}</span>
+                        <span class="sale-price">£${saleInfo.salePrice.toFixed(2)}</span>
+                      </div>
+                      <div class="sale-badge">Save ${savingsPercent}%</div>
+                    </div>
+                  `;
+                }
+              } catch (error) {
+                console.error('Error calculating sale price:', error);
+                // Fall back to regular price if sale calculation fails
+              }
+            }
+
             grid.innerHTML += `
               <div class="product-card" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-image="${img}">
-                <div class="product-image"><img src="${img}" alt="${product.name}"></div>
+                <div class="product-image">
+                  ${saleBadgeHTML}
+                  <img src="${img}" alt="${product.name}">
+                </div>
                 <div class="product-body">
                   <h3 class="product-name">${product.name}</h3>
-                  <div class="product-price">£${product.price.toFixed(2)}</div>
+                  ${priceHTML}
                   <div class="product-actions">
                     <a href="product-detail.html?id=${product.id}" class="product-btn">View Details</a>
                   </div>
                 </div>
               </div>
             `;
-          });
-        });
+          }
+        }
       } catch (error) {
         console.error('Error loading products:', error);
         container.innerHTML = '<div style="text-align: center; color: red;">Error loading products</div>';

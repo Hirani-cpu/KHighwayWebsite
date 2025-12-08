@@ -297,6 +297,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/sales.js"></script>
   <script type="module">
     // Load store settings
     import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -361,8 +362,8 @@
       renderCart();
     });
 
-    // Render cart
-    function renderCart() {
+    // Render cart with sale prices
+    async function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const cart = Cart.getCart();
 
@@ -379,10 +380,36 @@
         return;
       }
 
-      container.innerHTML = cart.map(item => {
+      // Calculate sale prices for all items
+      let subtotal = 0;
+      const itemsHTML = [];
+
+      for (const item of cart) {
+        // Get sale price if available
+        let displayPrice = item.price;
+        let priceHTML = `<div class="cart-item-price">£${item.price.toFixed(2)}</div>`;
+
+        if (window.Sales) {
+          const saleInfo = await window.Sales.calculateSalePrice(item.id, item.price);
+          if (saleInfo.hasDiscount) {
+            displayPrice = saleInfo.salePrice;
+            const savingsPercent = ((saleInfo.discountAmount / saleInfo.originalPrice) * 100).toFixed(0);
+            priceHTML = `
+              <div class="cart-item-price">
+                <span style="text-decoration: line-through; color: var(--gray-500); font-size: 0.85rem;">£${saleInfo.originalPrice.toFixed(2)}</span>
+                <span style="color: #ef4444; font-weight: 700; margin-left: 0.5rem;">£${saleInfo.salePrice.toFixed(2)}</span>
+                <span style="display: block; font-size: 0.7rem; color: #ef4444; margin-top: 0.25rem;">Save ${savingsPercent}%</span>
+              </div>
+            `;
+          }
+        }
+
+        subtotal += displayPrice * item.quantity;
+
         // Create variation ID parameter for function calls
         const varIdParam = item.variationId ? `'${item.variationId}'` : 'null';
-        return `
+
+        itemsHTML.push(`
         <div class="cart-item" data-id="${item.id}" data-variation-id="${item.variationId || ''}">
           <div class="cart-item-image">
             <img src="${item.image}" alt="${item.name}">
@@ -390,7 +417,7 @@
           <div class="cart-item-details">
             <h3>${item.name}</h3>
             ${item.variationLabel ? `<div class="cart-item-variation">Pack size: ${item.variationLabel}</div>` : ''}
-            <div class="cart-item-price">£${item.price.toFixed(2)}</div>
+            ${priceHTML}
           </div>
           <div class="cart-item-actions">
             <div class="quantity-controls">
@@ -402,10 +429,12 @@
             <button class="remove-btn" onclick="removeItem('${item.id}', ${varIdParam})">Remove</button>
           </div>
         </div>
-      `}).join('');
+      `);
+      }
 
+      container.innerHTML = itemsHTML.join('');
       document.getElementById('checkoutBtn').disabled = false;
-      updateSummary(Cart.getTotal());
+      updateSummary(subtotal);
     }
 
     function updateItemQuantity(id, quantity, variationId = null) {

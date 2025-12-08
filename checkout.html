@@ -413,6 +413,7 @@
 
   <script src="js/cart.js"></script>
   <script type="module" src="js/firebase-compat.js"></script>
+  <script type="module" src="js/sales.js"></script>
 
   <!-- EmailJS for notifications -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -493,12 +494,25 @@
       return parseFloat(selectedOption.dataset.price) || 0;
     }
 
-    // Load order summary
-    function loadOrderSummary() {
+    // Load order summary with sale prices
+    async function loadOrderSummary() {
       const container = document.getElementById('summaryItems');
       const cart = Cart.getCart();
 
-      container.innerHTML = cart.map(item => `
+      let itemsHTML = [];
+
+      for (const item of cart) {
+        // Get sale price if available
+        let displayPrice = item.price;
+
+        if (window.Sales) {
+          const saleInfo = await window.Sales.calculateSalePrice(item.id, item.price);
+          if (saleInfo.hasDiscount) {
+            displayPrice = saleInfo.salePrice;
+          }
+        }
+
+        itemsHTML.push(`
         <div class="summary-item">
           <div class="summary-item-image">
             <img src="${item.image}" alt="${item.name}">
@@ -508,16 +522,34 @@
             ${item.variationLabel ? `<div class="summary-item-variation" style="font-size: 0.8rem; color: #64748b;">${item.variationLabel}</div>` : ''}
             <div class="summary-item-qty">Qty: ${item.quantity}</div>
           </div>
-          <div class="summary-item-price">£${(item.price * item.quantity).toFixed(2)}</div>
+          <div class="summary-item-price">£${(displayPrice * item.quantity).toFixed(2)}</div>
         </div>
-      `).join('');
+      `);
+      }
 
-      updateTotals();
+      container.innerHTML = itemsHTML.join('');
+      await updateTotals();
     }
 
-    // Update totals based on selected delivery
-    function updateTotals() {
-      const subtotal = Cart.getTotal();
+    // Update totals based on selected delivery with sale prices
+    async function updateTotals() {
+      const cart = Cart.getCart();
+      let subtotal = 0;
+
+      // Calculate subtotal with sale prices
+      for (const item of cart) {
+        let displayPrice = item.price;
+
+        if (window.Sales) {
+          const saleInfo = await window.Sales.calculateSalePrice(item.id, item.price);
+          if (saleInfo.hasDiscount) {
+            displayPrice = saleInfo.salePrice;
+          }
+        }
+
+        subtotal += displayPrice * item.quantity;
+      }
+
       const shipping = getSelectedShipping();
       const total = subtotal + shipping;
 
