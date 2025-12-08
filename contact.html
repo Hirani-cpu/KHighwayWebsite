@@ -277,7 +277,7 @@
             <div class="contact-icon">🕐</div>
             <div class="contact-text">
               <h3>Business Hours</h3>
-              <p>Mon - Fri: 9:00 AM - 5:00 PM</p>
+              <p id="contactHours">Mon - Fri: 9:00 AM - 5:00 PM</p>
             </div>
           </div>
 
@@ -411,6 +411,37 @@
 
             // Update page title
             document.title = config.storeName;
+          }
+
+          // Update contact information
+          if (config.email) {
+            const emailElement = document.getElementById('contactEmail');
+            if (emailElement) {
+              emailElement.textContent = config.email;
+              emailElement.href = 'mailto:' + config.email;
+            }
+          }
+
+          if (config.phone) {
+            const phoneElement = document.getElementById('contactPhone');
+            if (phoneElement) {
+              phoneElement.textContent = config.phone;
+              phoneElement.href = 'tel:' + config.phone.replace(/\s/g, '');
+            }
+          }
+
+          if (config.address) {
+            const addressElement = document.getElementById('contactAddress');
+            if (addressElement) {
+              addressElement.textContent = config.address;
+            }
+          }
+
+          if (config.businessHours) {
+            const hoursElement = document.getElementById('contactHours');
+            if (hoursElement) {
+              hoursElement.textContent = config.businessHours;
+            }
           }
         }
       } catch (error) {

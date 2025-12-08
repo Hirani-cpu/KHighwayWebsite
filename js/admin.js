@@ -782,6 +782,7 @@ const Admin = {
         document.getElementById('settingPhone').value = config.phone || '';
         document.getElementById('settingCurrency').value = config.currency || 'GBP';
         document.getElementById('settingAddress').value = config.address || '';
+        document.getElementById('settingHours').value = config.businessHours || '';
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -807,6 +808,7 @@ const Admin = {
         phone: document.getElementById('settingPhone').value,
         currency: document.getElementById('settingCurrency').value,
         address: document.getElementById('settingAddress').value,
+        businessHours: document.getElementById('settingHours').value,
         updatedAt: serverTimestamp(),
         updatedBy: this.user.uid
       });
