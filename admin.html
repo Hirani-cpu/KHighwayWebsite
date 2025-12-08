@@ -163,10 +163,10 @@
     .image-upload-text strong { color: var(--primary); }
 
     .image-preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
-    .preview-image { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--gray-100); cursor: move; transition: all 0.3s ease; }
+    .preview-image { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--gray-100); cursor: move; transition: all 0.2s ease; border: 2px solid transparent; }
     .preview-image:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .preview-image.dragging { opacity: 0.5; transform: rotate(5deg); }
-    .preview-image.drag-over { border: 2px dashed var(--primary); }
+    .preview-image.dragging { opacity: 0.4; transform: scale(0.95); cursor: grabbing; }
+    .preview-image.drag-over { border: 2px dashed var(--primary); background: rgba(37, 99, 235, 0.1); transform: scale(1.05); }
     .preview-image img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     .preview-image .remove-image { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: var(--danger); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 1rem; line-height: 1; display: flex; align-items: center; justify-content: center; z-index: 10; }
     .preview-image .image-name { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; font-size: 0.65rem; padding: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
@@ -220,25 +220,33 @@
     .variations-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
     .variations-header h4 { font-size: 1rem; font-weight: 700; color: var(--secondary); margin: 0; }
     .variations-help { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1rem; }
-    .variations-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
-    .variation-row { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; align-items: center; background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200); }
-    .variation-row input { padding: 0.625rem 0.875rem; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.9rem; font-family: inherit; transition: all 0.3s ease; }
-    .variation-row input:focus { outline: none; border-color: var(--primary); }
-    .variation-row .variation-label-input { flex: 1; }
-    .variation-row .variation-price-input { width: 100%; }
-    .variation-row .variation-stock-input { width: 100%; }
-    .btn-remove-variation { width: 36px; height: 36px; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
-    .btn-remove-variation:hover { background: #dc2626; }
+    .variation-type-container { background: white; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; border: 2px solid var(--gray-300); }
+    .variation-type-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--gray-200); }
+    .variation-type-title { display: flex; align-items: center; gap: 0.75rem; flex: 1; }
+    .variation-type-title input { font-size: 0.95rem; font-weight: 600; padding: 0.5rem 0.75rem; border: 2px solid var(--gray-200); border-radius: 6px; }
+    .variation-type-title input:focus { outline: none; border-color: var(--primary); }
+    .btn-remove-variation-type { padding: 0.4rem 0.75rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s ease; }
+    .btn-remove-variation-type:hover { background: #dc2626; }
 
-    .variation-row-header { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; padding: 0 1rem; margin-bottom: 0.5rem; }
-    .variation-row-header span { font-size: 0.75rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; }
+    .variation-options-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .variation-option-row { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; align-items: center; padding: 0.75rem; background: var(--gray-100); border-radius: 6px; }
+    .variation-option-row input { padding: 0.5rem 0.75rem; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.85rem; font-family: inherit; transition: all 0.3s ease; }
+    .variation-option-row input:focus { outline: none; border-color: var(--primary); }
+    .btn-remove-option { width: 32px; height: 32px; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+    .btn-remove-option:hover { background: #dc2626; }
+
+    .variation-option-header { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; padding: 0 0.75rem; margin-bottom: 0.5rem; }
+    .variation-option-header span { font-size: 0.7rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .btn-add-option { margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease; }
+    .btn-add-option:hover { background: #059669; }
 
     .btn-sm { padding: 0.4rem 0.875rem; font-size: 0.8rem; }
 
     @media (max-width: 600px) {
-      .variation-row { grid-template-columns: 1fr; }
-      .variation-row-header { display: none; }
+      .variation-option-row { grid-template-columns: 1fr; }
+      .variation-option-header { display: none; }
     }
 
     /* Unread badge for messages */
@@ -696,7 +704,7 @@ Spindle Type: 7mm square"></textarea>
           <div class="form-group">
             <label class="variation-toggle-label">
               <input type="checkbox" id="hasVariations" onchange="Admin.toggleVariationsSection()">
-              <span class="toggle-text">This product has variations (e.g., different pack sizes with different prices)</span>
+              <span class="toggle-text">This product has variations (e.g., different sizes, colors, gasket types, lengths)</span>
             </label>
           </div>
 
@@ -704,11 +712,11 @@ Spindle Type: 7mm square"></textarea>
           <div class="variations-section" id="variationsSection" style="display: none;">
             <div class="variations-header">
               <h4>Product Variations</h4>
-              <button type="button" class="btn btn-success btn-sm" onclick="Admin.addVariationRow()">+ Add Variation</button>
+              <button type="button" class="btn btn-success btn-sm" onclick="Admin.addVariationType()">+ Add Variation Type</button>
             </div>
-            <p class="variations-help">Add different pack sizes or options with their own prices. Example: 10pcs, 20pcs, 50pcs</p>
-            <div class="variations-list" id="variationsList">
-              <!-- Variation rows will be added here dynamically -->
+            <p class="variations-help">Add different variation types (like Gasket Type, Length, Pack Size) with their options and prices. Each option can have its own price adjustment and stock.</p>
+            <div id="variationTypesList">
+              <!-- Variation type containers will be added here dynamically -->
             </div>
           </div>
 

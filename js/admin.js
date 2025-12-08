@@ -50,7 +50,8 @@ const Admin = {
   userRole: null,
   uploadedImages: [],
   editingProductId: null,
-  variationCounter: 0, // Counter for unique variation row IDs
+  variationTypeCounter: 0, // Counter for unique variation type IDs
+  variationOptionCounter: 0, // Counter for unique variation option IDs
 
   // Initialize admin panel
   async init() {
@@ -181,35 +182,58 @@ const Admin = {
     element.addEventListener('dragstart', (e) => {
       element.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', element.innerHTML);
+      e.dataTransfer.setData('text/plain', element.dataset.fileName);
     });
 
     element.addEventListener('dragend', (e) => {
       element.classList.remove('dragging');
+      // Clean up any drag-over classes
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
     });
 
     element.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      const preview = document.getElementById('imagePreview');
-      const dragging = preview.querySelector('.dragging');
-      const afterElement = this.getDragAfterElement(preview, e.clientY);
 
-      if (afterElement == null) {
-        preview.appendChild(dragging);
-      } else {
-        preview.insertBefore(dragging, afterElement);
+      // Add visual feedback
+      const dragging = document.querySelector('.dragging');
+      if (dragging && element !== dragging) {
+        element.classList.add('drag-over');
       }
+    });
+
+    element.addEventListener('dragleave', (e) => {
+      element.classList.remove('drag-over');
     });
 
     element.addEventListener('drop', (e) => {
       e.preventDefault();
-      this.reorderUploadedImages();
-      this.updatePrimaryBadges();
+      e.stopPropagation();
+      element.classList.remove('drag-over');
+
+      const preview = document.getElementById('imagePreview');
+      const dragging = preview.querySelector('.dragging');
+
+      if (dragging && element !== dragging) {
+        // Get all images
+        const allImages = Array.from(preview.children);
+        const draggedIndex = allImages.indexOf(dragging);
+        const targetIndex = allImages.indexOf(element);
+
+        // Reorder in DOM
+        if (draggedIndex < targetIndex) {
+          element.parentNode.insertBefore(dragging, element.nextSibling);
+        } else {
+          element.parentNode.insertBefore(dragging, element);
+        }
+
+        this.reorderUploadedImages();
+        this.updatePrimaryBadges();
+      }
     });
   },
 
-  // Get element after drag position
+  // Get element after drag position (kept for compatibility but not used in grid)
   getDragAfterElement(container, y) {
     const draggableElements = [...container.querySelectorAll('.preview-image:not(.dragging)')];
 
@@ -284,30 +308,53 @@ const Admin = {
     element.addEventListener('dragstart', (e) => {
       element.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/html', element.innerHTML);
+      e.dataTransfer.setData('text/plain', element.dataset.imageUrl);
     });
 
     element.addEventListener('dragend', (e) => {
       element.classList.remove('dragging');
+      // Clean up any drag-over classes
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
     });
 
     element.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      const existingGrid = document.getElementById('existingImagesGrid');
-      const dragging = existingGrid.querySelector('.dragging');
-      const afterElement = this.getDragAfterElement(existingGrid, e.clientY);
 
-      if (afterElement == null) {
-        existingGrid.appendChild(dragging);
-      } else {
-        existingGrid.insertBefore(dragging, afterElement);
+      // Add visual feedback
+      const dragging = document.querySelector('.dragging');
+      if (dragging && element !== dragging) {
+        element.classList.add('drag-over');
       }
+    });
+
+    element.addEventListener('dragleave', (e) => {
+      element.classList.remove('drag-over');
     });
 
     element.addEventListener('drop', (e) => {
       e.preventDefault();
-      this.updatePrimaryBadgesExisting();
+      e.stopPropagation();
+      element.classList.remove('drag-over');
+
+      const existingGrid = document.getElementById('existingImagesGrid');
+      const dragging = existingGrid.querySelector('.dragging');
+
+      if (dragging && element !== dragging) {
+        // Get all images
+        const allImages = Array.from(existingGrid.children);
+        const draggedIndex = allImages.indexOf(dragging);
+        const targetIndex = allImages.indexOf(element);
+
+        // Reorder in DOM
+        if (draggedIndex < targetIndex) {
+          element.parentNode.insertBefore(dragging, element.nextSibling);
+        } else {
+          element.parentNode.insertBefore(dragging, element);
+        }
+
+        this.updatePrimaryBadgesExisting();
+      }
     });
   },
 
@@ -952,8 +999,24 @@ const Admin = {
         }
 
         // Load variations if product has them
-        if (product.hasVariations && product.variations && product.variations.length > 0) {
-          this.loadVariationsToForm(product.variations);
+        if (product.hasVariations) {
+          // Support both old format (variations array) and new format (variationTypes array)
+          if (product.variationTypes && product.variationTypes.length > 0) {
+            this.loadVariationsToForm(product.variationTypes);
+          } else if (product.variations && product.variations.length > 0) {
+            // Convert old format to new format for backward compatibility
+            const convertedTypes = [{
+              id: 'type-1',
+              name: 'Pack Size',
+              options: product.variations.map(v => ({
+                id: v.id,
+                name: v.label,
+                priceAdjustment: v.price - product.price,
+                stock: v.stock || 0
+              }))
+            }];
+            this.loadVariationsToForm(convertedTypes);
+          }
         }
       }
     } catch (error) {
@@ -1088,14 +1151,26 @@ const Admin = {
 
       // Handle variations
       const hasVariations = document.getElementById('hasVariations').checked;
-      const variations = hasVariations ? this.getVariationsFromForm() : [];
+      const variationTypes = hasVariations ? this.getVariationsFromForm() : [];
 
       // Validate variations if enabled
-      if (hasVariations && variations.length === 0) {
-        alert('Please add at least one variation with a label and price');
+      if (hasVariations && variationTypes.length === 0) {
+        alert('Please add at least one variation type with options');
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Product';
         return;
+      }
+
+      // Validate that each variation type has at least one option
+      if (hasVariations) {
+        for (const type of variationTypes) {
+          if (!type.options || type.options.length === 0) {
+            alert(`Variation type "${type.name}" must have at least one option`);
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Product';
+            return;
+          }
+        }
       }
 
       const productData = {
@@ -1111,7 +1186,7 @@ const Admin = {
         features: features,
         specifications: specifications,
         hasVariations: hasVariations,
-        variations: variations,
+        variationTypes: variationTypes,
         updatedAt: serverTimestamp(),
         updatedBy: this.user.uid
       };
@@ -1148,114 +1223,168 @@ const Admin = {
 
     if (checkbox.checked) {
       section.style.display = 'block';
-      // Add header row and first variation if none exist
-      const list = document.getElementById('variationsList');
+      // Add first variation type if none exist
+      const list = document.getElementById('variationTypesList');
       if (list.children.length === 0) {
-        this.renderVariationsHeader();
-        this.addVariationRow();
+        this.addVariationType();
       }
     } else {
       section.style.display = 'none';
     }
   },
 
-  // Render the header row for variations
-  renderVariationsHeader() {
-    const list = document.getElementById('variationsList');
-    const headerExists = list.querySelector('.variation-row-header');
-    if (!headerExists) {
-      const header = document.createElement('div');
-      header.className = 'variation-row-header';
-      header.innerHTML = `
-        <span>Label (e.g., 10pcs)</span>
-        <span>Price (£)</span>
+  // Add a new variation type
+  addVariationType(data = {}) {
+    const list = document.getElementById('variationTypesList');
+    this.variationTypeCounter++;
+
+    const typeId = data.id || `type-${this.variationTypeCounter}`;
+    const container = document.createElement('div');
+    container.className = 'variation-type-container';
+    container.dataset.typeId = typeId;
+
+    container.innerHTML = `
+      <div class="variation-type-header">
+        <div class="variation-type-title">
+          <span style="font-weight: 700; color: var(--secondary);">Variation Type:</span>
+          <input type="text" class="variation-type-name" placeholder="e.g., Gasket Type, Length, Pack Size" value="${data.name || ''}" required>
+        </div>
+        <button type="button" class="btn-remove-variation-type" onclick="Admin.removeVariationType(this)">Remove Type</button>
+      </div>
+      <div class="variation-option-header">
+        <span>Option Name</span>
+        <span>Price Adj (£)</span>
         <span>Stock</span>
         <span></span>
-      `;
-      list.insertBefore(header, list.firstChild);
+      </div>
+      <div class="variation-options-list" data-type-id="${typeId}">
+        <!-- Options will be added here -->
+      </div>
+      <button type="button" class="btn-add-option" onclick="Admin.addVariationOption('${typeId}')">+ Add Option</button>
+    `;
+
+    list.appendChild(container);
+
+    // Add first option or load existing options
+    if (data.options && data.options.length > 0) {
+      data.options.forEach(option => {
+        this.addVariationOption(typeId, option);
+      });
+    } else {
+      this.addVariationOption(typeId);
     }
   },
 
-  // Add a new variation row
-  addVariationRow(data = {}) {
-    const list = document.getElementById('variationsList');
-    this.variationCounter++;
-
-    // Ensure header exists
-    this.renderVariationsHeader();
-
-    const row = document.createElement('div');
-    row.className = 'variation-row';
-    row.dataset.variationId = data.id || `new-${this.variationCounter}`;
-
-    row.innerHTML = `
-      <input type="text" class="variation-label-input" placeholder="e.g., 10pcs" value="${data.label || ''}" required>
-      <input type="number" class="variation-price-input" placeholder="0.00" step="0.01" min="0" value="${data.price || ''}" required>
-      <input type="number" class="variation-stock-input" placeholder="0" min="0" value="${data.stock || 0}">
-      <button type="button" class="btn-remove-variation" onclick="Admin.removeVariationRow(this)" title="Remove variation">&times;</button>
-    `;
-
-    list.appendChild(row);
-  },
-
-  // Remove a variation row
-  removeVariationRow(btn) {
-    const row = btn.closest('.variation-row');
-    if (row) {
-      row.remove();
-      // If no more variations, uncheck the toggle
-      const list = document.getElementById('variationsList');
-      const rows = list.querySelectorAll('.variation-row');
-      if (rows.length === 0) {
+  // Remove a variation type
+  removeVariationType(btn) {
+    const container = btn.closest('.variation-type-container');
+    if (container) {
+      container.remove();
+      // If no more variation types, uncheck the toggle
+      const list = document.getElementById('variationTypesList');
+      if (list.children.length === 0) {
         document.getElementById('hasVariations').checked = false;
         document.getElementById('variationsSection').style.display = 'none';
       }
     }
   },
 
-  // Get all variations from the form
+  // Add a new variation option to a specific type
+  addVariationOption(typeId, data = {}) {
+    const optionsList = document.querySelector(`.variation-options-list[data-type-id="${typeId}"]`);
+    if (!optionsList) return;
+
+    this.variationOptionCounter++;
+
+    const row = document.createElement('div');
+    row.className = 'variation-option-row';
+    row.dataset.optionId = data.id || `option-${this.variationOptionCounter}`;
+
+    row.innerHTML = `
+      <input type="text" class="option-name-input" placeholder="e.g., EPDM, Silicone, 100mm" value="${data.name || ''}" required>
+      <input type="number" class="option-price-input" placeholder="0.00" step="0.01" value="${data.priceAdjustment || 0}">
+      <input type="number" class="option-stock-input" placeholder="0" min="0" value="${data.stock || 0}">
+      <button type="button" class="btn-remove-option" onclick="Admin.removeVariationOption(this)" title="Remove option">&times;</button>
+    `;
+
+    optionsList.appendChild(row);
+  },
+
+  // Remove a variation option
+  removeVariationOption(btn) {
+    const row = btn.closest('.variation-option-row');
+    const optionsList = row.closest('.variation-options-list');
+    if (row) {
+      row.remove();
+      // If no more options in this type, keep at least the empty state
+      if (optionsList && optionsList.children.length === 0) {
+        const typeId = optionsList.dataset.typeId;
+        this.addVariationOption(typeId);
+      }
+    }
+  },
+
+  // Get all variation types and options from the form
   getVariationsFromForm() {
-    const list = document.getElementById('variationsList');
-    const rows = list.querySelectorAll('.variation-row');
-    const variations = [];
+    const typeContainers = document.querySelectorAll('.variation-type-container');
+    const variationTypes = [];
 
-    rows.forEach((row, index) => {
-      const label = row.querySelector('.variation-label-input').value.trim();
-      const price = parseFloat(row.querySelector('.variation-price-input').value) || 0;
-      const stock = parseInt(row.querySelector('.variation-stock-input').value) || 0;
+    typeContainers.forEach(container => {
+      const typeId = container.dataset.typeId;
+      const typeName = container.querySelector('.variation-type-name').value.trim();
 
-      if (label && price > 0) {
-        variations.push({
-          id: row.dataset.variationId || `var-${index}`,
-          label: label,
-          price: price,
-          stock: stock
+      if (!typeName) return; // Skip if no type name
+
+      const optionRows = container.querySelectorAll('.variation-option-row');
+      const options = [];
+
+      optionRows.forEach(row => {
+        const name = row.querySelector('.option-name-input').value.trim();
+        const priceAdjustment = parseFloat(row.querySelector('.option-price-input').value) || 0;
+        const stock = parseInt(row.querySelector('.option-stock-input').value) || 0;
+
+        if (name) {
+          options.push({
+            id: row.dataset.optionId,
+            name: name,
+            priceAdjustment: priceAdjustment,
+            stock: stock
+          });
+        }
+      });
+
+      if (options.length > 0) {
+        variationTypes.push({
+          id: typeId,
+          name: typeName,
+          options: options
         });
       }
     });
 
-    return variations;
+    return variationTypes;
   },
 
   // Clear variations section
   clearVariationsSection() {
-    const list = document.getElementById('variationsList');
+    const list = document.getElementById('variationTypesList');
     list.innerHTML = '';
     document.getElementById('hasVariations').checked = false;
     document.getElementById('variationsSection').style.display = 'none';
-    this.variationCounter = 0;
+    this.variationTypeCounter = 0;
+    this.variationOptionCounter = 0;
   },
 
   // Load variations into the form (for editing)
-  loadVariationsToForm(variations) {
+  loadVariationsToForm(variationTypes) {
     this.clearVariationsSection();
 
-    if (variations && variations.length > 0) {
+    if (variationTypes && variationTypes.length > 0) {
       document.getElementById('hasVariations').checked = true;
       document.getElementById('variationsSection').style.display = 'block';
 
-      variations.forEach(variation => {
-        this.addVariationRow(variation);
+      variationTypes.forEach(type => {
+        this.addVariationType(type);
       });
     }
   },
