@@ -680,9 +680,25 @@
           `;
         }).join('');
 
-        // Show "From £X.XX" with lowest price
+        // Show "From £X.XX" with lowest price initially
         const lowestPrice = Math.min(...variationData.combinations.map(c => c.price));
-        document.querySelector('.product-price').innerHTML = `From £${lowestPrice.toFixed(2)}`;
+        const highestPrice = Math.max(...variationData.combinations.map(c => c.price));
+
+        if (lowestPrice === highestPrice) {
+          document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)}`;
+        } else {
+          document.querySelector('.product-price').innerHTML = `£${lowestPrice.toFixed(2)} - £${highestPrice.toFixed(2)}`;
+        }
+
+        // Hide stock status initially until combination is selected
+        const stockStatus = document.querySelector('.stock-status');
+        stockStatus.style.display = 'none';
+
+        // Disable add to cart button until combination is selected
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        addToCartBtn.disabled = true;
+        addToCartBtn.style.opacity = '0.5';
+        addToCartBtn.style.cursor = 'not-allowed';
 
         // Add click handlers to all variation options
         container.querySelectorAll('.variation-option').forEach(option => {
@@ -745,10 +761,12 @@
 
       // Update display
       if (selectedCombination) {
+        // Update price to exact combination price
         document.querySelector('.product-price').innerHTML = `£${selectedCombination.price.toFixed(2)}`;
 
-        // Update stock status
+        // Show and update stock status
         const stockStatus = document.querySelector('.stock-status');
+        stockStatus.style.display = 'inline-flex';
         if (selectedCombination.stock > 0) {
           stockStatus.className = 'stock-status in-stock';
           stockStatus.innerHTML = '<span>●</span> In Stock (' + selectedCombination.stock + ' available)';
@@ -764,6 +782,18 @@
           if (skuSpan) {
             skuSpan.innerHTML = `SKU: ${selectedCombination.sku}`;
           }
+        }
+
+        // Enable add to cart button if stock is available
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (selectedCombination.stock > 0) {
+          addToCartBtn.disabled = false;
+          addToCartBtn.style.opacity = '1';
+          addToCartBtn.style.cursor = 'pointer';
+        } else {
+          addToCartBtn.disabled = true;
+          addToCartBtn.style.opacity = '0.5';
+          addToCartBtn.style.cursor = 'not-allowed';
         }
       }
     }
