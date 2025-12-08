@@ -157,15 +157,39 @@ const ProductsLoader = {
         productCard.dataset.price = product.price;
         productCard.dataset.image = mainImage;
 
+        // Determine price display and button behavior
+        let priceDisplay;
+        let addButton;
+
+        if (product.hasVariations && product.variationData?.combinations) {
+          // Product has variations - show price range and redirect to details
+          const prices = product.variationData.combinations.map(c => c.price);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+
+          if (minPrice === maxPrice) {
+            priceDisplay = `£${minPrice.toFixed(2)}`;
+          } else {
+            priceDisplay = `£${minPrice.toFixed(2)} - £${maxPrice.toFixed(2)}`;
+          }
+
+          // Button redirects to details page instead of adding to cart
+          addButton = `<a href="product-detail.html?id=${product.id}" class="product-btn btn-cart">Select Options</a>`;
+        } else {
+          // Regular product - show price and add to cart button
+          priceDisplay = `£${product.price.toFixed(2)}`;
+          addButton = `<button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>`;
+        }
+
         productCard.innerHTML = `
           <div class="product-image">
             <img src="${mainImage}" alt="${product.name}">
           </div>
           <div class="product-body">
             <h3 class="product-name">${product.name}</h3>
-            <div class="product-price">£${product.price.toFixed(2)}</div>
+            <div class="product-price">${priceDisplay}</div>
             <div class="product-actions">
-              <button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>
+              ${addButton}
               <a href="product-detail.html?id=${product.id}" class="product-btn">Details</a>
             </div>
           </div>
