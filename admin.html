@@ -221,26 +221,30 @@
     .variations-header h4 { font-size: 1rem; font-weight: 700; color: var(--secondary); margin: 0; }
     .variations-help { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1rem; }
 
-    .variation-type-container { background: white; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; border: 2px solid var(--gray-300); }
-    .variation-type-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--gray-200); }
-    .variation-type-title { display: flex; align-items: center; gap: 0.75rem; flex: 1; }
-    .variation-type-title input { font-size: 0.95rem; font-weight: 600; padding: 0.5rem 0.75rem; border: 2px solid var(--gray-200); border-radius: 6px; }
-    .variation-type-title input:focus { outline: none; border-color: var(--primary); }
-    .btn-remove-variation-type { padding: 0.4rem 0.75rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s ease; }
-    .btn-remove-variation-type:hover { background: #dc2626; }
+    /* Variation Attributes */
+    .variation-attributes-section { background: white; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; border: 2px solid var(--gray-300); }
+    .variation-attribute-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; align-items: center; }
+    .variation-attribute-row input { flex: 1; padding: 0.625rem 0.875rem; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.9rem; }
+    .variation-attribute-row input:focus { outline: none; border-color: var(--primary); }
+    .variation-attribute-row .attribute-name { font-weight: 600; }
+    .variation-attribute-values { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-left: 1rem; }
+    .variation-attribute-values input { flex: 0 0 140px; padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+    .btn-add-attribute-value { padding: 0.4rem 0.75rem; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .btn-add-attribute-value:hover { background: #059669; }
+    .btn-remove-attribute { padding: 0.4rem 0.75rem; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .btn-remove-attribute:hover { background: #dc2626; }
 
-    .variation-options-list { display: flex; flex-direction: column; gap: 0.5rem; }
-    .variation-option-row { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; align-items: center; padding: 0.75rem; background: var(--gray-100); border-radius: 6px; }
-    .variation-option-row input { padding: 0.5rem 0.75rem; border: 2px solid var(--gray-200); border-radius: 6px; font-size: 0.85rem; font-family: inherit; transition: all 0.3s ease; }
-    .variation-option-row input:focus { outline: none; border-color: var(--primary); }
-    .btn-remove-option { width: 32px; height: 32px; background: var(--danger); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
-    .btn-remove-option:hover { background: #dc2626; }
-
-    .variation-option-header { display: grid; grid-template-columns: 1fr 120px 100px auto; gap: 0.75rem; padding: 0 0.75rem; margin-bottom: 0.5rem; }
-    .variation-option-header span { font-size: 0.7rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .btn-add-option { margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: var(--success); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease; }
-    .btn-add-option:hover { background: #059669; }
+    /* Variation Combinations Table */
+    .combinations-section { background: white; border-radius: 8px; padding: 1.25rem; margin-top: 1rem; border: 2px solid var(--gray-300); }
+    .combinations-help { font-size: 0.85rem; color: var(--gray-500); margin-bottom: 1rem; }
+    .combinations-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .combinations-table th { background: var(--gray-100); padding: 0.75rem; text-align: left; font-size: 0.8rem; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-300); }
+    .combinations-table td { padding: 0.75rem; border-bottom: 1px solid var(--gray-200); }
+    .combinations-table input { width: 100%; padding: 0.5rem; border: 2px solid var(--gray-200); border-radius: 4px; font-size: 0.85rem; }
+    .combinations-table input:focus { outline: none; border-color: var(--primary); }
+    .combination-name { font-weight: 600; color: var(--secondary); }
+    .btn-generate-combinations { padding: 0.625rem 1.25rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 1rem; }
+    .btn-generate-combinations:hover { background: var(--primary-dark); }
 
     .btn-sm { padding: 0.4rem 0.875rem; font-size: 0.8rem; }
 
@@ -704,19 +708,28 @@ Spindle Type: 7mm square"></textarea>
           <div class="form-group">
             <label class="variation-toggle-label">
               <input type="checkbox" id="hasVariations" onchange="Admin.toggleVariationsSection()">
-              <span class="toggle-text">This product has variations (e.g., different sizes, colors, gasket types, lengths)</span>
+              <span class="toggle-text">This product has variations (e.g., Size + Color, Gasket Type + Length)</span>
             </label>
           </div>
 
           <!-- Variations Section (hidden by default) -->
           <div class="variations-section" id="variationsSection" style="display: none;">
             <div class="variations-header">
-              <h4>Product Variations</h4>
-              <button type="button" class="btn btn-success btn-sm" onclick="Admin.addVariationType()">+ Add Variation Type</button>
+              <h4>Variation Attributes</h4>
+              <button type="button" class="btn btn-success btn-sm" onclick="Admin.addVariationAttribute()">+ Add Attribute</button>
             </div>
-            <p class="variations-help">Add different variation types (like Gasket Type, Length, Pack Size) with their options and prices. Each option can have its own price adjustment and stock.</p>
-            <div id="variationTypesList">
-              <!-- Variation type containers will be added here dynamically -->
+            <p class="variations-help">Step 1: Define variation attributes (e.g., "Gasket Type", "Length"). Step 2: Add values for each (e.g., EPDM, Silicone). Step 3: Generate combinations and set prices.</p>
+            <div class="variation-attributes-section" id="variationAttributesList">
+              <!-- Variation attributes will be added here -->
+            </div>
+
+            <!-- Combinations Section -->
+            <div class="combinations-section" id="combinationsSection" style="display: none;">
+              <button type="button" class="btn-generate-combinations" onclick="Admin.generateCombinations()">🔄 Generate All Combinations</button>
+              <p class="combinations-help">All possible combinations will be generated. Set price, stock, and SKU for each combination.</p>
+              <div id="combinationsTableContainer">
+                <!-- Combinations table will be generated here -->
+              </div>
             </div>
           </div>
 

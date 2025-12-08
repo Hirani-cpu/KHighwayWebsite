@@ -50,8 +50,9 @@ const Admin = {
   userRole: null,
   uploadedImages: [],
   editingProductId: null,
-  variationTypeCounter: 0, // Counter for unique variation type IDs
-  variationOptionCounter: 0, // Counter for unique variation option IDs
+  variationAttributeCounter: 0, // Counter for unique attribute IDs
+  variationAttributes: [], // Store attributes and their values
+  variationCombinations: [], // Store all combinations with prices/stock
 
   // Initialize admin panel
   async init() {
@@ -999,24 +1000,8 @@ const Admin = {
         }
 
         // Load variations if product has them
-        if (product.hasVariations) {
-          // Support both old format (variations array) and new format (variationTypes array)
-          if (product.variationTypes && product.variationTypes.length > 0) {
-            this.loadVariationsToForm(product.variationTypes);
-          } else if (product.variations && product.variations.length > 0) {
-            // Convert old format to new format for backward compatibility
-            const convertedTypes = [{
-              id: 'type-1',
-              name: 'Pack Size',
-              options: product.variations.map(v => ({
-                id: v.id,
-                name: v.label,
-                priceAdjustment: v.price - product.price,
-                stock: v.stock || 0
-              }))
-            }];
-            this.loadVariationsToForm(convertedTypes);
-          }
+        if (product.hasVariations && product.variationData) {
+          this.loadVariationsToForm(product.variationData);
         }
       }
     } catch (error) {
@@ -1151,26 +1136,14 @@ const Admin = {
 
       // Handle variations
       const hasVariations = document.getElementById('hasVariations').checked;
-      const variationTypes = hasVariations ? this.getVariationsFromForm() : [];
+      const variationData = hasVariations ? this.getVariationsFromForm() : null;
 
       // Validate variations if enabled
-      if (hasVariations && variationTypes.length === 0) {
-        alert('Please add at least one variation type with options');
+      if (hasVariations && (!variationData || !variationData.combinations || variationData.combinations.length === 0)) {
+        alert('Please generate combinations and set prices for at least one combination');
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Product';
         return;
-      }
-
-      // Validate that each variation type has at least one option
-      if (hasVariations) {
-        for (const type of variationTypes) {
-          if (!type.options || type.options.length === 0) {
-            alert(`Variation type "${type.name}" must have at least one option`);
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Product';
-            return;
-          }
-        }
       }
 
       const productData = {
@@ -1186,7 +1159,7 @@ const Admin = {
         features: features,
         specifications: specifications,
         hasVariations: hasVariations,
-        variationTypes: variationTypes,
+        variationData: variationData,
         updatedAt: serverTimestamp(),
         updatedBy: this.user.uid
       };
@@ -1223,169 +1196,276 @@ const Admin = {
 
     if (checkbox.checked) {
       section.style.display = 'block';
-      // Add first variation type if none exist
-      const list = document.getElementById('variationTypesList');
-      if (list.children.length === 0) {
-        this.addVariationType();
+      // Add first attribute if none exist
+      if (this.variationAttributes.length === 0) {
+        this.addVariationAttribute();
       }
     } else {
       section.style.display = 'none';
+      this.clearVariationsSection();
     }
   },
 
-  // Add a new variation type
-  addVariationType(data = {}) {
-    const list = document.getElementById('variationTypesList');
-    this.variationTypeCounter++;
+  // Add a new variation attribute
+  addVariationAttribute(data = {}) {
+    this.variationAttributeCounter++;
+    const attrId = data.id || `attr-${this.variationAttributeCounter}`;
 
-    const typeId = data.id || `type-${this.variationTypeCounter}`;
-    const container = document.createElement('div');
-    container.className = 'variation-type-container';
-    container.dataset.typeId = typeId;
+    const attribute = {
+      id: attrId,
+      name: data.name || '',
+      values: data.values || ['']
+    };
 
-    container.innerHTML = `
-      <div class="variation-type-header">
-        <div class="variation-type-title">
-          <span style="font-weight: 700; color: var(--secondary);">Variation Type:</span>
-          <input type="text" class="variation-type-name" placeholder="e.g., Gasket Type, Length, Pack Size" value="${data.name || ''}" required>
-        </div>
-        <button type="button" class="btn-remove-variation-type" onclick="Admin.removeVariationType(this)">Remove Type</button>
-      </div>
-      <div class="variation-option-header">
-        <span>Option Name</span>
-        <span>Price Adj (£)</span>
-        <span>Stock</span>
-        <span></span>
-      </div>
-      <div class="variation-options-list" data-type-id="${typeId}">
-        <!-- Options will be added here -->
-      </div>
-      <button type="button" class="btn-add-option" onclick="Admin.addVariationOption('${typeId}')">+ Add Option</button>
-    `;
+    this.variationAttributes.push(attribute);
+    this.renderVariationAttributes();
 
-    list.appendChild(container);
-
-    // Add first option or load existing options
-    if (data.options && data.options.length > 0) {
-      data.options.forEach(option => {
-        this.addVariationOption(typeId, option);
-      });
-    } else {
-      this.addVariationOption(typeId);
+    // Show combinations section if we have at least one attribute
+    if (this.variationAttributes.length > 0) {
+      document.getElementById('combinationsSection').style.display = 'block';
     }
   },
 
-  // Remove a variation type
-  removeVariationType(btn) {
-    const container = btn.closest('.variation-type-container');
-    if (container) {
-      container.remove();
-      // If no more variation types, uncheck the toggle
-      const list = document.getElementById('variationTypesList');
-      if (list.children.length === 0) {
-        document.getElementById('hasVariations').checked = false;
-        document.getElementById('variationsSection').style.display = 'none';
-      }
-    }
-  },
+  // Render all variation attributes
+  renderVariationAttributes() {
+    const container = document.getElementById('variationAttributesList');
+    container.innerHTML = '';
 
-  // Add a new variation option to a specific type
-  addVariationOption(typeId, data = {}) {
-    const optionsList = document.querySelector(`.variation-options-list[data-type-id="${typeId}"]`);
-    if (!optionsList) return;
+    this.variationAttributes.forEach((attr, attrIndex) => {
+      const attrDiv = document.createElement('div');
+      attrDiv.className = 'variation-attribute-row';
+      attrDiv.innerHTML = `
+        <input type="text"
+               class="attribute-name"
+               placeholder="Attribute name (e.g., Gasket Type, Length)"
+               value="${attr.name}"
+               onchange="Admin.updateAttributeName(${attrIndex}, this.value)">
+        <button type="button" class="btn-remove-attribute" onclick="Admin.removeAttribute(${attrIndex})">Remove</button>
+      `;
 
-    this.variationOptionCounter++;
+      const valuesDiv = document.createElement('div');
+      valuesDiv.className = 'variation-attribute-values';
+      valuesDiv.style.marginLeft = '1rem';
+      valuesDiv.style.marginTop = '0.5rem';
 
-    const row = document.createElement('div');
-    row.className = 'variation-option-row';
-    row.dataset.optionId = data.id || `option-${this.variationOptionCounter}`;
-
-    row.innerHTML = `
-      <input type="text" class="option-name-input" placeholder="e.g., EPDM, Silicone, 100mm" value="${data.name || ''}" required>
-      <input type="number" class="option-price-input" placeholder="0.00" step="0.01" value="${data.priceAdjustment || 0}">
-      <input type="number" class="option-stock-input" placeholder="0" min="0" value="${data.stock || 0}">
-      <button type="button" class="btn-remove-option" onclick="Admin.removeVariationOption(this)" title="Remove option">&times;</button>
-    `;
-
-    optionsList.appendChild(row);
-  },
-
-  // Remove a variation option
-  removeVariationOption(btn) {
-    const row = btn.closest('.variation-option-row');
-    const optionsList = row.closest('.variation-options-list');
-    if (row) {
-      row.remove();
-      // If no more options in this type, keep at least the empty state
-      if (optionsList && optionsList.children.length === 0) {
-        const typeId = optionsList.dataset.typeId;
-        this.addVariationOption(typeId);
-      }
-    }
-  },
-
-  // Get all variation types and options from the form
-  getVariationsFromForm() {
-    const typeContainers = document.querySelectorAll('.variation-type-container');
-    const variationTypes = [];
-
-    typeContainers.forEach(container => {
-      const typeId = container.dataset.typeId;
-      const typeName = container.querySelector('.variation-type-name').value.trim();
-
-      if (!typeName) return; // Skip if no type name
-
-      const optionRows = container.querySelectorAll('.variation-option-row');
-      const options = [];
-
-      optionRows.forEach(row => {
-        const name = row.querySelector('.option-name-input').value.trim();
-        const priceAdjustment = parseFloat(row.querySelector('.option-price-input').value) || 0;
-        const stock = parseInt(row.querySelector('.option-stock-input').value) || 0;
-
-        if (name) {
-          options.push({
-            id: row.dataset.optionId,
-            name: name,
-            priceAdjustment: priceAdjustment,
-            stock: stock
-          });
-        }
+      attr.values.forEach((value, valueIndex) => {
+        const valueInput = document.createElement('input');
+        valueInput.type = 'text';
+        valueInput.placeholder = 'Value (e.g., EPDM, 5m)';
+        valueInput.value = value;
+        valueInput.onchange = () => this.updateAttributeValue(attrIndex, valueIndex, valueInput.value);
+        valuesDiv.appendChild(valueInput);
       });
 
-      if (options.length > 0) {
-        variationTypes.push({
-          id: typeId,
-          name: typeName,
-          options: options
-        });
-      }
+      const addValueBtn = document.createElement('button');
+      addValueBtn.type = 'button';
+      addValueBtn.className = 'btn-add-attribute-value';
+      addValueBtn.textContent = '+ Add Value';
+      addValueBtn.onclick = () => this.addAttributeValue(attrIndex);
+      valuesDiv.appendChild(addValueBtn);
+
+      container.appendChild(attrDiv);
+      container.appendChild(valuesDiv);
+    });
+  },
+
+  // Update attribute name
+  updateAttributeName(attrIndex, name) {
+    this.variationAttributes[attrIndex].name = name;
+  },
+
+  // Update attribute value
+  updateAttributeValue(attrIndex, valueIndex, value) {
+    this.variationAttributes[attrIndex].values[valueIndex] = value;
+  },
+
+  // Add a new value to an attribute
+  addAttributeValue(attrIndex) {
+    this.variationAttributes[attrIndex].values.push('');
+    this.renderVariationAttributes();
+  },
+
+  // Remove an attribute
+  removeAttribute(attrIndex) {
+    this.variationAttributes.splice(attrIndex, 1);
+    this.renderVariationAttributes();
+
+    if (this.variationAttributes.length === 0) {
+      document.getElementById('combinationsSection').style.display = 'none';
+      this.variationCombinations = [];
+    }
+  },
+
+  // Generate all possible combinations
+  generateCombinations() {
+    // Validate attributes have names and values
+    const validAttributes = this.variationAttributes.filter(attr => {
+      return attr.name.trim() && attr.values.filter(v => v.trim()).length > 0;
     });
 
-    return variationTypes;
+    if (validAttributes.length === 0) {
+      alert('Please add at least one attribute with name and values');
+      return;
+    }
+
+    // Clean up attribute values (remove empty ones)
+    validAttributes.forEach(attr => {
+      attr.values = attr.values.filter(v => v.trim());
+    });
+
+    // Generate cartesian product of all attribute values
+    const cartesianProduct = (arrays) => {
+      if (arrays.length === 0) return [[]];
+      const [first, ...rest] = arrays;
+      const restProduct = cartesianProduct(rest);
+      return first.flatMap(value =>
+        restProduct.map(combination => [value, ...combination])
+      );
+    };
+
+    const valueArrays = validAttributes.map(attr => attr.values);
+    const combinations = cartesianProduct(valueArrays);
+
+    // Create combination objects
+    this.variationCombinations = combinations.map((combo, index) => {
+      const existing = this.variationCombinations.find(c =>
+        JSON.stringify(c.attributes) === JSON.stringify(combo)
+      );
+
+      return {
+        id: existing?.id || `combo-${Date.now()}-${index}`,
+        attributes: combo,
+        price: existing?.price || '',
+        stock: existing?.stock || 0,
+        sku: existing?.sku || ''
+      };
+    });
+
+    this.renderCombinationsTable(validAttributes);
+  },
+
+  // Render combinations table
+  renderCombinationsTable(attributes) {
+    const container = document.getElementById('combinationsTableContainer');
+
+    if (this.variationCombinations.length === 0) {
+      container.innerHTML = '<p style="color: var(--gray-500);">No combinations generated yet. Click "Generate All Combinations" button above.</p>';
+      return;
+    }
+
+    const attributeHeaders = attributes.map(attr => attr.name).join('</th><th>');
+
+    container.innerHTML = `
+      <table class="combinations-table">
+        <thead>
+          <tr>
+            <th>${attributeHeaders}</th>
+            <th>Price (£)</th>
+            <th>Stock</th>
+            <th>SKU</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${this.variationCombinations.map((combo, index) => `
+            <tr>
+              ${combo.attributes.map(value => `<td class="combination-name">${value}</td>`).join('')}
+              <td>
+                <input type="number"
+                       step="0.01"
+                       min="0"
+                       placeholder="0.00"
+                       value="${combo.price}"
+                       onchange="Admin.updateCombination(${index}, 'price', this.value)">
+              </td>
+              <td>
+                <input type="number"
+                       min="0"
+                       placeholder="0"
+                       value="${combo.stock}"
+                       onchange="Admin.updateCombination(${index}, 'stock', this.value)">
+              </td>
+              <td>
+                <input type="text"
+                       placeholder="Optional"
+                       value="${combo.sku}"
+                       onchange="Admin.updateCombination(${index}, 'sku', this.value)">
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  },
+
+  // Update a combination value
+  updateCombination(index, field, value) {
+    if (field === 'price') {
+      this.variationCombinations[index].price = parseFloat(value) || 0;
+    } else if (field === 'stock') {
+      this.variationCombinations[index].stock = parseInt(value) || 0;
+    } else if (field === 'sku') {
+      this.variationCombinations[index].sku = value;
+    }
+  },
+
+  // Get variations data for saving
+  getVariationsFromForm() {
+    if (this.variationAttributes.length === 0) {
+      return null;
+    }
+
+    // Clean attributes
+    const attributes = this.variationAttributes
+      .filter(attr => attr.name.trim() && attr.values.filter(v => v.trim()).length > 0)
+      .map(attr => ({
+        id: attr.id,
+        name: attr.name.trim(),
+        values: attr.values.filter(v => v.trim()).map(v => v.trim())
+      }));
+
+    // Clean combinations
+    const combinations = this.variationCombinations
+      .filter(combo => combo.price && combo.price > 0)
+      .map(combo => ({
+        id: combo.id,
+        attributes: combo.attributes,
+        price: parseFloat(combo.price),
+        stock: parseInt(combo.stock) || 0,
+        sku: combo.sku.trim()
+      }));
+
+    return { attributes, combinations };
   },
 
   // Clear variations section
   clearVariationsSection() {
-    const list = document.getElementById('variationTypesList');
-    list.innerHTML = '';
+    this.variationAttributes = [];
+    this.variationCombinations = [];
+    this.variationAttributeCounter = 0;
+    document.getElementById('variationAttributesList').innerHTML = '';
+    document.getElementById('combinationsTableContainer').innerHTML = '';
     document.getElementById('hasVariations').checked = false;
     document.getElementById('variationsSection').style.display = 'none';
-    this.variationTypeCounter = 0;
-    this.variationOptionCounter = 0;
+    document.getElementById('combinationsSection').style.display = 'none';
   },
 
   // Load variations into the form (for editing)
-  loadVariationsToForm(variationTypes) {
+  loadVariationsToForm(variationData) {
     this.clearVariationsSection();
 
-    if (variationTypes && variationTypes.length > 0) {
+    if (variationData && variationData.attributes && variationData.attributes.length > 0) {
       document.getElementById('hasVariations').checked = true;
       document.getElementById('variationsSection').style.display = 'block';
 
-      variationTypes.forEach(type => {
-        this.addVariationType(type);
-      });
+      this.variationAttributes = variationData.attributes.map(attr => ({...attr}));
+      this.variationCombinations = variationData.combinations ? variationData.combinations.map(combo => ({...combo})) : [];
+
+      this.renderVariationAttributes();
+
+      if (this.variationCombinations.length > 0) {
+        document.getElementById('combinationsSection').style.display = 'block';
+        this.renderCombinationsTable(this.variationAttributes);
+      }
     }
   },
 
