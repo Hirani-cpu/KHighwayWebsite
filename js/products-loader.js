@@ -152,11 +152,6 @@ const ProductsLoader = {
         const mainImage = product.images?.[0] || 'images/placeholder.jpg';
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
-        productCard.dataset.id = product.id;
-        productCard.dataset.name = product.name;
-        productCard.dataset.price = product.price;
-        productCard.dataset.image = mainImage;
-        productCard.dataset.hasVariations = product.hasVariations ? 'true' : 'false';
 
         // Determine price display and button behavior
         let priceDisplay;
@@ -195,6 +190,13 @@ const ProductsLoader = {
             </div>
           </div>
         `;
+
+        // Set dataset AFTER innerHTML to prevent it from being overwritten
+        productCard.dataset.id = product.id;
+        productCard.dataset.name = product.name;
+        productCard.dataset.price = product.price;
+        productCard.dataset.image = mainImage;
+        productCard.dataset.hasVariations = product.hasVariations ? 'true' : 'false';
 
         grid.appendChild(productCard);
       });
