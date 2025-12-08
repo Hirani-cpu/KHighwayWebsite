@@ -478,6 +478,15 @@
     // Add to Cart function - make global for onclick
     window.addToCart = function(button) {
       const card = button.closest('.product-card');
+
+      // Check if product has variations
+      if (card.dataset.hasVariations === 'true') {
+        // Redirect to product detail page to select variations
+        window.location.href = `product-detail.html?id=${card.dataset.id}`;
+        return;
+      }
+
+      // Regular product - add to cart directly
       Cart.addItem({
         id: card.dataset.id,
         name: card.dataset.name,

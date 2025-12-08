@@ -156,6 +156,7 @@ const ProductsLoader = {
         productCard.dataset.name = product.name;
         productCard.dataset.price = product.price;
         productCard.dataset.image = mainImage;
+        productCard.dataset.hasVariations = product.hasVariations ? 'true' : 'false';
 
         // Determine price display and button behavior
         let priceDisplay;
@@ -173,8 +174,8 @@ const ProductsLoader = {
             priceDisplay = `£${minPrice.toFixed(2)} - £${maxPrice.toFixed(2)}`;
           }
 
-          // Button redirects to details page instead of adding to cart
-          addButton = `<a href="product-detail.html?id=${product.id}" class="product-btn btn-cart">Select Options</a>`;
+          // Button with onclick that checks for variations before allowing cart add
+          addButton = `<button class="product-btn btn-cart" onclick="addToCart(this)">Select Options</button>`;
         } else {
           // Regular product - show price and add to cart button
           priceDisplay = `£${product.price.toFixed(2)}`;
