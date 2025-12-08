@@ -273,15 +273,18 @@
     }
 
     /* Product Variation Selector */
-    .variation-selector { margin-bottom: 1.5rem; }
-    .variation-selector-label { font-weight: 600; color: var(--secondary); margin-bottom: 0.75rem; display: block; }
+    .variations-container { margin-bottom: 1.5rem; }
+    .variation-type-group { margin-bottom: 1.5rem; padding: 1.25rem; background: var(--gray-100); border-radius: 12px; }
+    .variation-type-label { font-weight: 700; color: var(--secondary); margin-bottom: 0.75rem; display: block; font-size: 1rem; }
     .variation-options { display: flex; flex-wrap: wrap; gap: 0.75rem; }
     .variation-option { padding: 0.75rem 1.25rem; background: white; border: 2px solid var(--gray-200); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; min-width: 90px; }
     .variation-option:hover { border-color: var(--primary); }
     .variation-option.selected { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
-    .variation-option .variation-label { font-weight: 600; color: var(--secondary); font-size: 1rem; }
-    .variation-option .variation-price { color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-top: 0.25rem; }
-    .variation-error { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
+    .variation-option.out-of-stock { opacity: 0.5; cursor: not-allowed; border-color: var(--gray-300); }
+    .variation-option .variation-label { font-weight: 600; color: var(--secondary); font-size: 0.95rem; }
+    .variation-option .variation-price { color: var(--primary); font-weight: 700; font-size: 0.85rem; margin-top: 0.25rem; }
+    .variation-option .stock-indicator { font-size: 0.7rem; color: var(--gray-500); margin-top: 0.25rem; }
+    .variation-error { color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; padding: 0.5rem; background: #fee2e2; border-radius: 6px; display: none; }
     .variation-error.show { display: block; }
   </style>
 </head>
@@ -423,13 +426,10 @@
           </div>
 
           <!-- Variation Selector (shown only for products with variations) -->
-          <div class="variation-selector" id="variationSelector" style="display: none;">
-            <span class="variation-selector-label">Select Pack Size:</span>
-            <div class="variation-options" id="variationOptions">
-              <!-- Variation options will be loaded dynamically -->
-            </div>
-            <div class="variation-error" id="variationError">Please select a pack size before adding to cart</div>
+          <div class="variations-container" id="variationsContainer" style="display: none;">
+            <!-- Variation type groups will be loaded dynamically -->
           </div>
+          <div class="variation-error" id="variationError">Please select all options before adding to cart</div>
 
           <div class="quantity-selector">
             <label>Quantity:</label>
@@ -642,54 +642,146 @@
       return;
     }
 
-    // Track selected variation (for products with variations)
-    let selectedVariation = null;
+    // Track selected variations (for products with multiple variation types)
+    const selectedVariations = {};
+    let basePrice = product.price;
 
     // Update page with product data
     document.querySelector('.product-title').textContent = product.name;
     document.querySelector('.product-category').textContent = product.category || '';
 
     // Handle variations if product has them
-    if (product.hasVariations && product.variations && product.variations.length > 0) {
-      // Show variation selector
-      document.getElementById('variationSelector').style.display = 'block';
+    if (product.hasVariations) {
+      // Support both new format (variationTypes) and old format (variations)
+      if (product.variationTypes && product.variationTypes.length > 0) {
+        // NEW FORMAT: Multiple variation types
+        document.getElementById('variationsContainer').style.display = 'block';
 
-      // Render variation options
-      const optionsContainer = document.getElementById('variationOptions');
-      optionsContainer.innerHTML = product.variations.map(v => `
-        <div class="variation-option" data-variation-id="${v.id}" data-price="${v.price}" data-label="${v.label}" data-stock="${v.stock || 0}">
-          <span class="variation-label">${v.label}</span>
-          <span class="variation-price">£${v.price.toFixed(2)}</span>
-        </div>
-      `).join('');
+        const container = document.getElementById('variationsContainer');
+        container.innerHTML = product.variationTypes.map(type => {
+          return `
+            <div class="variation-type-group" data-type-id="${type.id}">
+              <label class="variation-type-label">${type.name}:</label>
+              <div class="variation-options">
+                ${type.options.map(option => {
+                  const isOutOfStock = option.stock === 0;
+                  const priceDisplay = option.priceAdjustment !== 0
+                    ? `${option.priceAdjustment > 0 ? '+' : ''}£${option.priceAdjustment.toFixed(2)}`
+                    : 'No extra cost';
+                  return `
+                    <div class="variation-option ${isOutOfStock ? 'out-of-stock' : ''}"
+                         data-type-id="${type.id}"
+                         data-option-id="${option.id}"
+                         data-option-name="${option.name}"
+                         data-price-adjustment="${option.priceAdjustment}"
+                         data-stock="${option.stock}"
+                         ${isOutOfStock ? 'title="Out of stock"' : ''}>
+                      <span class="variation-label">${option.name}</span>
+                      <span class="variation-price">${priceDisplay}</span>
+                      ${option.stock !== undefined ? `<span class="stock-indicator">${option.stock > 0 ? `Stock: ${option.stock}` : 'Out of stock'}</span>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
 
-      // Show "From £X.XX" as the starting price (lowest variation price)
-      const lowestPrice = Math.min(...product.variations.map(v => v.price));
-      document.querySelector('.product-price').innerHTML = `From £${lowestPrice.toFixed(2)}`;
+        // Add click handlers to all variation options
+        container.querySelectorAll('.variation-option:not(.out-of-stock)').forEach(option => {
+          option.addEventListener('click', () => {
+            const typeId = option.dataset.typeId;
+            const typeGroup = option.closest('.variation-type-group');
 
-      // Add click handlers to variation options
-      optionsContainer.querySelectorAll('.variation-option').forEach(option => {
-        option.addEventListener('click', () => {
-          // Remove selected class from all options
-          optionsContainer.querySelectorAll('.variation-option').forEach(o => o.classList.remove('selected'));
-          // Add selected class to clicked option
-          option.classList.add('selected');
-          // Update selected variation
-          selectedVariation = {
-            id: option.dataset.variationId,
-            label: option.dataset.label,
-            price: parseFloat(option.dataset.price),
-            stock: parseInt(option.dataset.stock) || 0
-          };
-          // Update displayed price
-          document.querySelector('.product-price').innerHTML = `£${selectedVariation.price.toFixed(2)}`;
-          // Hide error if shown
-          document.getElementById('variationError').classList.remove('show');
+            // Remove selected class from other options in same type
+            typeGroup.querySelectorAll('.variation-option').forEach(opt => {
+              opt.classList.remove('selected');
+            });
+
+            // Add selected class to clicked option
+            option.classList.add('selected');
+
+            // Update selected variations
+            selectedVariations[typeId] = {
+              typeId: typeId,
+              optionId: option.dataset.optionId,
+              optionName: option.dataset.optionName,
+              priceAdjustment: parseFloat(option.dataset.priceAdjustment),
+              stock: parseInt(option.dataset.stock) || 0
+            };
+
+            // Calculate and update total price
+            updatePrice();
+
+            // Hide error if shown
+            document.getElementById('variationError').classList.remove('show');
+          });
         });
-      });
+
+        // Show base price initially
+        document.querySelector('.product-price').innerHTML = `£${basePrice.toFixed(2)}`;
+
+      } else if (product.variations && product.variations.length > 0) {
+        // OLD FORMAT: Single variation type (backward compatibility)
+        document.getElementById('variationsContainer').style.display = 'block';
+
+        const container = document.getElementById('variationsContainer');
+        container.innerHTML = `
+          <div class="variation-type-group" data-type-id="legacy">
+            <label class="variation-type-label">Select Option:</label>
+            <div class="variation-options">
+              ${product.variations.map(v => `
+                <div class="variation-option"
+                     data-type-id="legacy"
+                     data-variation-id="${v.id}"
+                     data-price="${v.price}"
+                     data-label="${v.label}"
+                     data-stock="${v.stock || 0}">
+                  <span class="variation-label">${v.label}</span>
+                  <span class="variation-price">£${v.price.toFixed(2)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        // Show "From £X.XX" for old format
+        const lowestPrice = Math.min(...product.variations.map(v => v.price));
+        document.querySelector('.product-price').innerHTML = `From £${lowestPrice.toFixed(2)}`;
+
+        // Add click handlers for old format
+        container.querySelectorAll('.variation-option').forEach(option => {
+          option.addEventListener('click', () => {
+            container.querySelectorAll('.variation-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+
+            selectedVariations['legacy'] = {
+              id: option.dataset.variationId,
+              label: option.dataset.label,
+              price: parseFloat(option.dataset.price),
+              stock: parseInt(option.dataset.stock) || 0
+            };
+
+            document.querySelector('.product-price').innerHTML = `£${selectedVariations['legacy'].price.toFixed(2)}`;
+            document.getElementById('variationError').classList.remove('show');
+          });
+        });
+      }
     } else {
       // No variations - show regular price
       document.querySelector('.product-price').innerHTML = `£${product.price.toFixed(2)}`;
+    }
+
+    // Function to update price based on selected variations
+    function updatePrice() {
+      let totalPrice = basePrice;
+
+      // Add all price adjustments from selected variations
+      Object.values(selectedVariations).forEach(variation => {
+        totalPrice += variation.priceAdjustment;
+      });
+
+      document.querySelector('.product-price').innerHTML = `£${totalPrice.toFixed(2)}`;
     }
 
     // Set main image from images array
@@ -784,24 +876,59 @@
       const quantity = parseInt(document.getElementById('quantity').value);
       const cartImage = product.images && product.images.length > 0 ? product.images[0] : 'images/placeholder.jpg';
 
-      // Check if product has variations and one must be selected
-      if (product.hasVariations && product.variations && product.variations.length > 0) {
-        if (!selectedVariation) {
-          // Show error message
-          document.getElementById('variationError').classList.add('show');
-          return;
-        }
+      // Check if product has variations
+      if (product.hasVariations) {
+        if (product.variationTypes && product.variationTypes.length > 0) {
+          // NEW FORMAT: Check all variation types are selected
+          const requiredTypes = product.variationTypes.length;
+          const selectedTypes = Object.keys(selectedVariations).length;
 
-        // Add to cart with variation data
-        Cart.addItem({
-          id: product.id,
-          name: product.name,
-          price: selectedVariation.price,
-          image: cartImage,
-          quantity: quantity,
-          variationId: selectedVariation.id,
-          variationLabel: selectedVariation.label
-        });
+          if (selectedTypes < requiredTypes) {
+            document.getElementById('variationError').classList.add('show');
+            return;
+          }
+
+          // Build variation label and calculate total price
+          let totalPrice = basePrice;
+          const variationLabels = [];
+
+          product.variationTypes.forEach(type => {
+            const selection = selectedVariations[type.id];
+            if (selection) {
+              variationLabels.push(`${type.name}: ${selection.optionName}`);
+              totalPrice += selection.priceAdjustment;
+            }
+          });
+
+          // Add to cart with new variation data
+          Cart.addItem({
+            id: product.id,
+            name: product.name,
+            price: totalPrice,
+            image: cartImage,
+            quantity: quantity,
+            variations: selectedVariations,
+            variationLabel: variationLabels.join(', ')
+          });
+
+        } else if (product.variations && product.variations.length > 0) {
+          // OLD FORMAT: Check single variation is selected
+          if (!selectedVariations['legacy']) {
+            document.getElementById('variationError').classList.add('show');
+            return;
+          }
+
+          const selected = selectedVariations['legacy'];
+          Cart.addItem({
+            id: product.id,
+            name: product.name,
+            price: selected.price,
+            image: cartImage,
+            quantity: quantity,
+            variationId: selected.id,
+            variationLabel: selected.label
+          });
+        }
       } else {
         // No variations - add normally
         Cart.addItem({
