@@ -153,12 +153,11 @@ const ProductsLoader = {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
 
-        // Determine price display and button behavior
+        // Determine price display
         let priceDisplay;
-        let addButton;
 
         if (product.hasVariations && product.variationData?.combinations) {
-          // Product has variations - show price range and redirect to details
+          // Product has variations - show price range
           const prices = product.variationData.combinations.map(c => c.price);
           const minPrice = Math.min(...prices);
           const maxPrice = Math.max(...prices);
@@ -168,13 +167,9 @@ const ProductsLoader = {
           } else {
             priceDisplay = `£${minPrice.toFixed(2)} - £${maxPrice.toFixed(2)}`;
           }
-
-          // Button with onclick that checks for variations before allowing cart add
-          addButton = `<button class="product-btn btn-cart" onclick="addToCart(this)">Select Options</button>`;
         } else {
-          // Regular product - show price and add to cart button
+          // Regular product - show price
           priceDisplay = `£${product.price.toFixed(2)}`;
-          addButton = `<button class="product-btn btn-cart" onclick="addToCart(this)">🛒 Add</button>`;
         }
 
         productCard.innerHTML = `
@@ -185,8 +180,7 @@ const ProductsLoader = {
             <h3 class="product-name">${product.name}</h3>
             <div class="product-price">${priceDisplay}</div>
             <div class="product-actions">
-              ${addButton}
-              <a href="product-detail.html?id=${product.id}" class="product-btn">Details</a>
+              <a href="product-detail.html?id=${product.id}" class="product-btn">View Details</a>
             </div>
           </div>
         `;
